@@ -921,7 +921,9 @@ button:active { transform: scale(.96); }
           if (row.mine) {
             var del = document.createElement('button'); del.type = 'button'; del.className = 'link danger'; del.textContent = 'SUPPRIMER';
             del.addEventListener('click', function () { armed(del, 'SÛR ? RETOUCHE', function () {
-              rpc('delete_prout', { p_device: device, p_prout: row.id }).then(function () {
+              rpc('delete_prout', { p_device: device, p_prout: row.id }).then(function (path) {
+                // the row is gone; now the file is an orphan the Storage policy lets us remove
+                if (path) fetch(SB.url + '/storage/v1/object/prouts/' + path, { method: 'DELETE', headers: sbHeaders({}) }).catch(function () {});
                 li.remove(); mine.forEach(function (r) { if (r.remoteId === row.id) { r.remoteId = null; saveRec(r); } });
                 $('boardStatus').textContent = 'PROUT RETIRÉ DU CLASSEMENT';
               }).catch(function (e) { $('boardStatus').textContent = friendly(e); });

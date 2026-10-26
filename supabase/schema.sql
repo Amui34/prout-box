@@ -88,7 +88,13 @@ create policy "prouts: dépôt" on storage.objects
     and (storage.foldername(name))[1] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
     and array_length(storage.foldername(name), 1) = 1
   );
--- Pas de policy update/delete : seuls les RPC (definer) effacent.
+-- Pas de policy update. Suppression : Supabase interdit `delete from storage.objects` depuis le SQL
+-- (trigger storage.protect_delete), donc le client efface le fichier via l'API Storage APRÈS que
+-- delete_prout a retiré la ligne ; la policy n'autorise que les fichiers orphelins (sans ligne `prouts`).
+drop policy if exists "prouts: suppression des orphelins" on storage.objects;
+create policy "prouts: suppression des orphelins" on storage.objects
+  for delete to anon, authenticated
+  using (bucket_id = 'prouts' and not exists (select 1 from public.prouts p where p.path = storage.objects.name));
 
 -- ─────────────────────────────────────────────────────────────────────────
 --  API (fonctions security definer, exposées à la clé publique)
@@ -166,19 +172,16 @@ begin
   where p.id = p_prout;
 end $$;
 
--- Supprimer SON prout (ligne + fichier).
-create or replace function delete_prout(p_device uuid, p_prout uuid)
-returns boolean
+-- Supprimer SON prout : retire la ligne et renvoie le chemin du fichier (null si ce n'est pas le sien),
+-- le client efface ensuite le fichier via l'API Storage (policy « suppression des orphelins »).
+drop function if exists delete_prout(uuid, uuid);
+create function delete_prout(p_device uuid, p_prout uuid)
+returns text
 language plpgsql security definer set search_path = public as $$
 declare v_path text;
 begin
   delete from prouts where id = p_prout and device_id = p_device returning path into v_path;
-  if v_path is null then return false; end if;
-  begin
-    delete from storage.objects where bucket_id = 'prouts' and name = v_path;
-  exception when others then null; -- le fichier orphelin sera nettoyé à la main si besoin
-  end;
-  return true;
+  return v_path;
 end $$;
 
 grant execute on function publish_prout(uuid, text, text, text, int, text, text) to anon, authenticated;

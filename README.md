@@ -55,11 +55,11 @@ Icônes et splash : modifier `assets/icon.svg` / `assets/splash.svg`, puis `npm 
 
 ## Publier sur l'App Store (100 % ligne de commande)
 
-Même procédure qu'Oplaa. Prérequis : une clé API App Store Connect (rôle Admin) dans `~/.appstoreconnect/private_keys/AuthKey_<KEYID>.p8`.
+Même procédure qu'Oplaa. Prérequis : une clé API App Store Connect (rôle Admin) dans `~/.appstoreconnect/private_keys/AuthKey_FJ7JL8VV39.p8`.
 
 1. `npm run sync:ios`
 2. Dans `ios/App/App.xcodeproj/project.pbxproj` : `CURRENT_PROJECT_VERSION` = numéro de build **strictement supérieur** au dernier uploadé ; `MARKETING_VERSION` = version cible.
-3. Archive : `xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' -archivePath out/App.xcarchive archive -allowProvisioningUpdates -authenticationKeyID <KEYID> -authenticationKeyIssuerID <ISSUER> -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_<KEYID>.p8`
+3. Archive : `xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' -archivePath out/App.xcarchive archive -allowProvisioningUpdates -authenticationKeyID FJ7JL8VV39 -authenticationKeyIssuerID fd850757-5b61-43a4-8f6e-99059e4a50f4 -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_FJ7JL8VV39.p8`
 4. Export : `xcodebuild -exportArchive -archivePath out/App.xcarchive -exportOptionsPlist exportOptions.plist -exportPath out` (plist : `method=app-store-connect`, `teamID`, `signingStyle=automatic`) avec les mêmes options d'authentification.
-5. Upload : `xcrun altool --upload-app -f out/App.ipa -t ios --apiKey <KEYID> --apiIssuer <ISSUER>`
+5. Upload : `xcrun altool --upload-app -f out/App.ipa -t ios --apiKey FJ7JL8VV39 --apiIssuer fd850757-5b61-43a4-8f6e-99059e4a50f4`
 6. App Store Connect : créer la version, notes, attacher le build une fois « Valid », soumettre.
