@@ -60,11 +60,11 @@ Première version : six prouts classiques, enregistrement de ton prout, jury à 
 
 | Champ | Valeur |
 |---|---|
-| URL d'assistance | https://proutbox.app (à créer : page vitrine, derrière le proxy Caddy `amui-proxy` ou Netlify) |
-| URL de politique de confidentialité | https://proutbox.app/privacy (contenu : `appstore/privacy.html`) |
-| URL marketing (facultatif) | https://proutbox.app |
+| URL d'assistance | https://amui34.github.io/prout-box/ (GitHub Pages, dossier `docs/`) |
+| URL de politique de confidentialité | https://amui34.github.io/prout-box/privacy.html (source : `docs/privacy.html`) |
+| URL marketing (facultatif) | https://amui34.github.io/prout-box/ |
 
-Si le domaine n'est pas encore acheté : héberger `privacy.html` sur n'importe quelle URL publique (Netlify Drop) et renseigner cette URL ; elle peut changer plus tard.
+Un vrai domaine pourra remplacer ces URL plus tard (elles sont modifiables dans App Store Connect à tout moment).
 
 ## Confidentialité de l'app (questionnaire App Store Connect)
 

@@ -12,7 +12,8 @@ Application iOS + web : on retourne le téléphone (ou la boîte à l'écran) et
 | Supabase | classement par pays / monde, votes 💩, signalements. Pas de compte : jeton = `device_id` secret par appareil | projet à créer (org Amui studio) |
 | Capacitor (`ios/`) | enveloppe iOS, bundle `com.proutbox.app`, équipe `772LDD7BCT` | ce dépôt |
 | `assets/` | icône et splash en SVG → PNG (sharp) → tailles iOS (`@capacitor/assets`) | ce dépôt |
-| `appstore/` | fiche App Store, politique de confidentialité, captures 6,9" (`shoot.sh` + `render.mjs`) | ce dépôt |
+| `appstore/` | fiche App Store, captures 6,9" (`shoot.sh` + `render.mjs`) | ce dépôt |
+| `docs/` | page vitrine + politique de confidentialité, publiées par GitHub Pages sur https://amui34.github.io/prout-box/ | ce dépôt |
 
 ## Mettre en route le classement en ligne (une seule fois)
 
