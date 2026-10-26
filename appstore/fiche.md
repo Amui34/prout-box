@@ -13,8 +13,10 @@
 | Catégorie principale | Divertissement |
 | Catégorie secondaire | Jeux › Famille |
 | Prix | Gratuit |
-| Classification d'âge | 4+ (humour pipi-caca, aucune violence, aucun contenu généré par d'autres utilisateurs) |
+| Classification d'âge | déclarée par API : humour grossier « peu fréquent / léger », contenu généré par les utilisateurs : oui, tout le reste : non |
 | Droits d'auteur | © 2026 Noa Madar |
+| App Store Connect | app id **6827309393**, bundle ID resource `MFL357LM76`, équipe `772LDD7BCT` |
+| Version 1.0 | build 1 soumise le 26/10/2026 (WAITING_FOR_REVIEW), publication automatique après approbation |
 
 ## Texte promotionnel (170 car. max)
 
@@ -39,7 +41,9 @@ Chaque prout enregistré passe devant un jury impitoyable :
 Le Prout-o-mètre calcule un score sur 10 000, identifie l'espèce de ton prout (la Mitraillette, la Trompette de Jéricho, le Pneu qui se dégonfle, la Souris timide…) et livre des statistiques essentielles : magnitude sur l'échelle de Richter du slip, nombre de pigeons effrayés, distance de sécurité.
 
 TOP PROUTS
-Entre tes initiales comme sur une borne d'arcade et publie ton prout dans le classement de ton pays… ou du monde entier. Écoute les prouts des autres, note-les de 1 à 5 💩 et fais grimper le tien.
+Entre tes initiales comme sur une borne d'arcade et publie ton prout dans le classement de ton pays… ou du monde entier. Écoute les prouts des autres, note-les de 1 à 5 crottes et fais grimper le tien.
+
+(Apple refuse les emoji dans la description, et les « Nouveautés » ne peuvent pas être renseignées sur une première version.)
 
 SIMPLE ET SANS PRISE DE TÊTE
 • Un seul écran, zéro réglage
