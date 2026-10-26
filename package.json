@@ -1,0 +1,33 @@
+{
+  "name": "prout-box",
+  "version": "1.0.0",
+  "description": "Prout Box — la boîte à meuh qui pète. App web + iOS.",
+  "main": "www/index.html",
+  "scripts": {
+    "render": "node assets/render.mjs",
+    "assets": "capacitor-assets generate --ios --iconBackgroundColor '#FFD23F' --splashBackgroundColor '#FFD23F'",
+    "sync:ios": "cap copy ios",
+    "open:ios": "cap open ios",
+    "serve": "python3 -m http.server 4817 --directory www"
+  },
+  "keywords": [
+    "prout",
+    "boîte à meuh",
+    "capacitor",
+    "ios"
+  ],
+  "author": "Noa Madar",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/cli": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
+    "@capacitor/ios": "^8.5.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@playwright/test": "^1.48.0",
+    "sharp": "^0.35.4"
+  }
+}

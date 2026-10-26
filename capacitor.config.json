@@ -1,0 +1,10 @@
+{
+  "appId": "com.proutbox.app",
+  "appName": "Prout Box",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#FFD23F",
+    "allowsLinkPreview": false
+  }
+}

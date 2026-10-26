@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFD23F">
+<title>Prout Box</title>
+<style>body{margin:0}[hidden]{display:none!important}:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@800;900&family=Press+Start+2P&display=swap">
+<style>
+/* Layout: one screen. The box in the middle, the sound picker under it, one record button at the bottom. */
+:root {
+  --sun: #FFD23F;
+  --gas: #8BD450;
+  --tomato: #FF5A3C;
+  --ink: #2A1B12;
+  --white: #FFFFFF;
+  --display: 'Luckiest Guy', 'Arial Black', Impact, system-ui, sans-serif;
+  --body: 'Nunito', system-ui, -apple-system, sans-serif;
+  --pixel: 'Press Start 2P', 'Courier New', monospace;
+  --crt: #0A0A1F;
+  --phosphor: #39FF14;
+  --neon: #FF2EA6;
+  --gold: #FFE600;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body {
+  background: var(--sun); color: var(--ink); font-family: var(--body);
+  transition: background .2s; overflow: hidden;
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+}
+body.playing { background: var(--gas); }
+.app {
+  height: 100%; max-width: 460px; margin: 0 auto; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px;
+  padding-block: 20px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; letter-spacing: 1px; line-height: 1; }
+
+.hero { position: relative; flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.canbtn { background: none; border: none; padding: 0; margin: 0; cursor: grab; touch-action: none; border-radius: 30px; }
+.can { display: block; width: min(240px, 60vw); height: auto; max-height: 46vh; transition: transform .5s cubic-bezier(.4,1.8,.5,1); transform-origin: 50% 55%; }
+.can.dragging { transition: none; }
+.can.flipped { transform: rotate(180deg); }
+.can.wiggle { animation: wiggle .12s linear infinite; }
+@keyframes wiggle { 0%,100% { translate: 0 0 } 25% { translate: -4px 2px } 75% { translate: 4px -2px } }
+.hint { margin: 0; font-weight: 900; font-size: 17px; text-align: center; text-wrap: balance; }
+
+.burst {
+  position: absolute; top: 2%; right: 0; width: 150px; height: 150px; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  transform: scale(0) rotate(-20deg); transition: transform .25s cubic-bezier(.3,1.8,.5,1);
+}
+.burst.show { transform: scale(1) rotate(8deg); }
+.burst svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.burst span {
+  position: relative; font-family: var(--display); font-size: 26px; line-height: .95; text-align: center; white-space: pre-line;
+  color: var(--tomato); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; padding: 0 20px;
+}
+
+.picker { display: flex; align-items: center; gap: 10px; width: 100%; }
+.arrow {
+  width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--ink); background: var(--white); color: var(--ink);
+  display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; flex-shrink: 0;
+}
+.name { flex: 1; min-width: 0; text-align: center; }
+.name b { display: block; font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: .5px; line-height: 1.1; padding-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.name button { background: none; border: none; padding: 4px 8px; font: 800 13px var(--body); color: var(--ink); text-decoration: underline; cursor: pointer; min-height: 32px; }
+.name .tag { display: block; font-family: var(--pixel); font-size: 10px; line-height: 1.6; color: var(--ink); background: var(--gold); border: 2px solid var(--ink); border-radius: 4px; padding: 3px 6px 1px; margin: 4px auto 0; width: max-content; max-width: 100%; }
+
+.lead {
+  width: 100%; height: 48px; box-sizing: border-box; border: 3px solid var(--ink); border-radius: 12px;
+  background: var(--ink); color: var(--phosphor); cursor: pointer;
+  font-family: var(--pixel); font-size: 12px; letter-spacing: 1px; padding-top: 3px;
+  text-shadow: 0 0 6px rgba(57,255,20,.7); box-shadow: 4px 4px 0 var(--neon);
+}
+
+/* Retro arcade screens: score reveal + leaderboard */
+.screen {
+  position: fixed; inset: 0; z-index: 10; background: var(--crt); color: var(--phosphor);
+  font-family: var(--pixel); font-size: 12px; line-height: 1.7; text-shadow: 0 0 6px rgba(57,255,20,.6);
+  display: flex; flex-direction: column; align-items: center; box-sizing: border-box; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: max(28px, env(safe-area-inset-top, 0px)) 16px max(24px, env(safe-area-inset-bottom, 0px));
+}
+.screen::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 2px 4px); }
+.screen::after { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.75)); }
+.screen > * { position: relative; z-index: 1; }
+.screen h2 { margin: 0 0 18px; font: 400 20px/1.4 var(--pixel); color: var(--gold); text-align: center; text-shadow: 3px 3px 0 var(--neon); }
+.screen p { margin: 0; text-align: center; }
+.blink { animation: rblink 1s steps(2) infinite; }
+@keyframes rblink { 50% { opacity: 0; } }
+.pxbtn {
+  font-family: var(--pixel); font-size: 12px; line-height: 1; padding: 14px 16px 11px; cursor: pointer; text-transform: uppercase;
+  background: transparent; color: var(--phosphor); border: 3px solid var(--phosphor); box-shadow: 4px 4px 0 var(--neon); text-shadow: inherit;
+}
+.pxbtn.dim { color: #9AA; border-color: #9AA; box-shadow: 4px 4px 0 #445; text-shadow: none; }
+.pxbtn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--neon); }
+.row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: auto; padding-top: 18px; }
+
+.bigscore { font-size: 34px; line-height: 1; color: #fff; text-shadow: 0 0 12px var(--phosphor), 0 0 24px var(--phosphor); margin: 6px 0 12px; letter-spacing: 2px; }
+.verdict { color: var(--neon); text-shadow: 0 0 8px var(--neon); font-size: 13px; min-height: 22px; text-align: center; }
+.jury { width: 100%; max-width: 340px; margin: 14px 0 4px; display: flex; flex-direction: column; gap: 12px; }
+.judge { display: grid; grid-template-columns: 36px 1fr; gap: 4px 10px; align-items: center; opacity: 0; transform: translateX(-14px); transition: opacity .25s, transform .25s; }
+.judge.in { opacity: 1; transform: none; }
+.judge .face { grid-row: span 2; font-size: 28px; line-height: 1; text-align: center; text-shadow: none; filter: drop-shadow(0 0 4px var(--phosphor)); }
+.judge .who { font-size: 9px; color: var(--gold); display: flex; justify-content: space-between; gap: 8px; }
+.judge .who i { font-style: normal; color: #fff; white-space: nowrap; }
+.judge q { quotes: none; font-size: 9px; line-height: 1.6; color: var(--phosphor); }
+.fun { font-size: 8px; line-height: 2; color: #9FF; text-align: center; margin: 10px 0 14px; text-shadow: 0 0 6px rgba(153,255,255,.5); }
+.total { font-size: 10px; color: #fff; margin-top: 6px; }
+.initials { display: flex; gap: 14px; margin: 12px 0 6px; }
+.slot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.slot button { background: none; border: none; color: var(--gold); font-family: var(--pixel); font-size: 16px; padding: 6px 12px; cursor: pointer; text-shadow: inherit; }
+.slot b { display: block; width: 44px; text-align: center; font: 400 28px/1 var(--pixel); color: #fff; border-bottom: 4px solid var(--neon); padding: 8px 0 6px; }
+
+.board { list-style: none; margin: 0; padding: 0; width: 100%; max-width: 360px; flex: 1; min-height: 0; overflow-y: auto; }
+.board li { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 10px 6px; border-bottom: 2px dashed rgba(57,255,20,.25); cursor: pointer; }
+.board .rk { white-space: nowrap; }
+.board li.hot { background: rgba(255,46,166,.18); }
+.board li:nth-child(1) { color: var(--gold); text-shadow: 0 0 8px var(--gold); }
+.board li:nth-child(2) { color: #DDE6FF; }
+.board li:nth-child(3) { color: #FFA54F; }
+.board .rk::before { content: '> '; opacity: 0; }
+.board li.hot .rk::before { opacity: 1; }
+.board .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board .nm small { display: block; font-size: 7px; color: var(--phosphor); text-shadow: none; opacity: .85; margin-top: 3px; }
+.board .sc { text-align: right; }
+.board .sc small { display: block; font-size: 7px; opacity: .8; margin-top: 3px; }
+.board li.open { background: rgba(57,255,20,.08); }
+.board .rate { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0 4px; color: var(--phosphor); text-shadow: none; }
+.board .rate .crottes { display: flex; gap: 6px; }
+.board .rate .crottes button { background: none; border: none; font-size: 26px; line-height: 1; padding: 4px; cursor: pointer; filter: grayscale(1) opacity(.45); transition: transform .1s; }
+.board .rate .crottes button.lit { filter: none; transform: scale(1.1); }
+.board .rate .actions { display: flex; gap: 18px; }
+.link { background: none; border: none; color: var(--gold); font-family: var(--pixel); font-size: 9px; text-decoration: underline; cursor: pointer; padding: 6px; text-shadow: inherit; }
+.link.danger { color: #FF7A7A; }
+.tabs { display: flex; gap: 8px; margin: -6px 0 10px; width: 100%; max-width: 360px; }
+.tab { flex: 1; font-family: var(--pixel); font-size: 8px; line-height: 1.3; padding: 10px 4px 8px; background: transparent; color: var(--phosphor); border: 2px solid rgba(57,255,20,.4); cursor: pointer; text-shadow: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tab.on { border-color: var(--gold); color: var(--gold); box-shadow: 3px 3px 0 var(--neon); }
+.status { font-size: 8px; color: #9FF; min-height: 14px; margin-top: 8px; }
+.pub { display: block; margin: 6px 0 0 auto; font-family: var(--pixel); font-size: 8px; padding: 8px 10px 6px; background: var(--gold); color: var(--crt); border: none; cursor: pointer; text-shadow: none; }
+.clist { width: 100%; max-width: 360px; flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.clist button { font-family: var(--pixel); font-size: 8px; line-height: 1.4; text-align: left; padding: 10px 8px 8px; background: transparent; color: var(--phosphor); border: 2px solid rgba(57,255,20,.35); cursor: pointer; text-shadow: inherit; }
+.clist button.on { border-color: var(--gold); color: var(--gold); }
+
+.rec {
+  display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; height: 64px; box-sizing: border-box;
+  border: 3px solid var(--ink); border-radius: 32px; background: var(--tomato); color: var(--white); cursor: pointer;
+  font-family: var(--display); font-size: 22px; letter-spacing: 1px; padding-top: 4px;
+}
+.rec .dot { width: 20px; height: 20px; border-radius: 50%; background: var(--white); border: 3px solid var(--ink); margin-top: -4px; }
+.rec.on { background: var(--ink); color: var(--white); }
+.rec.on .dot { border-radius: 4px; background: var(--tomato); animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .3; } }
+.note { margin: -4px 0 0; font-size: 13px; font-weight: 800; text-align: center; min-height: 18px; }
+
+button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+button:active { transform: scale(.96); }
+@media (prefers-reduced-motion: reduce) { .can, .can.wiggle, .burst, .rec.on .dot { animation: none !important; transition: none; } }
+</style>
+
+<div class="app">
+  <h1 id="title">Prout Box</h1>
+
+  <div class="hero">
+    <button class="canbtn" id="canBtn" type="button" aria-label="Retourner la boîte">
+      <svg class="can" id="can" viewBox="0 0 240 340" aria-hidden="true">
+        <defs>
+          <linearGradient id="redSide" x1="0" x2="1">
+            <stop offset="0" stop-color="#FF8A6E"/><stop offset=".35" stop-color="#FF5A3C"/><stop offset="1" stop-color="#D9381E"/>
+          </linearGradient>
+          <linearGradient id="labelSide" x1="0" x2="1">
+            <stop offset="0" stop-color="#FFFFFF"/><stop offset=".6" stop-color="#FFF9EC"/><stop offset="1" stop-color="#F1E2C4"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="120" cy="326" rx="96" ry="10" fill="rgba(42,27,18,.22)"/>
+        <!-- body -->
+        <path d="M20 46 V292 A100 24 0 0 0 220 292 V46 Z" fill="url(#redSide)" stroke="#2A1B12" stroke-width="5" stroke-linejoin="round"/>
+        <!-- polka dots -->
+        <g fill="#FFD23F" stroke="#2A1B12" stroke-width="2">
+          <circle cx="44" cy="84" r="6"/><circle cx="82" cy="78" r="6"/><circle cx="120" cy="84" r="6"/><circle cx="158" cy="78" r="6"/><circle cx="196" cy="84" r="6"/>
+          <circle cx="44" cy="270" r="6"/><circle cx="82" cy="278" r="6"/><circle cx="120" cy="270" r="6"/><circle cx="158" cy="278" r="6"/><circle cx="196" cy="270" r="6"/>
+        </g>
+        <!-- label -->
+        <rect x="20" y="100" width="200" height="150" fill="url(#labelSide)"/>
+        <path d="M20 100 H220 M20 250 H220" stroke="#2A1B12" stroke-width="4"/>
+        <!-- mascot: a little gas cloud -->
+        <g transform="translate(0 -6)">
+          <g fill="#2A1B12">
+            <circle cx="92" cy="166" r="25"/><circle cx="120" cy="146" r="31"/><circle cx="150" cy="164" r="25"/>
+            <circle cx="106" cy="182" r="21"/><circle cx="136" cy="184" r="21"/>
+          </g>
+          <g fill="#8BD450">
+            <circle cx="92" cy="166" r="21"/><circle cx="120" cy="146" r="27"/><circle cx="150" cy="164" r="21"/>
+            <circle cx="106" cy="182" r="17"/><circle cx="136" cy="184" r="17"/><circle cx="120" cy="170" r="22"/>
+          </g>
+          <circle cx="108" cy="140" r="7" fill="#B9EC8A" opacity=".7"/>
+          <g id="face">
+            <circle cx="109" cy="156" r="5.5" fill="#2A1B12"/><circle cx="133" cy="156" r="5.5" fill="#2A1B12"/>
+            <circle cx="111" cy="154" r="1.8" fill="#fff"/><circle cx="135" cy="154" r="1.8" fill="#fff"/>
+            <ellipse cx="100" cy="168" rx="6" ry="3.5" fill="#FF8FA3"/><ellipse cx="142" cy="168" rx="6" ry="3.5" fill="#FF8FA3"/>
+            <path d="M110 167 Q121 180 132 167" fill="#2A1B12"/>
+          </g>
+        </g>
+        <text x="120" y="236" text-anchor="middle" font-family="Luckiest Guy, Arial Black, sans-serif" font-size="34" letter-spacing="2" fill="#FF5A3C" stroke="#2A1B12" stroke-width="5" paint-order="stroke" stroke-linejoin="round">PROUT</text>
+        <text x="120" y="122" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="900" font-size="10" letter-spacing="2.5" fill="#2A1B12">LA BOÎTE QUI PÈTE</text>
+        <!-- shine -->
+        <rect x="34" y="50" width="14" height="236" rx="7" fill="#fff" opacity=".35"/>
+        <rect x="196" y="50" width="16" height="240" fill="#2A1B12" opacity=".08"/>
+        <!-- lid -->
+        <ellipse cx="120" cy="46" rx="100" ry="24" fill="#FFD23F" stroke="#2A1B12" stroke-width="5"/>
+        <ellipse cx="120" cy="46" rx="80" ry="17" fill="#F2B705" stroke="#2A1B12" stroke-width="3"/>
+        <g id="holes" fill="#2A1B12"></g>
+      </svg>
+    </button>
+    <div class="burst" id="burst" aria-live="polite">
+      <svg viewBox="0 0 200 200" aria-hidden="true"><polygon id="burstStar" fill="#FFFFFF" stroke="#2A1B12" stroke-width="6" stroke-linejoin="round" points=""/></svg>
+      <span id="burstText"></span>
+    </div>
+    <p class="hint" id="hint">Retourne la boîte !</p>
+  </div>
+
+  <div class="picker">
+    <button class="arrow" id="prev" type="button" aria-label="Prout précédent">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="name">
+      <b id="soundName">La Trompette</b>
+      <span class="tag" id="tag" hidden></span>
+      <button id="delBtn" type="button" hidden>Supprimer</button>
+    </div>
+    <button class="arrow" id="next" type="button" aria-label="Prout suivant">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <button class="rec" id="recBtn" type="button"><span class="dot"></span><span id="recLabel">Enregistrer mon prout</span></button>
+  <button class="lead" id="boardBtn" type="button">★ TOP PROUTS ★</button>
+  <p class="note" id="note" aria-live="polite"></p>
+</div>
+
+<!-- Retro screen 1: the score of a freshly recorded prout -->
+<div class="screen" id="scoreScreen" hidden role="dialog" aria-label="Score de ton prout">
+  <h2>NOUVEAU PROUT !</h2>
+  <p>SCORE</p>
+  <div class="bigscore" id="bigScore">000000</div>
+  <div class="verdict" id="verdict"></div>
+  <div class="jury" id="jury" aria-live="polite"></div>
+  <div class="total" id="juryTotal"></div>
+  <div class="fun" id="fun"></div>
+  <p class="blink">ENTRE TES INITIALES</p>
+  <div class="initials" id="initials"></div>
+  <div class="row">
+    <button class="pxbtn" id="scoreOk" type="button">Valider</button>
+    <button class="pxbtn dim" id="scoreTrash" type="button">Jeter</button>
+  </div>
+</div>
+
+<!-- Retro screen 2: the leaderboard (online by country / world, plus my local prouts) -->
+<div class="screen" id="boardScreen" hidden role="dialog" aria-label="Classement des meilleurs prouts">
+  <h2>TOP PROUTS</h2>
+  <div class="tabs" id="tabs" role="tablist">
+    <button class="tab on" type="button" data-tab="country" id="tabCountry" role="tab">🌍 PAYS</button>
+    <button class="tab" type="button" data-tab="world" role="tab">🌍 MONDE</button>
+    <button class="tab" type="button" data-tab="mine" role="tab">📱 MOI</button>
+  </div>
+  <p id="boardHint">TOUCHE UN PROUT POUR L'ÉCOUTER ET LE NOTER</p>
+  <ol class="board" id="board"></ol>
+  <p class="blink" id="boardEmpty" hidden>AUCUN PROUT...<br>ENREGISTRE LE TIEN !</p>
+  <p class="status" id="boardStatus"></p>
+  <div class="row">
+    <button class="pxbtn dim" id="countryBtn" type="button">Pays</button>
+    <button class="pxbtn" id="boardClose" type="button">Retour</button>
+  </div>
+</div>
+
+<!-- Retro screen 3: publish a freshly recorded prout to the online leaderboard -->
+<div class="screen" id="pubScreen" hidden role="dialog" aria-label="Publier ton prout">
+  <h2>PUBLIER ?</h2>
+  <p id="pubText">ENVOYER TON PROUT DANS LE TOP PROUTS ?</p>
+  <p class="status" id="pubStatus"></p>
+  <button class="link" id="pubCountry" type="button">CHANGER DE PAYS</button>
+  <div class="row">
+    <button class="pxbtn" id="pubOk" type="button">Publier</button>
+    <button class="pxbtn dim" id="pubLater" type="button">Plus tard</button>
+  </div>
+</div>
+
+<!-- Retro screen 4: pick your country -->
+<div class="screen" id="countryScreen" hidden role="dialog" aria-label="Choisir ton pays">
+  <h2>TON PAYS</h2>
+  <p>TON PROUT CONCOURT DANS CE PAYS</p>
+  <div class="clist" id="clist"></div>
+  <div class="row"><button class="pxbtn dim" id="countryClose" type="button">Retour</button></div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script>
+(function () {
+  var SOUNDS = [
+    { id: 'trompette', name: 'La Trompette', bang: 'PRRRT\nRRT !' },
+    { id: 'coussin', name: 'Le Coussin', bang: 'PFFRRT !' },
+    { id: 'discret', name: 'Le Discret', bang: 'pfff…' },
+    { id: 'mouille', name: 'Le Mouillé', bang: 'BLRRPF !' },
+    { id: 'rafale', name: 'La Rafale', bang: 'PA-PA\nPRRT !' },
+    { id: 'grincant', name: 'Le Grinçant', bang: 'IIIRRT ?' }
+  ];
+  var PRESETS = {
+    trompette: [{ at: 0, dur: 1.35, f0: 98, f1: 68, flut: [24, 32], noise: .22, cut: 950, vol: .95 }],
+    coussin:   [{ at: 0, dur: 1.0, f0: 150, f1: 82, flut: [28, 38], noise: .35, cut: 1150, vol: .9 }],
+    discret:   [{ at: 0, dur: .5, f0: 170, f1: 140, flut: [36, 46], noise: .75, cut: 1500, vol: .4 }],
+    mouille:   [{ at: 0, dur: .95, f0: 72, f1: 52, flut: [9, 22], noise: .95, cut: 720, vol: .85, gaps: .35 }],
+    rafale: [
+      { at: 0, dur: .15, f0: 120, f1: 110, flut: [30, 36], noise: .3, cut: 1000, vol: .85 },
+      { at: .22, dur: .13, f0: 128, f1: 115, flut: [30, 36], noise: .3, cut: 1000, vol: .8 },
+      { at: .42, dur: .14, f0: 112, f1: 104, flut: [30, 36], noise: .3, cut: 1000, vol: .85 },
+      { at: .62, dur: .12, f0: 135, f1: 120, flut: [30, 36], noise: .3, cut: 1000, vol: .8 },
+      { at: .82, dur: .7, f0: 105, f1: 70, flut: [22, 30], noise: .3, cut: 950, vol: .95 }
+    ],
+    grincant:  [{ at: 0, dur: 1.15, f0: 240, f1: 120, flut: [40, 56], noise: .12, cut: 1900, vol: .6 }]
+  };
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var $ = function (id) { return document.getElementById(id); };
+  var can = $('can');
+  can.classList.remove('idle');
+  var mine = [];          // my recordings: {id, name, blob, created, buffer?}
+  var index = 0;          // position in the combined list (classics, then mine)
+  var playingUntil = 0, playTimer = null;
+  var recording = false;
+
+  // lid holes + comic burst
+  (function () {
+    var g = $('holes');
+    var add = function (x, y, r) { var c = document.createElementNS(SVGNS, 'circle'); c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', r); g.appendChild(c); };
+    add(120, 46, 3.2);
+    [[24, 5.5, 8], [48, 11, 14], [66, 14.5, 20]].forEach(function (ring) {
+      for (var i = 0; i < ring[2]; i++) { var a = i / ring[2] * Math.PI * 2; add(120 + Math.cos(a) * ring[0], 46 + Math.sin(a) * ring[1], 2.8); }
+    });
+    var pts = [], n = 16;
+    for (var i = 0; i < n * 2; i++) {
+      var a = i / (n * 2) * Math.PI * 2 - Math.PI / 2, r = i % 2 ? 66 : 94 + (i % 4 ? 0 : 4);
+      pts.push((100 + Math.cos(a) * r).toFixed(1) + ',' + (100 + Math.sin(a) * r).toFixed(1));
+    }
+    $('burstStar').setAttribute('points', pts.join(' '));
+  })();
+
+  // ================= audio engine =================
+  var ctx = null, noiseBuf = null, master = null, silentEl = null;
+  function silentWavUrl() {
+    var n = 800, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+    var w = function (o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 8000, true); v.setUint32(28, 16000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    w(36, 'data'); v.setUint32(40, n * 2, true);
+    return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+  }
+  function mediaUnlock() {
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    try {
+      if (!silentEl) { silentEl = document.createElement('audio'); silentEl.setAttribute('playsinline', ''); silentEl.loop = true; silentEl.src = silentWavUrl(); }
+      var p = silentEl.play(); if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
+  }
+  function unlockAudio() {
+    if (recording) return ctx;
+    mediaUnlock();
+    if (!ctx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+      var comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -24; comp.knee.value = 6; comp.ratio.value = 8; comp.attack.value = .003; comp.release.value = .15;
+      master = ctx.createGain(); master.gain.value = 1;
+      var boost = ctx.createGain(); boost.gain.value = 2.2;
+      master.connect(comp); comp.connect(boost); boost.connect(ctx.destination);
+      var len = ctx.sampleRate * 2;
+      noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+      var d = noiseBuf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  ['touchend', 'click', 'pointerup', 'keydown'].forEach(function (ev) {
+    document.addEventListener(ev, function () { unlockAudio(); }, { capture: true, passive: true });
+  });
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  // c/out default to the live context + master; the demo mode passes an OfflineAudioContext instead.
+  function voice(p, start, c, out, nb) {
+    c = c || ctx; out = out || master; nb = nb || noiseBuf;
+    var end = start + p.dur, cut = p.cut * 1.8;
+    var amp = c.createGain(); amp.gain.value = 0;
+    var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 4;
+    lp.frequency.setValueAtTime(cut, start); lp.frequency.linearRampToValueAtTime(cut * .65, end);
+    lp.connect(amp); amp.connect(out);
+    var osc = c.createOscillator(); osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(p.f0, start); osc.frequency.exponentialRampToValueAtTime(p.f1, end);
+    var tg = c.createGain(); tg.gain.value = 1 - p.noise * .6; osc.connect(tg); tg.connect(lp);
+    var src = c.createBufferSource(); src.buffer = nb; src.loop = true;
+    var bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = p.f0 * 3; bp.Q.value = 1.2;
+    var ng = c.createGain(); ng.gain.value = p.noise * 1.6;
+    src.connect(bp); bp.connect(ng); ng.connect(lp);
+    var t = start, high = true;
+    amp.gain.setValueAtTime(0, start);
+    while (t < end) {
+      var k = (t - start) / p.dur;
+      var env = Math.min(1, k / .06) * (k > .7 ? Math.max(0, (1 - k) / .3) : 1);
+      var half = 1 / (rnd(p.flut[0], p.flut[1]) * (1 - k * .25)) / 2;
+      var v = high ? env * p.vol * rnd(.6, 1) : env * p.vol * rnd(.02, .25);
+      if (p.gaps && high && Math.random() < p.gaps * .3) v *= .15;
+      amp.gain.linearRampToValueAtTime(v, t + half);
+      osc.detune.setValueAtTime(rnd(-60, 60), t);
+      t += half; high = !high;
+    }
+    amp.gain.linearRampToValueAtTime(0, end + .03);
+    osc.start(start); src.start(start, Math.random());
+    osc.stop(end + .1); src.stop(end + .1);
+    return end;
+  }
+  function playPreset(id) {
+    var t0 = ctx.currentTime + .03, last = t0;
+    PRESETS[id].forEach(function (v) { last = Math.max(last, voice(v, t0 + v.at)); });
+    return last - t0;
+  }
+  function decodeBlob(blob) {
+    return blob.arrayBuffer().then(function (ab) {
+      return new Promise(function (res, rej) { var p = ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); });
+    });
+  }
+  function playRecording(rec) {
+    var go = function (buf) {
+      var s = ctx.createBufferSource(); s.buffer = buf;
+      var g = ctx.createGain(); g.gain.value = .55;
+      s.connect(g); g.connect(master); s.start();
+      return buf.duration;
+    };
+    if (rec.buffer) return Promise.resolve(go(rec.buffer));
+    return decodeBlob(rec.blob).then(function (buf) { rec.buffer = buf; return go(buf); });
+  }
+
+
+  // ================= the list of prouts =================
+  function list() {
+    return SOUNDS.map(function (s) { return { kind: 'preset', id: s.id, name: s.name, bang: s.bang }; })
+      .concat(mine.map(function (r) { return { kind: 'rec', id: r.id, name: r.name, bang: 'PROUT\nMAISON !', rec: r }; }));
+  }
+  function current() { var l = list(); index = (index + l.length) % l.length; return l[index]; }
+  function show() {
+    var c = current();
+    $('soundName').textContent = c.name;
+    $('delBtn').hidden = c.kind !== 'rec';
+    var hasScore = c.kind === 'rec' && c.rec.score != null;
+    $('tag').hidden = !hasScore;
+    if (hasScore) $('tag').textContent = pad6(c.rec.score) + ' PTS · ' + ((c.rec.stats && c.rec.stats.species) || '???');
+    resetDel();
+    try { localStorage.setItem('proutbox.pick', c.kind + ':' + c.id); } catch (e) {}
+  }
+  $('prev').addEventListener('click', function () { index--; show(); fire(); });
+  $('next').addEventListener('click', function () { index++; show(); fire(); });
+
+  // ================= one prout =================
+  function note(t) { $('note').textContent = t || ''; }
+  function showPlaying(text, dur) {
+    $('burstText').textContent = text;
+    $('burst').classList.add('show');
+    try { navigator.vibrate && navigator.vibrate([60, 30, 80, 30, 120]); } catch (e) {}
+    document.body.classList.add('playing');
+    can.classList.add('wiggle');
+    playingUntil = Date.now() + dur * 1000;
+    clearTimeout(playTimer);
+    playTimer = setTimeout(function () {
+      document.body.classList.remove('playing');
+      can.classList.remove('wiggle');
+      $('burst').classList.remove('show');
+    }, dur * 1000 + 300);
+  }
+  function fire() {
+    if (recording || screenOpen) return Promise.resolve(0);
+    if (!unlockAudio()) { note('Le son ne marche pas sur ce navigateur'); return Promise.resolve(0); }
+    var c = current();
+    if (c.kind === 'rec') {
+      playingUntil = Date.now() + 1500;
+      return playRecording(c.rec).then(function (d) { showPlaying(c.bang, d); return d; })
+        .catch(function () { note('Impossible de lire ce prout'); return 0; });
+    }
+    var d = playPreset(c.id);
+    showPlaying(c.bang, d);
+    return Promise.resolve(d);
+  }
+
+  // ================= my recordings, kept on this phone =================
+  var dbp = null;
+  function idb() {
+    if (dbp) return dbp;
+    dbp = new Promise(function (res, rej) {
+      try {
+        var r = indexedDB.open('proutbox', 1);
+        r.onupgradeneeded = function () { r.result.createObjectStore('recs', { keyPath: 'id' }); };
+        r.onsuccess = function () { res(r.result); };
+        r.onerror = function () { rej(r.error); };
+      } catch (e) { rej(e); }
+    });
+    return dbp;
+  }
+  function store(mode, fn) {
+    return idb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction('recs', mode), out = fn(tx.objectStore('recs'));
+        tx.oncomplete = function () { res(out && out.result); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function saveRec(r) { return store('readwrite', function (os) { return os.put({ id: r.id, name: r.name, blob: r.blob, created: r.created, score: r.score, stats: r.stats, remoteId: r.remoteId || null, country: r.country || null }); }).catch(function () {}); }
+  function deleteRec(id) { return store('readwrite', function (os) { return os.delete(id); }).catch(function () {}); }
+  function loadRecs() { return store('readonly', function (os) { return os.getAll(); }).catch(function () { return []; }); }
+
+  var delTimer = null;
+  function resetDel() { clearTimeout(delTimer); $('delBtn').textContent = 'Supprimer'; $('delBtn').dataset.armed = ''; }
+  $('delBtn').addEventListener('click', function () {
+    var c = current(); if (c.kind !== 'rec') return;
+    if (this.dataset.armed !== '1') {
+      this.dataset.armed = '1'; this.textContent = 'Sûr ? Touche encore';
+      delTimer = setTimeout(resetDel, 3000); return;
+    }
+    mine = mine.filter(function (r) { return r.id !== c.id; });
+    deleteRec(c.id);
+    index = 0; show(); note('Prout supprimé');
+  });
+
+  // ================= record =================
+  var mediaRec = null, recStream = null, chunks = [], recStart = 0, tick = null, stopT = null;
+  function setRecUI(on, sec) {
+    $('recBtn').classList.toggle('on', on);
+    $('recLabel').textContent = on ? ('Stop · 0:0' + sec) : 'Enregistrer mon prout';
+  }
+  function startRec() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+      note('Micro bloqué ici. Ouvre la Prout Box dans ton navigateur'); return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true } }).then(function (stream) {
+      recStream = stream; chunks = [];
+      var types = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'];
+      var type = types.filter(function (t) { return MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t); })[0];
+      mediaRec = type ? new MediaRecorder(stream, { mimeType: type }) : new MediaRecorder(stream);
+      mediaRec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+      mediaRec.onstop = function () {
+        recStream.getTracks().forEach(function (t) { t.stop(); });
+        recording = false; clearInterval(tick); clearTimeout(stopT); setRecUI(false);
+        var blob = new Blob(chunks, { type: mediaRec.mimeType || type || 'audio/webm' });
+        if (!blob.size) return;
+        var r = { id: String(Date.now()), name: '', blob: blob, created: Date.now() };
+        note('Analyse du prout…');
+        analyzeBlob(blob).catch(function () { return { score: 1500, loud: .3, dur: .3, peak: .3, bursts: 1 }; })
+          .then(function (st) { r.stats = st; r.score = st.score; note(''); openScore(r); });
+      };
+      recording = true; recStart = Date.now(); note('');
+      mediaRec.start(); setRecUI(true, 0);
+      tick = setInterval(function () { setRecUI(true, Math.min(6, Math.floor((Date.now() - recStart) / 1000))); }, 250);
+      stopT = setTimeout(stopRec, 6000);
+    }).catch(function (err) {
+      note(err && err.name === 'NotAllowedError' ? 'Accès au micro refusé' : 'Micro bloqué ici. Ouvre la Prout Box dans ton navigateur');
+    });
+  }
+  function stopRec() { if (mediaRec && mediaRec.state !== 'inactive') mediaRec.stop(); }
+  $('recBtn').addEventListener('click', function () { recording ? stopRec() : startRec(); });
+
+  // ================= the prout-o-meter: a score out of 10 000 =================
+  // Decoded offline (no user gesture needed), then measured in 20 ms windows:
+  // loudness (avg RMS of the noisy part), active duration, peak, and number of bursts.
+  function analyzeBlob(blob) {
+    return blob.arrayBuffer().then(function (ab) {
+      var OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      var oc = new OAC(1, 1, 44100);
+      return new Promise(function (res, rej) { var p = oc.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); });
+    }).then(function (buf) {
+      var d = buf.getChannelData(0), win = Math.max(1, Math.floor(buf.sampleRate / 50));
+      var peak = 0, th = .03, active = 0, bursts = 0, gap = 99, sum = 0;
+      for (var i = 0; i < d.length; i += win) {
+        var s = 0, n = Math.min(win, d.length - i);
+        for (var j = 0; j < n; j++) { var x = d[i + j]; s += x * x; if (x > peak) peak = x; else if (-x > peak) peak = -x; }
+        var rms = Math.sqrt(s / n);
+        if (rms > th) { active++; sum += rms; if (gap >= 3) bursts++; gap = 0; } else gap++;
+      }
+      var dur = active / 50, loud = Math.min(1, (active ? sum / active : 0) / .2);
+      var pk = Math.min(1, peak / .9), dd = Math.min(1, dur / 4), bb = Math.min(10, bursts);
+      return judge({ score: Math.round(loud * 5000 + dd * 3000 + pk * 1500 + bb * 50), loud: loud, dur: dd, peak: pk, bursts: bb / 10 });
+    });
+  }
+  function pad6(n) { return ('000000' + Math.max(0, Math.round(n))).slice(-6); }
+
+  // ================= the jury =================
+  // Three judges, each with a pet criterion, a note out of 10 and a line picked by bracket (0-3, 4-6, 7-8, 9-10).
+  var JURY = [
+    { name: 'MAMIE JOSETTE', face: '👵', raw: function (st) { return st.loud * 7 + st.peak * 3; }, lines: [
+      ['Pardon ? J\'ai rien entendu.', 'C\'est le chat ?', 'Une souris qui éternue.'],
+      ['Oh, c\'est mignon.', 'Comme ton grand-père après la soupe.', 'Ça passe, mais ouvre la fenêtre.'],
+      ['Mon Dieu, les voisins !', 'Jésus Marie Joseph !', 'J\'ai lâché mon tricot.'],
+      ['JE VAIS DÉFAILLIR.', 'Appelez le curé !', 'Mes rideaux ont bougé.']
+    ] },
+    { name: 'PR. VON PFFT', face: '🧪', raw: function (st) { return st.dur * 6 + st.bursts * 4; }, lines: [
+      ['Monophasique. Décevant.', 'Signal trop court pour l\'analyse.', 'Hypothèse : un soupir.'],
+      ['Spectre honnête, sans plus.', 'Une courbe tout à fait banale.', 'Je note une légère résonance.'],
+      ['Belle tenue dans la durée !', 'Rafale digne d\'une mobylette.', 'Harmoniques très riches.'],
+      ['PUBLIABLE DANS NATURE.', 'Un cas d\'école. Je prends des notes.', 'Je demande une subvention.']
+    ] },
+    { name: 'DJ FLATULE', face: '🎧', raw: function (st) { return st.peak * 4 + st.bursts * 3 + st.loud * 3; }, lines: [
+      ['Pas de drop, pas de deal.', 'Même pas un bruit blanc.', 'C\'est le silence qui gagne.'],
+      ['Y\'a du bounce, manque le drop.', 'Ça groove mollement.', 'Bon pour une pub de yaourt.'],
+      ['Ça claque, je le mets dans mon set !', 'Sub-basses de compétition.', 'Le dancefloor est en feu.'],
+      ['TITRE DE L\'ÉTÉ.', 'Disque d\'or, direct.', 'Ibiza vient d\'appeler.']
+    ] }
+  ];
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function species(st) {
+    var L = st.loud, D = st.dur, B = st.bursts * 10, P = st.peak;
+    if (st.score < 600) return 'LE FANTÔME';
+    if (B >= 5) return 'LA MITRAILLETTE';
+    if (B >= 3 && D >= .5) return 'LA MOBYLETTE';
+    if (L >= .7 && D >= .7) return 'LA TROMPETTE DE JÉRICHO';
+    if (L >= .6 && D < .3) return 'LE COUP DE CANON';
+    if (P >= .8 && L < .5) return 'LE PÉTARD MOUILLÉ';
+    if (L < .35 && D >= .6) return 'LE PNEU QUI SE DÉGONFLE';
+    if (L < .35) return 'LA SOURIS TIMIDE';
+    if (D >= .5) return 'LE SERPENT SOURNOIS';
+    return 'LE COUSSIN PÉTEUR';
+  }
+  // Adds the jury verdict to a stats object (stored with the recording, so the verdict never changes afterwards).
+  function judge(st) {
+    st.species = species(st);
+    st.jury = JURY.map(function (j) {
+      var n = Math.max(0, Math.min(10, Math.round(j.raw(st) + rnd(-.7, .7))));
+      var b = n <= 3 ? 0 : n <= 6 ? 1 : n <= 8 ? 2 : 3;
+      return { n: n, line: pick(j.lines[b]) };
+    });
+    st.fun = {
+      mag: (st.score / 10000 * 9).toFixed(1).replace('.', ','),
+      pigeons: Math.round(st.loud * 20 + st.bursts * 10 + st.peak * 5),
+      dist: (0.5 + st.score / 10000 * 9).toFixed(1).replace('.', ',')
+    };
+    return st;
+  }
+
+  // 8-bit blips, played through the same master chain
+  function blip(f, d, vol) {
+    var c = unlockAudio(); if (!c) return;
+    var o = c.createOscillator(), g = c.createGain(); o.type = 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(vol || .06, c.currentTime); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + d);
+    o.connect(g); g.connect(master); o.start(); o.stop(c.currentTime + d);
+  }
+  function jingle() { [523, 659, 784, 1047].forEach(function (f, i) { setTimeout(function () { blip(f, .22, .08); }, i * 90); }); }
+
+  // ================= retro screens =================
+  var screenOpen = false;
+  function openScreen(id) { screenOpen = true; $(id).hidden = false; }
+  function closeScreens() { screenOpen = false; ['scoreScreen', 'boardScreen', 'pubScreen', 'countryScreen'].forEach(function (id) { $(id).hidden = true; }); }
+
+  // --- score screen + arcade initials ---
+  var pending = null, initials = ['A', 'A', 'A'], LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  try { var si = localStorage.getItem('proutbox.initials'); if (si && si.length === 3) initials = si.split(''); } catch (e) {}
+  (function () {
+    var box = $('initials');
+    initials.forEach(function (_, i) {
+      var slot = document.createElement('div'); slot.className = 'slot';
+      var up = document.createElement('button'), b = document.createElement('b'), down = document.createElement('button');
+      up.type = down.type = 'button'; up.textContent = '▲'; down.textContent = '▼';
+      up.setAttribute('aria-label', 'Lettre suivante'); down.setAttribute('aria-label', 'Lettre précédente');
+      var step = function (dir) { initials[i] = LETTERS[(LETTERS.indexOf(initials[i]) + dir + 26) % 26]; b.textContent = initials[i]; blip(880 + dir * 120, .05); };
+      up.addEventListener('click', function () { step(1); });
+      down.addEventListener('click', function () { step(-1); });
+      b.addEventListener('click', function () { step(1); });
+      b.textContent = initials[i];
+      slot.appendChild(up); slot.appendChild(b); slot.appendChild(down); box.appendChild(slot);
+    });
+  })();
+  function renderJury(st) {
+    var box = $('jury'); box.innerHTML = '';
+    var total = 0;
+    JURY.forEach(function (j, i) {
+      var v = st.jury[i]; total += v.n;
+      var el = document.createElement('div'); el.className = 'judge';
+      var face = document.createElement('span'), who = document.createElement('span'), note = document.createElement('i'), q = document.createElement('q');
+      face.className = 'face'; face.textContent = j.face;
+      who.className = 'who'; who.textContent = j.name; note.textContent = v.n + '/10'; who.appendChild(note);
+      q.textContent = v.line;
+      el.appendChild(face); el.appendChild(who); el.appendChild(q); box.appendChild(el);
+    });
+    $('juryTotal').textContent = '';
+    $('fun').innerHTML = '';
+    return total;
+  }
+  function revealJury(st) {
+    var kids = $('jury').children, total = 0;
+    JURY.forEach(function (_, i) {
+      setTimeout(function () {
+        kids[i].classList.add('in'); blip(520 + i * 180, .09, .05);
+        total += st.jury[i].n;
+        if (i === JURY.length - 1) {
+          $('juryTotal').textContent = 'JURY : ' + total + '/30';
+          $('fun').innerHTML = 'MAGNITUDE : ' + st.fun.mag + ' SUR L\'ÉCHELLE DE RICHTER DU SLIP<br>PIGEONS EFFRAYÉS : ' + st.fun.pigeons + '<br>DISTANCE DE SÉCURITÉ : ' + st.fun.dist + ' M';
+          jingle();
+        }
+      }, 350 * (i + 1));
+    });
+  }
+  function openScore(r) {
+    pending = r;
+    var st = r.stats;
+    $('bigScore').textContent = '000000'; $('verdict').textContent = '';
+    renderJury(st);
+    $('scoreScreen').scrollTop = 0;
+    openScreen('scoreScreen');
+    var t0 = performance.now(), D = 1400, last = -1;
+    (function step(now) {
+      var k = Math.min(1, (now - t0) / D); k = 1 - Math.pow(1 - k, 3);
+      $('bigScore').textContent = pad6(r.score * k);
+      var tick = Math.floor(k * 16);
+      if (tick !== last) { last = tick; blip(260 + tick * 50, .05, .04); }
+      if (k < 1) requestAnimationFrame(step); else { $('verdict').textContent = 'ESPÈCE : ' + st.species; revealJury(st); }
+    })(t0);
+  }
+  $('scoreOk').addEventListener('click', function () {
+    if (!pending) { closeScreens(); return; }
+    var r = pending; pending = null;
+    r.name = initials.join('');
+    try { localStorage.setItem('proutbox.initials', r.name); } catch (e) {}
+    mine.push(r); saveRec(r);
+    closeScreens();
+    index = list().length - 1; show();
+    if (online()) { openPublish(r); return; }
+    note('Enregistré ! Retourne la boîte pour l’entendre');
+    can.classList.add('flipped'); fire().then(flipBackLater);
+  });
+  $('scoreTrash').addEventListener('click', function () { var was = pending; pending = null; closeScreens(); if (was) note('Prout jeté'); });
+
+  // ================= online: Supabase (see supabase/schema.sql) =================
+  // No account: a secret device id (uuid in localStorage) is the token for publishing, voting, reporting, deleting.
+  var SB = window.PROUTBOX_SUPABASE || {};
+  function online() { return !!(SB.url && SB.anonKey && /^https?:/.test(SB.url)); }
+  function uuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) { var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
+  }
+  var device = null;
+  try { device = localStorage.getItem('proutbox.device'); if (!device) { device = uuid(); localStorage.setItem('proutbox.device', device); } } catch (e) { device = uuid(); }
+  function sbHeaders(extra) {
+    var h = { apikey: SB.anonKey, Authorization: 'Bearer ' + SB.anonKey };
+    for (var k in extra) h[k] = extra[k];
+    return h;
+  }
+  function sbCheck(r) {
+    return r.text().then(function (t) {
+      var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {}
+      if (!r.ok) throw new Error((j && (j.message || j.error || j.hint)) || ('HTTP ' + r.status));
+      return j;
+    });
+  }
+  function rpc(fn, args) {
+    return fetch(SB.url + '/rest/v1/rpc/' + fn, { method: 'POST', headers: sbHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(args) }).then(sbCheck);
+  }
+  function upload(path, blob) {
+    return fetch(SB.url + '/storage/v1/object/prouts/' + path, { method: 'POST', headers: sbHeaders({ 'Content-Type': blob.type || 'application/octet-stream', 'x-upsert': 'false' }), body: blob }).then(sbCheck);
+  }
+  function audioUrl(path) { return SB.url + '/storage/v1/object/public/prouts/' + path; }
+  function friendly(err) {
+    var m = (err && err.message) || '';
+    if (/initiales refus/i.test(m)) return 'CES INITIALES SONT REFUSÉES';
+    if (/trop de/i.test(m)) return 'DOUCEMENT ! RÉESSAIE DEMAIN';
+    if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'HORS LIGNE';
+    return 'OUPS : ' + m.toUpperCase().slice(0, 60);
+  }
+
+  // --- countries ---
+  var COUNTRIES = [
+    ['FR', 'France'], ['BE', 'Belgique'], ['CH', 'Suisse'], ['CA', 'Canada'], ['LU', 'Luxembourg'], ['MC', 'Monaco'],
+    ['DE', 'Allemagne'], ['ES', 'Espagne'], ['IT', 'Italie'], ['PT', 'Portugal'], ['GB', 'Royaume-Uni'], ['IE', 'Irlande'], ['NL', 'Pays-Bas'],
+    ['AT', 'Autriche'], ['DK', 'Danemark'], ['SE', 'Suède'], ['NO', 'Norvège'], ['FI', 'Finlande'], ['IS', 'Islande'], ['PL', 'Pologne'],
+    ['CZ', 'Tchéquie'], ['SK', 'Slovaquie'], ['HU', 'Hongrie'], ['RO', 'Roumanie'], ['BG', 'Bulgarie'], ['GR', 'Grèce'], ['HR', 'Croatie'],
+    ['SI', 'Slovénie'], ['RS', 'Serbie'], ['UA', 'Ukraine'], ['TR', 'Turquie'], ['US', 'États-Unis'], ['MX', 'Mexique'], ['BR', 'Brésil'],
+    ['AR', 'Argentine'], ['CL', 'Chili'], ['CO', 'Colombie'], ['PE', 'Pérou'], ['MA', 'Maroc'], ['DZ', 'Algérie'], ['TN', 'Tunisie'],
+    ['SN', 'Sénégal'], ['CI', 'Côte d’Ivoire'], ['CM', 'Cameroun'], ['CD', 'RD Congo'], ['MG', 'Madagascar'], ['MU', 'Maurice'], ['RE', 'La Réunion'],
+    ['GP', 'Guadeloupe'], ['MQ', 'Martinique'], ['GF', 'Guyane'], ['PF', 'Polynésie fr.'], ['NC', 'Nouvelle-Calédonie'], ['ZA', 'Afrique du Sud'],
+    ['EG', 'Égypte'], ['NG', 'Nigeria'], ['KE', 'Kenya'], ['IL', 'Israël'], ['LB', 'Liban'], ['AE', 'Émirats'], ['SA', 'Arabie saoudite'],
+    ['IN', 'Inde'], ['PK', 'Pakistan'], ['CN', 'Chine'], ['JP', 'Japon'], ['KR', 'Corée du Sud'], ['TW', 'Taïwan'], ['VN', 'Vietnam'],
+    ['TH', 'Thaïlande'], ['ID', 'Indonésie'], ['PH', 'Philippines'], ['MY', 'Malaisie'], ['SG', 'Singapour'], ['AU', 'Australie'], ['NZ', 'Nouvelle-Zélande']
+  ];
+  function flag(cc) { return cc.toUpperCase().replace(/./g, function (c) { return String.fromCodePoint(127397 + c.charCodeAt(0)); }); }
+  function countryName(cc) { for (var i = 0; i < COUNTRIES.length; i++) if (COUNTRIES[i][0] === cc) return COUNTRIES[i][1]; return cc; }
+  var country = null;
+  try { country = localStorage.getItem('proutbox.country'); } catch (e) {}
+  if (!country) {
+    var loc = (navigator.language || '').toUpperCase().match(/[-_]([A-Z]{2})\b/);
+    if (loc && countryName(loc[1]) !== loc[1]) country = loc[1];
+    if (!country) { try { var tz = Intl.DateTimeFormat().resolvedOptions().timeZone; if (/Paris/.test(tz)) country = 'FR'; } catch (e) {} }
+    country = country || 'FR';
+  }
+  function setCountry(cc) { country = cc; try { localStorage.setItem('proutbox.country', cc); } catch (e) {} $('tabCountry').textContent = flag(cc) + ' ' + countryName(cc).toUpperCase(); }
+  var countryBack = null;
+  function openCountry(back) {
+    countryBack = back || null;
+    var box = $('clist'); box.innerHTML = '';
+    COUNTRIES.forEach(function (c) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = flag(c[0]) + ' ' + c[1].toUpperCase();
+      if (c[0] === country) b.className = 'on';
+      b.addEventListener('click', function () { setCountry(c[0]); blip(900, .06); closeScreens(); if (countryBack) countryBack(); });
+      box.appendChild(b);
+    });
+    closeScreens(); openScreen('countryScreen');
+  }
+  $('countryClose').addEventListener('click', function () { closeScreens(); if (countryBack) countryBack(); });
+  setCountry(country);
+
+  // --- publish a recording ---
+  var pubRec = null;
+  function openPublish(r) {
+    pubRec = r;
+    $('pubText').textContent = 'ENVOYER « ' + r.name + ' · ' + ((r.stats && r.stats.species) || '???') + ' » DANS LE TOP PROUTS ' + flag(country) + ' ' + countryName(country).toUpperCase() + ' ?';
+    $('pubStatus').textContent = ''; $('pubOk').disabled = false;
+    openScreen('pubScreen');
+  }
+  function publish(r) {
+    var ext = /mp4|m4a|aac/.test(r.blob.type) ? 'm4a' : /webm/.test(r.blob.type) ? 'webm' : /ogg/.test(r.blob.type) ? 'ogg' : /wav/.test(r.blob.type) ? 'wav' : 'bin';
+    var path = device + '/' + r.id + '.' + ext;
+    return upload(path, r.blob).then(function () {
+      return rpc('publish_prout', { p_device: device, p_initials: r.name, p_country: country, p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_path: path, p_mime: r.blob.type || 'audio/mp4' });
+    }).then(function (id) { r.remoteId = id; r.country = country; return saveRec(r); });
+  }
+  $('pubOk').addEventListener('click', function () {
+    if (!pubRec) return;
+    var r = pubRec; $('pubOk').disabled = true; $('pubStatus').textContent = 'ENVOI…';
+    publish(r).then(function () {
+      pubRec = null; closeScreens(); jingle();
+      note('Publié dans le TOP PROUTS ' + flag(country) + ' !');
+      boardTab = 'country'; openBoard();
+    }).catch(function (e) { $('pubOk').disabled = false; $('pubStatus').textContent = friendly(e); });
+  });
+  $('pubLater').addEventListener('click', function () {
+    pubRec = null; closeScreens();
+    note('Enregistré ! Tu pourras le publier depuis TOP PROUTS › MOI');
+    can.classList.add('flipped'); fire().then(flipBackLater);
+  });
+  $('pubCountry').addEventListener('click', function () { var r = pubRec; openCountry(function () { openPublish(r); }); });
+
+  // --- remote playback (cached) ---
+  var remoteBufs = {};
+  function playRemote(row) {
+    var go = function (buf) {
+      var s = ctx.createBufferSource(); s.buffer = buf; var g = ctx.createGain(); g.gain.value = .55;
+      s.connect(g); g.connect(master); s.start(); return buf.duration;
+    };
+    if (remoteBufs[row.id]) return Promise.resolve(go(remoteBufs[row.id]));
+    return fetch(audioUrl(row.path)).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+      .then(decodeBlob).then(function (buf) { remoteBufs[row.id] = buf; return go(buf); });
+  }
+
+  // --- leaderboard ---
+  var boardTimer = null, boardTab = 'country', boardSeq = 0;
+  function armed(btn, label, fn) {
+    // two-tap confirmation, like the delete link on the main screen
+    if (btn.dataset.armed === '1') { btn.dataset.armed = ''; fn(); return; }
+    btn.dataset.armed = '1'; var was = btn.textContent; btn.textContent = label;
+    setTimeout(function () { if (btn.dataset.armed === '1') { btn.dataset.armed = ''; btn.textContent = was; } }, 3000);
+  }
+  function rowEl(i, name, sub, right, rightSub) {
+    var li = document.createElement('li');
+    var rk = document.createElement('span'), nm = document.createElement('span'), sc = document.createElement('span');
+    rk.className = 'rk'; nm.className = 'nm'; sc.className = 'sc';
+    rk.textContent = (i + 1) + '.'; nm.textContent = name; sc.textContent = right;
+    if (sub) { var s = document.createElement('small'); s.textContent = sub; nm.appendChild(s); }
+    if (rightSub) { var s2 = document.createElement('small'); s2.textContent = rightSub; sc.appendChild(s2); }
+    li.appendChild(rk); li.appendChild(nm); li.appendChild(sc);
+    return li;
+  }
+  function playRow(li, p) {
+    if (!unlockAudio()) return;
+    clearTimeout(boardTimer);
+    Array.prototype.forEach.call($('board').children, function (x) { x.classList.remove('hot'); });
+    li.classList.add('hot');
+    p().then(function (d) { boardTimer = setTimeout(function () { li.classList.remove('hot'); }, d * 1000); })
+      .catch(function () { li.classList.remove('hot'); $('boardStatus').textContent = 'LECTURE IMPOSSIBLE'; });
+  }
+  function renderRemote(rows) {
+    var ol = $('board'); ol.innerHTML = '';
+    rows.forEach(function (row, i) {
+      var li = rowEl(i, row.initials + ' ' + flag(row.country), row.species, '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), row.votes + (row.votes > 1 ? ' VOTES' : ' VOTE'));
+      var rate = null;
+      li.addEventListener('click', function (e) {
+        if (rate && rate.contains(e.target)) return;
+        var wasOpen = li.classList.contains('open');
+        Array.prototype.forEach.call(ol.children, function (x) { if (x !== li) { x.classList.remove('open'); var rr = x.querySelector('.rate'); if (rr) rr.remove(); } });
+        if (!wasOpen) {
+          li.classList.add('open');
+          rate = document.createElement('div'); rate.className = 'rate';
+          var lab = document.createElement('span'); lab.textContent = row.mine ? 'C’EST TON PROUT' : 'NOTE CE PROUT';
+          var cr = document.createElement('div'); cr.className = 'crottes';
+          var paint = function (n) { Array.prototype.forEach.call(cr.children, function (b, k) { b.classList.toggle('lit', k < n); }); };
+          for (var k = 1; k <= 5; k++) (function (k) {
+            var b = document.createElement('button'); b.type = 'button'; b.textContent = '💩'; b.setAttribute('aria-label', k + ' sur 5');
+            b.addEventListener('click', function () {
+              if (row.mine) { $('boardStatus').textContent = 'ON NE VOTE PAS POUR SOI !'; return; }
+              paint(k); blip(600 + k * 120, .08);
+              rpc('vote_prout', { p_device: device, p_prout: row.id, p_stars: k }).then(function (res) {
+                var v = res && res[0]; if (!v) return;
+                row.votes = v.votes; row.avg = v.avg; row.my_stars = k;
+                li.querySelector('.sc').childNodes[0].textContent = '💩 ' + Number(v.avg).toFixed(1);
+                li.querySelector('.sc small').textContent = v.votes + (v.votes > 1 ? ' VOTES' : ' VOTE');
+                $('boardStatus').textContent = 'MERCI POUR TA NOTE !';
+              }).catch(function (e) { $('boardStatus').textContent = friendly(e); });
+            });
+            cr.appendChild(b);
+          })(k);
+          paint(row.my_stars || 0);
+          var acts = document.createElement('div'); acts.className = 'actions';
+          if (row.mine) {
+            var del = document.createElement('button'); del.type = 'button'; del.className = 'link danger'; del.textContent = 'SUPPRIMER';
+            del.addEventListener('click', function () { armed(del, 'SÛR ? RETOUCHE', function () {
+              rpc('delete_prout', { p_device: device, p_prout: row.id }).then(function () {
+                li.remove(); mine.forEach(function (r) { if (r.remoteId === row.id) { r.remoteId = null; saveRec(r); } });
+                $('boardStatus').textContent = 'PROUT RETIRÉ DU CLASSEMENT';
+              }).catch(function (e) { $('boardStatus').textContent = friendly(e); });
+            }); });
+            acts.appendChild(del);
+          } else {
+            var rep = document.createElement('button'); rep.type = 'button'; rep.className = 'link danger'; rep.textContent = 'SIGNALER';
+            rep.addEventListener('click', function () { armed(rep, 'SÛR ? RETOUCHE', function () {
+              rpc('report_prout', { p_device: device, p_prout: row.id, p_reason: 'inapproprié' }).then(function () {
+                li.remove(); $('boardStatus').textContent = 'SIGNALÉ, MERCI. ON REGARDE.';
+              }).catch(function (e) { $('boardStatus').textContent = friendly(e); });
+            }); });
+            acts.appendChild(rep);
+          }
+          rate.appendChild(lab); rate.appendChild(cr); rate.appendChild(acts); li.appendChild(rate);
+          playRow(li, function () { return playRemote(row); });
+        } else { li.classList.remove('open'); if (rate) { rate.remove(); rate = null; } }
+      });
+      ol.appendChild(li);
+    });
+    $('boardEmpty').hidden = rows.length > 0;
+    $('boardEmpty').innerHTML = 'AUCUN PROUT ICI...<br>SOIS LE PREMIER !';
+  }
+  function renderMine() {
+    var ol = $('board'); ol.innerHTML = '';
+    var rows = mine.slice().sort(function (a, b) { return (b.score || 0) - (a.score || 0) || a.created - b.created; });
+    rows.forEach(function (r, i) {
+      var li = rowEl(i, r.name || '???', (r.stats && r.stats.species) || '', pad6(r.score || 0), r.remoteId ? 'EN LIGNE ' + flag(r.country || country) : '');
+      if (online() && !r.remoteId) {
+        var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = 'PUBLIER';
+        pb.addEventListener('click', function (e) { e.stopPropagation(); openPublish(r); });
+        li.querySelector('.sc').appendChild(pb);
+      }
+      li.addEventListener('click', function () { playRow(li, function () { return playRecording(r); }); });
+      ol.appendChild(li);
+    });
+    $('boardEmpty').hidden = rows.length > 0;
+    $('boardEmpty').innerHTML = 'AUCUN PROUT...<br>ENREGISTRE LE TIEN !';
+  }
+  function loadBoard() {
+    var seq = ++boardSeq;
+    $('board').innerHTML = ''; $('boardEmpty').hidden = true; $('boardStatus').textContent = '';
+    Array.prototype.forEach.call($('tabs').children, function (t) { t.classList.toggle('on', t.dataset.tab === boardTab); });
+    $('boardHint').textContent = boardTab === 'mine' ? 'TES PROUTS SUR CE TÉLÉPHONE' : 'TOUCHE UN PROUT POUR L’ÉCOUTER ET LE NOTER';
+    if (boardTab === 'mine') { renderMine(); return; }
+    if (!online()) { $('boardEmpty').hidden = false; $('boardEmpty').innerHTML = 'CLASSEMENT EN LIGNE<br>BIENTÔT DISPONIBLE'; return; }
+    $('boardStatus').textContent = 'CHARGEMENT…';
+    rpc('top_prouts', { p_device: device, p_country: boardTab === 'country' ? country : null, p_limit: 50 }).then(function (rows) {
+      if (seq !== boardSeq) return;
+      $('boardStatus').textContent = ''; renderRemote(rows || []);
+    }).catch(function (e) { if (seq !== boardSeq) return; $('boardStatus').textContent = friendly(e); $('boardEmpty').hidden = false; $('boardEmpty').innerHTML = 'PAS DE RÉSEAU ?<br>RÉESSAIE PLUS TARD'; });
+  }
+  function openBoard() {
+    if (!online() && boardTab !== 'mine') boardTab = 'mine';
+    openScreen('boardScreen'); loadBoard();
+    blip(660, .08); setTimeout(function () { blip(990, .12); }, 90);
+  }
+  Array.prototype.forEach.call($('tabs').children, function (t) {
+    t.addEventListener('click', function () { boardTab = t.dataset.tab; blip(760, .05); loadBoard(); });
+  });
+  $('countryBtn').addEventListener('click', function () { openCountry(function () { boardTab = 'country'; openBoard(); }); });
+  $('boardBtn').addEventListener('click', openBoard);
+  $('boardClose').addEventListener('click', function () { closeScreens(); blip(440, .08); });
+
+  // --- demo mode (easter egg, also used for the App Store screenshots): 5 taps on the title ---
+  // Renders three classic prouts offline into WAV "recordings" so the leaderboard has something to show.
+  function wavBlob(buf) {
+    var d = buf.getChannelData(0), n = d.length, ab = new ArrayBuffer(44 + n * 2), v = new DataView(ab);
+    var w = function (o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, buf.sampleRate, true); v.setUint32(28, buf.sampleRate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    w(36, 'data'); v.setUint32(40, n * 2, true);
+    for (var i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, d[i])) * 32767, true);
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+  function renderPreset(id) {
+    var OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext, sr = 44100;
+    var parts = PRESETS[id], len = 0;
+    parts.forEach(function (v) { len = Math.max(len, v.at + v.dur); });
+    var oc = new OAC(1, Math.ceil((len + .3) * sr), sr);
+    var nb = oc.createBuffer(1, sr * 2, sr), nd = nb.getChannelData(0);
+    for (var i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    var out = oc.createGain(); out.gain.value = .9; out.connect(oc.destination);
+    parts.forEach(function (v) { voice(v, .05 + v.at, oc, out, nb); });
+    return oc.startRendering().then(wavBlob);
+  }
+  function seedDemo() {
+    var demo = [['NOA', 'rafale'], ['ZOE', 'trompette'], ['LEO', 'discret'], ['MAX', 'mouille']];
+    note('Mode démo : 4 prouts arrivent…');
+    Promise.all(demo.map(function (d, i) {
+      return renderPreset(d[1]).then(function (blob) {
+        return analyzeBlob(blob).then(function (st) {
+          return { id: 'demo' + Date.now() + i, name: d[0], blob: blob, created: Date.now() + i, score: st.score, stats: st };
+        });
+      });
+    })).then(function (recs) {
+      recs.forEach(function (r) { mine.push(r); saveRec(r); });
+      note(''); show();
+      openScore(recs[0]); pending = null; // review only: both buttons just close
+    }).catch(function () { note('Démo impossible ici'); });
+  }
+  var titleTaps = 0, titleTimer = null;
+  $('title').addEventListener('click', function () {
+    clearTimeout(titleTimer); titleTimer = setTimeout(function () { titleTaps = 0; }, 3000);
+    if (++titleTaps >= 5) { titleTaps = 0; seedDemo(); }
+  });
+
+  // ================= flip the box on screen =================
+  var canBtn = $('canBtn'), drag = null, backTimer = null;
+  function setRot(deg) { can.style.transform = deg == null ? '' : 'rotate(' + deg + 'deg)'; }
+  function flipBackLater() {
+    clearTimeout(backTimer);
+    backTimer = setTimeout(function () { setRot(null); if (!phoneFlipped) can.classList.remove('flipped'); }, Math.max(900, playingUntil - Date.now() + 150));
+  }
+  canBtn.addEventListener('pointerdown', function (e) {
+    startSensor();
+    drag = { x: e.clientX, y: e.clientY, angle: 0, fired: false, moved: false };
+    can.classList.add('dragging');
+    try { canBtn.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  canBtn.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y, dist = Math.max(Math.abs(dx), Math.abs(dy));
+    if (dist > 8) drag.moved = true;
+    if (!drag.moved) return;
+    var dir = Math.abs(dx) > Math.abs(dy) ? Math.sign(dx) : 1;
+    drag.angle = Math.min(180, dist * 1.4) * (dir || 1);
+    setRot(drag.angle);
+    if (!drag.fired && Math.abs(drag.angle) >= 140) { drag.fired = true; unlockAudio(); fire(); }
+  });
+  function endDrag() {
+    if (!drag) return;
+    var d = drag; drag = null;
+    can.classList.remove('dragging');
+    if (!d.moved) { setRot(null); can.classList.add('flipped'); fire().then(flipBackLater); return; }
+    if (d.fired) { setRot(d.angle > 0 ? 180 : -180); flipBackLater(); } else { setRot(null); }
+  }
+  canBtn.addEventListener('pointerup', endDrag);
+  canBtn.addEventListener('pointercancel', endDrag);
+  canBtn.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); can.classList.add('flipped'); fire().then(flipBackLater); } });
+
+  // ================= flip the real phone (starts on the first touch) =================
+  // beta: ~0 flat face up, ~90 upright, ~-90 upside down, ~±180 face down
+  var sensorAsked = false, phoneFlipped = false, lastFire = 0;
+  function onOrient(e) {
+    if (e.beta == null) return;
+    if (!phoneFlipped && (e.beta < -50 || e.beta > 145)) {
+      phoneFlipped = true; can.classList.add('flipped');
+      if (Date.now() - lastFire > 700) { lastFire = Date.now(); fire(); }
+    } else if (phoneFlipped && e.beta > 5 && e.beta < 125) {
+      phoneFlipped = false; can.classList.remove('flipped');
+    }
+  }
+  function startSensor() {
+    if (sensorAsked) return; sensorAsked = true;
+    var DOE = window.DeviceOrientationEvent;
+    if (!DOE) return;
+    var go = function () {
+      window.addEventListener('deviceorientation', onOrient);
+      $('hint').textContent = 'Retourne la boîte… ou ton téléphone !';
+      try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(function () {}); } catch (e) {}
+    };
+    if (typeof DOE.requestPermission === 'function') {
+      DOE.requestPermission().then(function (r) { if (r === 'granted') go(); }).catch(function () {});
+    } else { go(); }
+  }
+  ['click', 'touchend'].forEach(function (ev) { document.addEventListener(ev, startSensor, { capture: true, passive: true }); });
+
+  // ================= start =================
+  var saved = null;
+  try { saved = localStorage.getItem('proutbox.pick'); } catch (e) {}
+  var restore = function () {
+    if (!saved) return;
+    var l = list();
+    for (var i = 0; i < l.length; i++) if (l[i].kind + ':' + l[i].id === saved) { index = i; return; }
+  };
+  restore(); show();
+  loadRecs().then(function (rows) {
+    if (rows && rows.length) {
+      mine = rows.sort(function (a, b) { return a.created - b.created; });
+      restore(); show();
+      // recordings made before the prout-o-meter (or the jury) existed: score them now
+      mine.forEach(function (r) {
+        if (r.score == null) analyzeBlob(r.blob).then(function (st) { r.stats = st; r.score = st.score; saveRec(r); show(); }).catch(function () {});
+        else if (r.stats && !r.stats.jury) { judge(r.stats); saveRec(r); show(); }
+      });
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
