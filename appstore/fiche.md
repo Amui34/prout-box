@@ -16,7 +16,7 @@
 | Classification d'âge | déclarée par API : humour grossier « peu fréquent / léger », contenu généré par les utilisateurs : oui, tout le reste : non |
 | Droits d'auteur | © 2026 Noa Madar |
 | App Store Connect | app id **6827309393**, bundle ID resource `MFL357LM76`, équipe `772LDD7BCT` |
-| Version 1.0 | build 1 soumise le 26/10/2026 (WAITING_FOR_REVIEW), publication automatique après approbation |
+| Version 1.0 | build 2 soumise le 28/10/2026 (WAITING_FOR_REVIEW, build 1 retiré), publication automatique après approbation |
 
 ## Texte promotionnel (170 car. max)
 

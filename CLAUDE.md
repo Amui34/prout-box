@@ -71,7 +71,7 @@ Fond jaune soleil `#FFD23F`, vert gaz `#8BD450` pendant le prout, rouge tomate `
 ## App Store
 
 - App Store Connect : app id **6827309393**, bundle `com.proutbox.app` (resource `MFL357LM76`), équipe `772LDD7BCT`, clé API `FJ7JL8VV39` (Issuer ID dans README.md, `.p8` hors dépôt).
-- **1.0 (build 1) soumise le 26/10/2026** (WAITING_FOR_REVIEW, publication auto après approbation). Fiche, catégories, classification d'âge, captures 6,9", notes de révision, prix gratuit et disponibilité (175 territoires) posés par l'API ; confidentialité (audio + identifiant, non liés, pas de suivi) remplie dans App Store Connect via Chrome (pas d'API).
+- **1.0 (build 2) soumise le 28/10/2026** après retrait du build 1 (WAITING_FOR_REVIEW, publication auto après approbation). Fiche, catégories, classification d'âge, captures 6,9", notes de révision, prix gratuit et disponibilité (175 territoires) posés par l'API ; confidentialité (audio + identifiant, non liés, pas de suivi) remplie dans App Store Connect via Chrome (pas d'API).
 - Prochaine version : `npm run sync:ios` → bump `CURRENT_PROJECT_VERSION` (> 1) et `MARKETING_VERSION` → archive / export / `altool` (README) → attacher le build et soumettre par l'API (scripts du type `asc_submit.mjs`, cf. Oplaa). Pièges : pas d'emoji dans la description, `whatsNew` interdit sur une 1re version.
 - Dépôt GitHub public `Amui34/prout-box`, site + politique de confidentialité sur GitHub Pages (`docs/`).
 
