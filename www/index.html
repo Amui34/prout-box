@@ -149,6 +149,36 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .clist button { font-family: var(--pixel); font-size: 8px; line-height: 1.4; text-align: left; padding: 10px 8px 8px; background: transparent; color: var(--phosphor); border: 2px solid rgba(57,255,20,.35); cursor: pointer; text-shadow: inherit; }
 .clist button.on { border-color: var(--gold); color: var(--gold); }
 
+/* two retro buttons side by side under the record button */
+.leads { display: flex; gap: 10px; width: 100%; }
+.leads .lead { flex: 1; font-size: 10px; padding-inline: 4px; white-space: nowrap; }
+.skinlink { margin: -6px 0 0; background: none; border: none; font: 800 12px var(--body); color: var(--ink); text-decoration: underline; cursor: pointer; opacity: .75; }
+.can svg.skin { display: block; width: 100%; height: auto; }
+
+/* groups */
+.gcard { width: 100%; max-width: 360px; display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 12px 8px; border: 2px solid rgba(57,255,20,.35); margin-bottom: 10px; cursor: pointer; text-align: left; background: transparent; color: var(--phosphor); font-family: var(--pixel); text-shadow: inherit; }
+.gcard b { display: block; font-weight: 400; font-size: 11px; color: var(--gold); margin-bottom: 4px; }
+.gcard small { display: block; font-size: 7px; opacity: .85; line-height: 1.6; }
+.gcard .badge { font-size: 8px; background: var(--neon); color: #fff; padding: 4px 6px 2px; text-shadow: none; }
+.pxinput { width: 100%; max-width: 320px; box-sizing: border-box; font-family: var(--pixel); font-size: 12px; padding: 12px 10px 10px; background: #000; color: #fff; border: 3px solid var(--phosphor); outline: none; text-transform: uppercase; letter-spacing: 1px; margin: 6px 0 14px; }
+.pxinput::placeholder { color: rgba(57,255,20,.4); text-transform: none; letter-spacing: 0; }
+.pxinput:focus { border-color: var(--gold); }
+.code { font-size: 22px; color: #fff; letter-spacing: 6px; text-shadow: 0 0 10px var(--phosphor); margin: 6px 0; }
+.gtabs { display: flex; gap: 6px; margin: 0 0 10px; width: 100%; max-width: 360px; }
+.gtabs .tab { font-size: 7px; padding: 9px 2px 7px; }
+.guess { width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.guess .who { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.guess .who button { font-family: var(--pixel); font-size: 9px; line-height: 1.4; padding: 12px 6px 10px; background: transparent; color: var(--phosphor); border: 2px solid var(--phosphor); cursor: pointer; text-shadow: inherit; overflow: hidden; text-overflow: ellipsis; }
+.guess .who button.hit { border-color: var(--gold); color: var(--gold); box-shadow: 3px 3px 0 var(--neon); }
+.guess .who button.miss { border-color: #FF7A7A; color: #FF7A7A; }
+.guess .big { font-size: 13px; color: var(--gold); text-shadow: 0 0 8px var(--gold); min-height: 22px; }
+.defi { width: 100%; max-width: 360px; box-sizing: border-box; border: 2px dashed rgba(57,255,20,.4); padding: 12px 10px; margin-bottom: 12px; text-align: center; }
+.defi h3 { margin: 0 0 6px; font: 400 11px/1.5 var(--pixel); color: var(--gold); }
+.defi p { font-size: 8px; line-height: 1.7; margin: 0 0 10px; }
+.defi .row { margin-top: 4px; padding-top: 4px; }
+.defi select { font-family: var(--pixel); font-size: 9px; background: #000; color: var(--phosphor); border: 2px solid var(--phosphor); padding: 8px; margin-bottom: 8px; }
+.board .nm .tag2 { display: inline-block; font-size: 7px; background: var(--neon); color: #fff; padding: 2px 4px 1px; margin-left: 6px; text-shadow: none; vertical-align: middle; }
+
 .rec {
   display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; height: 64px; box-sizing: border-box;
   border: 3px solid var(--ink); border-radius: 32px; background: var(--tomato); color: var(--white); cursor: pointer;
@@ -170,7 +200,41 @@ button:active { transform: scale(.96); }
 
   <div class="hero">
     <button class="canbtn" id="canBtn" type="button" aria-label="Retourner la boîte">
-      <svg class="can" id="can" viewBox="0 0 240 340" aria-hidden="true">
+      <div class="can" id="can">
+      <!-- skin 2: the whoopee cushion -->
+      <svg class="skin" id="skinCushion" viewBox="0 0 240 340" aria-hidden="true" style="display:none">
+        <defs>
+          <radialGradient id="cushRed" cx=".4" cy=".35" r=".8">
+            <stop offset="0" stop-color="#FF8A6E"/><stop offset=".55" stop-color="#FF5A3C"/><stop offset="1" stop-color="#C92E16"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="120" cy="318" rx="98" ry="12" fill="rgba(42,27,18,.22)"/>
+        <!-- neck -->
+        <path d="M150 262 L212 300 Q226 310 214 318 L160 296 Z" fill="#E8482C" stroke="#2A1B12" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M168 290 L205 309" stroke="#2A1B12" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+        <!-- body -->
+        <path d="M120 60 C40 60 10 130 22 198 C34 268 86 300 136 290 C196 278 236 220 224 152 C214 96 180 60 120 60 Z" fill="url(#cushRed)" stroke="#2A1B12" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M60 110 C78 86 100 78 120 78" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".45"/>
+        <!-- mascot -->
+        <g transform="translate(0 6)">
+          <g fill="#2A1B12">
+            <circle cx="92" cy="166" r="25"/><circle cx="120" cy="146" r="31"/><circle cx="150" cy="164" r="25"/>
+            <circle cx="106" cy="182" r="21"/><circle cx="136" cy="184" r="21"/>
+          </g>
+          <g fill="#8BD450">
+            <circle cx="92" cy="166" r="21"/><circle cx="120" cy="146" r="27"/><circle cx="150" cy="164" r="21"/>
+            <circle cx="106" cy="182" r="17"/><circle cx="136" cy="184" r="17"/><circle cx="120" cy="170" r="22"/>
+          </g>
+          <circle cx="108" cy="140" r="7" fill="#B9EC8A" opacity=".7"/>
+          <circle cx="109" cy="156" r="5.5" fill="#2A1B12"/><circle cx="133" cy="156" r="5.5" fill="#2A1B12"/>
+          <circle cx="111" cy="154" r="1.8" fill="#fff"/><circle cx="135" cy="154" r="1.8" fill="#fff"/>
+          <ellipse cx="100" cy="168" rx="6" ry="3.5" fill="#FF8FA3"/><ellipse cx="142" cy="168" rx="6" ry="3.5" fill="#FF8FA3"/>
+          <path d="M110 167 Q121 180 132 167" fill="#2A1B12"/>
+        </g>
+        <text x="120" y="252" text-anchor="middle" font-family="Luckiest Guy, Arial Black, sans-serif" font-size="30" letter-spacing="2" fill="#FFD23F" stroke="#2A1B12" stroke-width="5" paint-order="stroke" stroke-linejoin="round">PROUT</text>
+      </svg>
+      <!-- skin 1: the can -->
+      <svg class="skin" id="skinCan" viewBox="0 0 240 340" aria-hidden="true">
         <defs>
           <linearGradient id="redSide" x1="0" x2="1">
             <stop offset="0" stop-color="#FF8A6E"/><stop offset=".35" stop-color="#FF5A3C"/><stop offset="1" stop-color="#D9381E"/>
@@ -190,8 +254,8 @@ button:active { transform: scale(.96); }
         <!-- label -->
         <rect x="20" y="100" width="200" height="150" fill="url(#labelSide)"/>
         <path d="M20 100 H220 M20 250 H220" stroke="#2A1B12" stroke-width="4"/>
-        <!-- mascot: a little gas cloud -->
-        <g transform="translate(0 -6)">
+        <!-- mascot: a little gas cloud (1.15× around its centre) -->
+        <g transform="translate(-18 -31) scale(1.15)">
           <g fill="#2A1B12">
             <circle cx="92" cy="166" r="25"/><circle cx="120" cy="146" r="31"/><circle cx="150" cy="164" r="25"/>
             <circle cx="106" cy="182" r="21"/><circle cx="136" cy="184" r="21"/>
@@ -209,20 +273,19 @@ button:active { transform: scale(.96); }
           </g>
         </g>
         <text x="120" y="236" text-anchor="middle" font-family="Luckiest Guy, Arial Black, sans-serif" font-size="34" letter-spacing="2" fill="#FF5A3C" stroke="#2A1B12" stroke-width="5" paint-order="stroke" stroke-linejoin="round">PROUT</text>
-        <!-- shine -->
-        <rect x="34" y="50" width="14" height="236" rx="7" fill="#fff" opacity=".35"/>
-        <rect x="196" y="50" width="16" height="240" fill="#2A1B12" opacity=".08"/>
         <!-- lid -->
         <ellipse cx="120" cy="46" rx="100" ry="24" fill="#FFD23F" stroke="#2A1B12" stroke-width="5"/>
         <ellipse cx="120" cy="46" rx="80" ry="17" fill="#F2B705" stroke="#2A1B12" stroke-width="3"/>
         <g id="holes" fill="#2A1B12"></g>
       </svg>
+      </div>
     </button>
     <div class="burst" id="burst" aria-live="polite">
       <svg viewBox="0 0 200 200" aria-hidden="true"><polygon id="burstStar" fill="#FFFFFF" stroke="#2A1B12" stroke-width="6" stroke-linejoin="round" points=""/></svg>
       <span id="burstText"></span>
     </div>
     <p class="hint" id="hint">Retourne la boîte !</p>
+    <button class="skinlink" id="skinBtn" type="button">Changer de boîte</button>
   </div>
 
   <div class="picker">
@@ -240,7 +303,10 @@ button:active { transform: scale(.96); }
   </div>
 
   <button class="rec" id="recBtn" type="button"><span class="dot"></span><span id="recLabel">Enregistrer mon prout</span></button>
-  <button class="lead" id="boardBtn" type="button">★ TOP PROUTS ★</button>
+  <div class="leads">
+    <button class="lead" id="boardBtn" type="button">★ TOP PROUTS</button>
+    <button class="lead" id="groupsBtn" type="button">👯 GROUPES</button>
+  </div>
   <p class="note" id="note" aria-live="polite"></p>
 </div>
 
@@ -298,6 +364,56 @@ button:active { transform: scale(.96); }
   <p>TON PROUT CONCOURT DANS CE PAYS</p>
   <div class="clist" id="clist"></div>
   <div class="row"><button class="pxbtn dim" id="countryClose" type="button">Retour</button></div>
+</div>
+
+<!-- Retro screen 5: my groups -->
+<div class="screen" id="groupsScreen" hidden role="dialog" aria-label="Mes groupes">
+  <h2>GROUPES</h2>
+  <p>TES POTES, UNE GALERIE PRIVÉE, DES DÉFIS</p>
+  <div id="glist" style="width:100%;max-width:360px;flex:1;min-height:0;overflow-y:auto;margin-top:12px"></div>
+  <p class="blink" id="gEmpty" hidden>AUCUN GROUPE...<br>CRÉE LE TIEN OU REJOINS-EN UN !</p>
+  <p class="status" id="gStatus"></p>
+  <div class="row">
+    <button class="pxbtn" id="gCreateBtn" type="button">Créer</button>
+    <button class="pxbtn" id="gJoinBtn" type="button">Rejoindre</button>
+    <button class="pxbtn dim" id="groupsClose" type="button">Retour</button>
+  </div>
+</div>
+
+<!-- Retro screen 6: create or join a group -->
+<div class="screen" id="gformScreen" hidden role="dialog" aria-label="Créer ou rejoindre un groupe">
+  <h2 id="gformTitle">CRÉER UN GROUPE</h2>
+  <p id="gformHint">UN CODE À PARTAGER SERA GÉNÉRÉ</p>
+  <label class="status" for="gName" id="gNameLabel">NOM DU GROUPE</label>
+  <input class="pxinput" id="gName" maxlength="24" autocomplete="off" placeholder="Les Pétomanes">
+  <label class="status" for="gPseudo">TON PSEUDO DANS LE GROUPE</label>
+  <input class="pxinput" id="gPseudo" maxlength="12" autocomplete="off" placeholder="Noa">
+  <p class="status" id="gformStatus"></p>
+  <div class="row">
+    <button class="pxbtn" id="gformOk" type="button">Valider</button>
+    <button class="pxbtn dim" id="gformCancel" type="button">Annuler</button>
+  </div>
+</div>
+
+<!-- Retro screen 7: one group (gallery, guess game, challenges, scores) -->
+<div class="screen" id="groupScreen" hidden role="dialog" aria-label="Groupe">
+  <h2 id="gTitle">GROUPE</h2>
+  <button class="link" id="gCode" type="button">CODE : ABCDEF · PARTAGER</button>
+  <div class="gtabs" id="gtabs" role="tablist">
+    <button class="tab on" type="button" data-tab="gallery" role="tab">🎧 GALERIE</button>
+    <button class="tab" type="button" data-tab="guess" role="tab">🕵️ QUI ?</button>
+    <button class="tab" type="button" data-tab="defis" role="tab">🏆 DÉFIS</button>
+    <button class="tab" type="button" data-tab="scores" role="tab">👃 FLAIR</button>
+  </div>
+  <ol class="board" id="gBoard"></ol>
+  <div class="guess" id="gGuess" hidden></div>
+  <div id="gDefis" hidden style="width:100%;max-width:360px;flex:1;min-height:0;overflow-y:auto"></div>
+  <p class="blink" id="gBoardEmpty" hidden></p>
+  <p class="status" id="gBoardStatus"></p>
+  <div class="row">
+    <button class="pxbtn dim" id="gLeave" type="button">Quitter</button>
+    <button class="pxbtn" id="groupClose" type="button">Retour</button>
+  </div>
 </div>
 
 <script src="supabase-config.js"></script>
@@ -660,7 +776,7 @@ button:active { transform: scale(.96); }
   // ================= retro screens =================
   var screenOpen = false;
   function openScreen(id) { screenOpen = true; $(id).hidden = false; }
-  function closeScreens() { screenOpen = false; ['scoreScreen', 'boardScreen', 'pubScreen', 'countryScreen'].forEach(function (id) { $(id).hidden = true; }); }
+  function closeScreens() { screenOpen = false; ['scoreScreen', 'boardScreen', 'pubScreen', 'countryScreen', 'groupsScreen', 'gformScreen', 'groupScreen'].forEach(function (id) { $(id).hidden = true; }); }
 
   // --- score screen + arcade initials ---
   var pending = null, initials = ['A', 'A', 'A'], LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -734,11 +850,12 @@ button:active { transform: scale(.96); }
     mine.push(r); saveRec(r);
     closeScreens();
     index = list().length - 1; show();
+    if (recContext) { var rc = recContext; recContext = null; publishToGroup(r, rc); return; }
     if (online()) { openPublish(r); return; }
     note('Enregistré ! Retourne la boîte pour l’entendre');
     can.classList.add('flipped'); fire().then(flipBackLater);
   });
-  $('scoreTrash').addEventListener('click', function () { var was = pending; pending = null; closeScreens(); if (was) note('Prout jeté'); });
+  $('scoreTrash').addEventListener('click', function () { var was = pending; pending = null; recContext = null; closeScreens(); if (was) note('Prout jeté'); });
 
   // ================= online: Supabase (see supabase/schema.sql) =================
   // No account: a secret device id (uuid in localStorage) is the token for publishing, voting, reporting, deleting.
@@ -1062,6 +1179,268 @@ button:active { transform: scale(.96); }
     clearTimeout(titleTimer); titleTimer = setTimeout(function () { titleTaps = 0; }, 3000);
     if (++titleTaps >= 5) { titleTaps = 0; seedDemo(); }
   });
+
+  // ================= box skin: can or whoopee cushion =================
+  var skin = 'can';
+  try { skin = localStorage.getItem('proutbox.skin') || 'can'; } catch (e) {}
+  function applySkin() {
+    $('skinCan').style.display = skin === 'can' ? 'block' : 'none'; $('skinCushion').style.display = skin === 'cushion' ? 'block' : 'none'; // SVG elements have no .hidden
+    $('skinBtn').textContent = skin === 'can' ? 'Passer au coussin péteur' : 'Revenir à la canette';
+    $('canBtn').setAttribute('aria-label', skin === 'can' ? 'Retourner la boîte' : 'Écraser le coussin');
+  }
+  $('skinBtn').addEventListener('click', function () { skin = skin === 'can' ? 'cushion' : 'can'; try { localStorage.setItem('proutbox.skin', skin); } catch (e) {} applySkin(); blip(skin === 'can' ? 700 : 500, .08); });
+  applySkin();
+
+  // ================= groups: friends, a private gallery, challenges =================
+  var recContext = null; // set by a challenge: {group, kind:'jour'|'imitation', theme?, target?}
+  var THEMES = ['LE PLUS DISCRET', 'FAÇON TROMPETTE', 'LE PLUS LONG', 'LE PLUS MOUILLÉ', 'EN RAFALE', 'LE PLUS GRINÇANT', 'LE PLUS TIMIDE', 'UN PROUT DE DINOSAURE', 'LE PROUT DU MATIN', 'LE PROUT DE MAMIE', 'UN PROUT ÉLÉGANT', 'LE PROUT QUI S’EXCUSE', 'LE PROUT SURPRISE', 'FAÇON MOTEUR', 'LE PROUT SOUS LA COUETTE', 'LE PROUT DE ROBOT', 'EN TROIS TEMPS', 'LE PLUS AIGU'];
+  function themeOfDay() { var d = new Date(); var n = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); return THEMES[n % THEMES.length]; }
+  var curGroup = null, gTab = 'gallery', gSeq = 0, gMembers = [], gRows = [];
+  function gStatus(t) { $('gBoardStatus').textContent = t || ''; }
+  function presetName(id) { for (var i = 0; i < SOUNDS.length; i++) if (SOUNDS[i].id === id) return SOUNDS[i].name.toUpperCase(); return (id || '').toUpperCase(); }
+
+  function openGroups() {
+    if (!online()) { note('Les groupes arrivent avec le classement en ligne'); return; }
+    closeScreens(); openScreen('groupsScreen');
+    $('glist').innerHTML = ''; $('gEmpty').hidden = true; $('gStatus').textContent = 'CHARGEMENT…';
+    rpc('my_groups', { p_device: device }).then(function (rows) {
+      rows = rows || []; $('gStatus').textContent = ''; $('gEmpty').hidden = rows.length > 0;
+      rows.forEach(function (g) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'gcard';
+        var left = document.createElement('div'), nm = document.createElement('b'), sm = document.createElement('small');
+        nm.textContent = g.name.toUpperCase();
+        sm.textContent = g.members + (g.members > 1 ? ' MEMBRES' : ' MEMBRE') + ' · ' + g.prouts + (g.prouts > 1 ? ' PROUTS' : ' PROUT') + ' · TOI : ' + g.pseudo.toUpperCase();
+        left.appendChild(nm); left.appendChild(sm); b.appendChild(left);
+        if (g.to_guess > 0) { var bd = document.createElement('span'); bd.className = 'badge'; bd.textContent = g.to_guess + ' À DEVINER'; b.appendChild(bd); }
+        b.addEventListener('click', function () { openGroup(g); });
+        $('glist').appendChild(b);
+      });
+    }).catch(function (e) { $('gStatus').textContent = friendly(e); });
+    blip(660, .08); setTimeout(function () { blip(990, .12); }, 90);
+  }
+  var gformMode = 'create';
+  function openGform(mode) {
+    gformMode = mode;
+    $('gformTitle').textContent = mode === 'create' ? 'CRÉER UN GROUPE' : 'REJOINDRE UN GROUPE';
+    $('gformHint').textContent = mode === 'create' ? 'UN CODE À PARTAGER SERA GÉNÉRÉ' : 'DEMANDE LE CODE À 6 LETTRES À TES POTES';
+    $('gNameLabel').textContent = mode === 'create' ? 'NOM DU GROUPE' : 'CODE DU GROUPE';
+    $('gName').placeholder = mode === 'create' ? 'Les Pétomanes' : 'ABCDEF'; $('gName').maxLength = mode === 'create' ? 24 : 6; $('gName').value = '';
+    var lastPseudo = ''; try { lastPseudo = localStorage.getItem('proutbox.pseudo') || ''; } catch (e) {}
+    $('gPseudo').value = lastPseudo; $('gformStatus').textContent = ''; $('gformOk').disabled = false;
+    closeScreens(); openScreen('gformScreen'); setTimeout(function () { $('gName').focus(); }, 50);
+  }
+  $('gCreateBtn').addEventListener('click', function () { openGform('create'); });
+  $('gJoinBtn').addEventListener('click', function () { openGform('join'); });
+  $('gformCancel').addEventListener('click', openGroups);
+  $('gformOk').addEventListener('click', function () {
+    var a = $('gName').value.trim(), p = $('gPseudo').value.trim();
+    if (!a || !p) { $('gformStatus').textContent = 'REMPLIS LES DEUX CASES'; return; }
+    $('gformOk').disabled = true; $('gformStatus').textContent = 'ENVOI…';
+    try { localStorage.setItem('proutbox.pseudo', p); } catch (e) {}
+    var call = gformMode === 'create' ? rpc('create_group', { p_device: device, p_name: a, p_pseudo: p }) : rpc('join_group', { p_device: device, p_code: a.toUpperCase(), p_pseudo: p });
+    call.then(function (rows) { jingle(); openGroup(rows[0]); }).catch(function (e) { $('gformOk').disabled = false; $('gformStatus').textContent = friendly(e); });
+  });
+  function openGroup(g) {
+    curGroup = g; gTab = 'gallery';
+    $('gTitle').textContent = g.name.toUpperCase();
+    $('gCode').textContent = 'CODE : ' + g.code + ' · PARTAGER';
+    closeScreens(); openScreen('groupScreen'); loadGroup();
+  }
+  $('gCode').addEventListener('click', function () {
+    var txt = 'Rejoins mon groupe « ' + curGroup.name + ' » sur Prout Box avec le code ' + curGroup.code + ' ! https://apps.apple.com/fr/app/prout-box/id6827309393';
+    if (navigator.share) navigator.share({ text: txt }).catch(function () {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { gStatus('CODE COPIÉ !'); }, function () {});
+  });
+  Array.prototype.forEach.call($('gtabs').children, function (t) { t.addEventListener('click', function () { gTab = t.dataset.tab; blip(760, .05); loadGroup(); }); });
+  function loadGroup() {
+    var seq = ++gSeq;
+    Array.prototype.forEach.call($('gtabs').children, function (t) { t.classList.toggle('on', t.dataset.tab === gTab); });
+    $('gBoard').innerHTML = ''; $('gBoard').hidden = gTab === 'guess' || gTab === 'defis';
+    $('gGuess').hidden = gTab !== 'guess'; $('gDefis').hidden = gTab !== 'defis';
+    $('gBoardEmpty').hidden = true; gStatus('CHARGEMENT…');
+    Promise.all([rpc('group_members', { p_device: device, p_group: curGroup.id }), rpc('group_gallery', { p_device: device, p_group: curGroup.id, p_limit: 100 })]).then(function (res) {
+      if (seq !== gSeq) return;
+      gMembers = res[0] || []; gRows = res[1] || []; gStatus('');
+      if (gTab === 'gallery') renderGallery(); else if (gTab === 'guess') renderGuess(); else if (gTab === 'defis') renderDefis(); else renderScores();
+    }).catch(function (e) { if (seq === gSeq) gStatus(friendly(e)); });
+  }
+  function tag2(li, text) { var t = document.createElement('span'); t.className = 'tag2'; t.textContent = text; var nm = li.querySelector('.nm'); nm.insertBefore(t, nm.querySelector('small')); }
+  // --- gallery ---
+  function renderGallery() {
+    var ol = $('gBoard');
+    gRows.forEach(function (row, i) {
+      var li = rowEl(i, row.author ? row.author.toUpperCase() : '???', row.species, '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), row.votes + (row.votes > 1 ? ' VOTES' : ' VOTE'));
+      if (row.kind === 'jour') tag2(li, row.theme || 'DÉFI DU JOUR');
+      if (row.kind === 'imitation') tag2(li, 'IMITE ' + presetName(row.target) + ' · ' + (row.similarity || 0) + ' %');
+      var rate = null;
+      li.addEventListener('click', function (e) {
+        if (rate && rate.contains(e.target)) return;
+        var wasOpen = li.classList.contains('open');
+        Array.prototype.forEach.call(ol.children, function (x) { if (x !== li) { x.classList.remove('open'); var rr = x.querySelector('.rate'); if (rr) rr.remove(); } });
+        if (wasOpen) { li.classList.remove('open'); if (rate) { rate.remove(); rate = null; } return; }
+        li.classList.add('open');
+        rate = document.createElement('div'); rate.className = 'rate';
+        var lab = document.createElement('span');
+        lab.textContent = row.mine ? 'C’EST TON PROUT' : (!row.author ? 'DEVINE D’ABORD QUI A PÉTÉ !' : (row.my_stars ? 'TA NOTE : ' + row.my_stars + '/5' : 'NOTE CE PROUT'));
+        rate.appendChild(lab);
+        if (!row.mine && row.author) {
+          var cr = document.createElement('div'); cr.className = 'crottes';
+          var paint = function (n) { Array.prototype.forEach.call(cr.children, function (b, k) { b.classList.toggle('lit', k < n); }); };
+          for (var k = 1; k <= 5; k++) (function (k) {
+            var b = document.createElement('button'); b.type = 'button'; b.textContent = '💩'; b.setAttribute('aria-label', k + ' sur 5');
+            b.addEventListener('click', function () {
+              paint(k); blip(600 + k * 120, .08);
+              rpc('vote_group_prout', { p_device: device, p_group_prout: row.id, p_stars: k }).then(function (res) {
+                var v = res && res[0]; if (!v) return;
+                row.votes = v.votes; row.avg = v.avg; row.my_stars = k;
+                li.querySelector('.sc').childNodes[0].textContent = '💩 ' + Number(v.avg).toFixed(1);
+                li.querySelector('.sc small').textContent = v.votes + (v.votes > 1 ? ' VOTES' : ' VOTE');
+                lab.textContent = 'TA NOTE : ' + k + '/5';
+              }).catch(function (e) { gStatus(friendly(e)); });
+            });
+            cr.appendChild(b);
+          })(k);
+          paint(row.my_stars || 0); rate.appendChild(cr);
+        }
+        var acts = document.createElement('div'); acts.className = 'actions';
+        if (row.mine) {
+          var del = document.createElement('button'); del.type = 'button'; del.className = 'link danger'; del.textContent = 'RETIRER';
+          del.addEventListener('click', function () { armed(del, 'SÛR ? RETOUCHE', function () {
+            rpc('delete_group_prout', { p_device: device, p_group_prout: row.id }).then(function (path) {
+              if (path) fetch(SB.url + '/storage/v1/object/prouts/' + path, { method: 'DELETE', headers: sbHeaders({}) }).catch(function () {});
+              li.remove(); gStatus('PROUT RETIRÉ DU GROUPE');
+            }).catch(function (e) { gStatus(friendly(e)); });
+          }); });
+          acts.appendChild(del);
+        } else {
+          var rep = document.createElement('button'); rep.type = 'button'; rep.className = 'link danger'; rep.textContent = 'SIGNALER';
+          rep.addEventListener('click', function () { armed(rep, 'SÛR ? RETOUCHE', function () {
+            rpc('report_group_prout', { p_device: device, p_group_prout: row.id }).then(function () { li.remove(); gStatus('MASQUÉ POUR TOUT LE GROUPE'); }).catch(function (e) { gStatus(friendly(e)); });
+          }); });
+          acts.appendChild(rep);
+        }
+        rate.appendChild(acts); li.appendChild(rate);
+        playRow(li, function () { return playRemote(row); });
+      });
+      ol.appendChild(li);
+    });
+    $('gBoardEmpty').hidden = gRows.length > 0; $('gBoardEmpty').innerHTML = 'LA GALERIE EST VIDE...<br>ENVOIE UN PROUT ICI !';
+    var add = document.createElement('li'); add.style.display = 'block'; add.style.textAlign = 'center'; add.style.border = 'none';
+    var addb = document.createElement('button'); addb.type = 'button'; addb.className = 'pub'; addb.style.margin = '6px auto 0'; addb.textContent = '+ ENVOYER UN DE MES PROUTS';
+    addb.addEventListener('click', function (e) { e.stopPropagation(); pickMineForGroup(); });
+    add.appendChild(addb); ol.appendChild(add);
+  }
+  function pickMineForGroup() {
+    var ol = $('gBoard'); ol.innerHTML = ''; gStatus('CHOISIS UN PROUT À ENVOYER DANS LE GROUPE');
+    if (!mine.length) { $('gBoardEmpty').hidden = false; $('gBoardEmpty').innerHTML = 'AUCUN PROUT SUR CE TÉLÉPHONE...<br>ENREGISTRE-EN UN D’ABORD !'; return; }
+    mine.slice().sort(function (a, b) { return b.created - a.created; }).forEach(function (r, i) {
+      var li = rowEl(i, r.name || '???', (r.stats && r.stats.species) || '', pad6(r.score || 0), '');
+      var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = 'ENVOYER';
+      pb.addEventListener('click', function (e) { e.stopPropagation(); publishToGroup(r, { group: curGroup, kind: 'libre' }); });
+      li.querySelector('.sc').appendChild(pb);
+      li.addEventListener('click', function () { playRow(li, function () { return playRecording(r); }); });
+      ol.appendChild(li);
+    });
+  }
+  // upload + publish a local recording into a group (free, daily theme, or imitation with its similarity)
+  function publishToGroup(r, rc) {
+    if (!online()) return;
+    curGroup = rc.group; gTab = 'gallery';
+    closeScreens(); openScreen('groupScreen');
+    $('gTitle').textContent = rc.group.name.toUpperCase(); $('gCode').textContent = 'CODE : ' + rc.group.code + ' · PARTAGER';
+    $('gBoard').innerHTML = ''; $('gBoard').hidden = false; $('gGuess').hidden = true; $('gDefis').hidden = true; gStatus('ENVOI DANS LE GROUPE…');
+    var ext = /mp4|m4a|aac/.test(r.blob.type) ? 'm4a' : /webm/.test(r.blob.type) ? 'webm' : /ogg/.test(r.blob.type) ? 'ogg' : /wav/.test(r.blob.type) ? 'wav' : 'bin';
+    var path = device + '/g' + r.id + '-' + Date.now().toString(36) + '.' + ext;
+    var prep = (rc.kind === 'imitation' && rc.similarity == null)
+      ? renderPreset(rc.target).then(analyzeBlob).then(function (st) { rc.similarity = similarity(r.stats, st); })
+      : Promise.resolve();
+    prep.then(function () { return upload(path, r.blob); }).then(function () {
+      return rpc('publish_group_prout', { p_device: device, p_group: rc.group.id, p_path: path, p_mime: r.blob.type || 'audio/mp4', p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_kind: rc.kind || 'libre', p_theme: rc.theme || null, p_target: rc.target || null, p_similarity: rc.similarity == null ? null : rc.similarity });
+    }).then(function () {
+      jingle(); note(''); loadGroup();
+      setTimeout(function () { gStatus(rc.kind === 'imitation' ? 'IMITATION ENVOYÉE : ' + rc.similarity + ' % DE RESSEMBLANCE' : 'PROUT ENVOYÉ DANS LE GROUPE !'); }, 600);
+    }).catch(function (e) { loadGroup(); setTimeout(function () { gStatus(friendly(e)); }, 600); });
+  }
+  // --- Qui a pété ? ---
+  function renderGuess() {
+    var box = $('gGuess'); box.innerHTML = '';
+    var pool = gRows.filter(function (r) { return !r.mine && !r.author; });
+    var others = gMembers.filter(function (m) { return !m.me; });
+    if (!others.length) { box.innerHTML = '<p class="big">INVITE DES POTES !</p><p>PARTAGE LE CODE DU GROUPE, ILS ENVOIENT LEURS PROUTS, ET TU DEVINES QUI A PÉTÉ.</p>'; return; }
+    if (!pool.length) { box.innerHTML = '<p class="big">PLUS RIEN À RENIFLER !</p><p>QUAND TES POTES ENVERRONT DE NOUVEAUX PROUTS, TU POURRAS DEVINER QUI A PÉTÉ.</p>'; return; }
+    var row = pool[Math.floor(Math.random() * pool.length)];
+    var title = document.createElement('p'); title.className = 'big'; title.textContent = 'QUI A PÉTÉ ?'; box.appendChild(title);
+    var info = document.createElement('p'); info.textContent = pool.length + (pool.length > 1 ? ' PROUTS À DEVINER · ' : ' PROUT À DEVINER · ') + row.species; box.appendChild(info);
+    var play = document.createElement('button'); play.type = 'button'; play.className = 'pxbtn'; play.textContent = '▶ Écouter'; box.appendChild(play);
+    play.addEventListener('click', function () { if (!unlockAudio()) return; play.textContent = '▶ Réécouter'; playRemote(row).catch(function () { gStatus('LECTURE IMPOSSIBLE'); }); });
+    var who = document.createElement('div'); who.className = 'who'; box.appendChild(who);
+    var result = document.createElement('p'); result.className = 'big'; box.appendChild(result);
+    var done = false;
+    others.forEach(function (m) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = m.pseudo.toUpperCase();
+      b.addEventListener('click', function () {
+        if (done) return; done = true;
+        rpc('guess_author', { p_device: device, p_group_prout: row.id, p_member: m.id }).then(function (res) {
+          var v = res && res[0]; if (!v) return;
+          row.author = v.author; row.author_id = v.author_id; row.guessed = m.id; row.guess_correct = v.correct;
+          Array.prototype.forEach.call(who.children, function (x) { x.disabled = true; if (x.textContent === v.author.toUpperCase()) x.classList.add('hit'); });
+          if (!v.correct) b.classList.add('miss');
+          result.textContent = v.correct ? 'BIEN JOUÉ ! C’ÉTAIT ' + v.author.toUpperCase() + ' · +1' : 'RATÉ ! C’ÉTAIT ' + v.author.toUpperCase();
+          if (v.correct) jingle(); else blip(180, .3, .08);
+          var next = document.createElement('button'); next.type = 'button'; next.className = 'pxbtn'; next.textContent = 'Suivant'; next.addEventListener('click', renderGuess); box.appendChild(next);
+        }).catch(function (e) { done = false; gStatus(friendly(e)); });
+      });
+      who.appendChild(b);
+    });
+  }
+  // --- Défis ---
+  function renderDefis() {
+    var box = $('gDefis'); box.innerHTML = '';
+    var theme = themeOfDay();
+    var d1 = document.createElement('div'); d1.className = 'defi';
+    var h1 = document.createElement('h3'); h1.textContent = '🌞 LE PROUT DU JOUR'; d1.appendChild(h1);
+    var p0 = document.createElement('p'); p0.textContent = 'THÈME : ' + theme + ' · CHACUN ENREGISTRE, LE GROUPE NOTE.'; d1.appendChild(p0);
+    var todays = gRows.filter(function (r) { return r.kind === 'jour' && r.theme === theme; });
+    var p1 = document.createElement('p'); p1.textContent = todays.length ? todays.length + (todays.length > 1 ? ' PARTICIPATIONS AUJOURD’HUI' : ' PARTICIPATION AUJOURD’HUI') : 'PERSONNE N’A ENCORE OSÉ.'; d1.appendChild(p1);
+    var b1 = document.createElement('button'); b1.type = 'button'; b1.className = 'pxbtn'; b1.textContent = '● Enregistrer le mien';
+    b1.addEventListener('click', function () { startChallenge({ group: curGroup, kind: 'jour', theme: theme }); });
+    d1.appendChild(b1); box.appendChild(d1);
+    var d2 = document.createElement('div'); d2.className = 'defi';
+    var h2 = document.createElement('h3'); h2.textContent = '🎭 L’IMITATEUR'; d2.appendChild(h2);
+    var p2a = document.createElement('p'); p2a.textContent = 'REPRODUIS UN PROUT CLASSIQUE, LE PROUT-O-MÈTRE MESURE LA RESSEMBLANCE.'; d2.appendChild(p2a);
+    var sel = document.createElement('select'); SOUNDS.forEach(function (s) { var o = document.createElement('option'); o.value = s.id; o.textContent = s.name.toUpperCase(); sel.appendChild(o); }); d2.appendChild(sel);
+    var best = gRows.filter(function (r) { return r.kind === 'imitation'; }).sort(function (a, b) { return (b.similarity || 0) - (a.similarity || 0); })[0];
+    var p2 = document.createElement('p'); p2.textContent = best ? 'RECORD DU GROUPE : ' + (best.author ? best.author.toUpperCase() : '???') + ' · ' + presetName(best.target) + ' · ' + best.similarity + ' %' : 'AUCUNE IMITATION POUR L’INSTANT.'; d2.appendChild(p2);
+    var row2 = document.createElement('div'); row2.className = 'row';
+    var lis = document.createElement('button'); lis.type = 'button'; lis.className = 'pxbtn dim'; lis.textContent = '▶ Modèle';
+    lis.addEventListener('click', function () { if (!unlockAudio()) return; playPreset(sel.value); });
+    var b2 = document.createElement('button'); b2.type = 'button'; b2.className = 'pxbtn'; b2.textContent = '● Imiter';
+    b2.addEventListener('click', function () { startChallenge({ group: curGroup, kind: 'imitation', target: sel.value }); });
+    row2.appendChild(lis); row2.appendChild(b2); d2.appendChild(row2); box.appendChild(d2);
+  }
+  function startChallenge(rc) {
+    recContext = rc; closeScreens();
+    note(rc.kind === 'jour' ? 'Défi du jour : ' + rc.theme + ' — à toi !' : 'Imite ' + presetName(rc.target) + ' — à toi !');
+    setTimeout(function () { if (!recording) startRec(); }, 500);
+  }
+  // 0-100 : how close the recording's stats are to the classic's
+  function similarity(a, b) {
+    var d = Math.abs(a.loud - b.loud) + Math.abs(a.dur - b.dur) + Math.abs(a.peak - b.peak) + Math.abs(a.bursts - b.bursts) * 1.5;
+    return Math.max(0, Math.min(100, Math.round(100 - d * 28)));
+  }
+  // --- Scores (les meilleurs renifleurs) ---
+  function renderScores() {
+    var ol = $('gBoard');
+    var rows = gMembers.slice().sort(function (a, b) { return b.correct - a.correct || a.guesses - b.guesses || b.prouts - a.prouts; });
+    rows.forEach(function (m, i) {
+      ol.appendChild(rowEl(i, m.pseudo.toUpperCase() + (m.me ? ' (TOI)' : ''), m.prouts + (m.prouts > 1 ? ' PROUTS ENVOYÉS' : ' PROUT ENVOYÉ'), '👃 ' + m.correct, m.guesses ? Math.round(m.correct / m.guesses * 100) + ' % DE FLAIR' : 'PAS ENCORE RENIFLÉ'));
+    });
+    $('gBoardEmpty').hidden = rows.length > 0;
+  }
+  $('gLeave').addEventListener('click', function () { armed($('gLeave'), 'Sûr ?', function () { rpc('leave_group', { p_device: device, p_group: curGroup.id }).then(openGroups).catch(function (e) { gStatus(friendly(e)); }); }); });
+  $('groupClose').addEventListener('click', openGroups);
+  $('groupsClose').addEventListener('click', function () { closeScreens(); blip(440, .08); });
+  $('groupsBtn').addEventListener('click', openGroups);
 
   // ================= flip the box on screen =================
   var canBtn = $('canBtn'), drag = null, backTimer = null;

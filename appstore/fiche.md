@@ -92,6 +92,13 @@ Tout est en place côté app et base : à décrire dans les notes de révision.
 - Contact de modération : noamadar.noa@gmail.com (dans la politique de confidentialité).
 - Conditions d'utilisation : à afficher sur la page vitrine (« En publiant un prout, tu acceptes qu'il soit écouté et noté par tout le monde, et retiré s'il est signalé »).
 
+## Groupes (1.2) — ce qui change pour Apple
+
+- Contenu utilisateur supplémentaire : pseudo (12 car., filtré par la liste noire) et prouts envoyés dans des groupes privés sur invitation (code à 6 lettres). Visibles seulement par les membres.
+- Modération : SIGNALER masque le prout pour tout le groupe immédiatement ; l'auteur peut RETIRER ; QUITTER le groupe efface ses liens ; dernier membre parti = groupe supprimé.
+- Confidentialité App Store Connect : rien de nouveau à déclarer (toujours « Contenu utilisateur › Audio », « Identifiants › ID utilisateur », plus « Localisation approximative » depuis la 1.1). Le pseudo entre dans « Contenu utilisateur » (autre contenu) : à cocher.
+- Nouveautés 1.2 (texte) : « Les GROUPES : crée un groupe avec tes potes, une galerie privée de vos prouts, le jeu « Qui a pété ? », le prout du jour et l'imitateur. Nouvelle peau : le coussin péteur. Ta ville (approximative, si tu veux) à côté de ton prout dans le TOP PROUTS. »
+
 ## Informations pour la révision Apple
 
 Notes pour l'équipe de révision (à coller) :
