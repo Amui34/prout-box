@@ -55,7 +55,7 @@ Icônes et splash : modifier `assets/icon.svg` / `assets/splash.svg`, puis `npm 
 
 ## Publier sur l'App Store (100 % ligne de commande)
 
-Même procédure qu'Oplaa. App Store Connect : app id `6827309393`, bundle `com.proutbox.app`, équipe `772LDD7BCT`. La 1.0 (build 2, étiquette simplifiée) a été soumise le 28/10/2026. Prérequis : une clé API App Store Connect (rôle Admin) dans `~/.appstoreconnect/private_keys/AuthKey_FJ7JL8VV39.p8`.
+Même procédure qu'Oplaa. App Store Connect : app id `6827309393`, bundle `com.proutbox.app`, équipe `772LDD7BCT`. La 1.0 (build 2) est en vente depuis le 31/10/2026 : https://apps.apple.com/fr/app/prout-box/id6827309393. Scripts API réutilisables dans `scripts/asc/` (état, et à venir : création de version, attache de build, soumission). Prérequis : une clé API App Store Connect (rôle Admin) dans `~/.appstoreconnect/private_keys/AuthKey_FJ7JL8VV39.p8`.
 
 1. `npm run sync:ios`
 2. Dans `ios/App/App.xcodeproj/project.pbxproj` : `CURRENT_PROJECT_VERSION` = numéro de build **strictement supérieur** au dernier uploadé ; `MARKETING_VERSION` = version cible.
