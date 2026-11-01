@@ -1,0 +1,6 @@
+Nouveautés de la 1.1 :
+
+• LES GROUPES : crée un groupe avec tes potes grâce à un code à 6 lettres. Une galerie privée de vos prouts, le jeu « Qui a pété ? » (devine l'auteur !), le prout du jour à thème et l'imitateur qui mesure ta ressemblance avec un prout classique. Classement des meilleurs renifleurs.
+• Nouvelle peau : le coussin péteur, en plus de la canette.
+• Ta ville (approximative, seulement si tu l'acceptes) à côté de ton prout dans le TOP PROUTS.
+• La canette est plus épurée, et tu vois ta propre note dans le classement.
