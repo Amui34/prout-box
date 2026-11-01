@@ -35,7 +35,8 @@
   <ul>
     <li>l'enregistrement audio du prout (6 secondes maximum) ;</li>
     <li>les 3 initiales que tu as choisies, le pays que tu as sélectionné, et le score du jury ;</li>
-    <li>l'identifiant aléatoire de ton appareil.</li>
+    <li>l'identifiant aléatoire de ton appareil ;</li>
+    <li><strong>ta ville, si tu l'acceptes</strong> : au moment de publier, l'app peut demander ta position pour afficher ta ville à côté de ton prout (par exemple « Montpellier »). La position est arrondie à environ 1 km avant d'être convertie en nom de ville par le service BigDataCloud, puis <strong>seul le nom de la ville est conservé</strong>, jamais tes coordonnées. Tu peux refuser la permission ou retirer la ville d'un geste avant de publier : le pays suffit.</li>
   </ul>
   <p>Un prout publié peut être écouté et noté par tous les utilisateurs de l'app. Tu peux le retirer à tout moment (« Supprimer » dans TOP PROUTS) : il est alors effacé de nos serveurs, fichier compris. Les notes que tu donnes aux autres prouts sont aussi enregistrées, liées à l'identifiant de ton appareil.</p>
 
@@ -46,11 +47,12 @@
   <ul>
     <li><strong>Micro</strong> : uniquement pendant l'enregistrement d'un prout, à ta demande (6 secondes maximum).</li>
     <li><strong>Mouvement</strong> : uniquement pour détecter que tu retournes le téléphone.</li>
+    <li><strong>Position</strong> (facultative, « pendant l'utilisation ») : uniquement au moment de publier un prout, pour trouver ta ville. Jamais en arrière-plan.</li>
   </ul>
 
   <h2>Ce que l'app ne fait pas</h2>
   <ul>
-    <li>Aucun compte, aucune inscription, aucune géolocalisation (le pays est choisi à la main).</li>
+    <li>Aucun compte, aucune inscription, aucune géolocalisation en arrière-plan (la ville n'est cherchée qu'au moment de publier, et seulement si tu l'acceptes).</li>
     <li>Aucune publicité, aucun traqueur, aucune statistique d'utilisation.</li>
     <li>Aucune donnée vendue ou transmise à des tiers, en dehors de l'hébergeur technique (Supabase).</li>
   </ul>

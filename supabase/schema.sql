@@ -25,6 +25,7 @@ create table if not exists prouts (
   initials      text not null check (initials ~ '^[A-Z]{3}$'),
   country       text not null check (country ~ '^[A-Z]{2}$'),
   species       text not null default '',
+  city          text,                            -- ville approximative (facultative), ex. « Montpellier »
   jury          int  not null default 0 check (jury between 0 and 10000),
   path          text not null unique,            -- objet dans le bucket "prouts"
   mime          text not null default 'audio/mp4',
@@ -34,6 +35,7 @@ create table if not exists prouts (
   hidden        boolean not null default false,  -- masqué (signalements ou modération manuelle)
   created_at    timestamptz not null default now()
 );
+alter table prouts add column if not exists city text; -- ajout 1.1 (bases créées avant)
 create index if not exists prouts_country_idx on prouts (country) where not hidden;
 create index if not exists prouts_created_idx on prouts (created_at desc);
 
@@ -100,9 +102,10 @@ create policy "prouts: suppression des orphelins" on storage.objects
 --  API (fonctions security definer, exposées à la clé publique)
 -- ─────────────────────────────────────────────────────────────────────────
 
--- Publier un prout déjà déposé dans le bucket.
+-- Publier un prout déjà déposé dans le bucket. p_city (1.1) : ville approximative, facultative.
+drop function if exists publish_prout(uuid, text, text, text, int, text, text);
 create or replace function publish_prout(
-  p_device uuid, p_initials text, p_country text, p_species text, p_jury int, p_path text, p_mime text
+  p_device uuid, p_initials text, p_country text, p_species text, p_jury int, p_path text, p_mime text, p_city text default null
 ) returns uuid
 language plpgsql security definer set search_path = public as $$
 declare v_id uuid; v_today int;
@@ -114,21 +117,22 @@ begin
   if not exists (select 1 from storage.objects where bucket_id = 'prouts' and name = p_path) then raise exception 'fichier absent'; end if;
   select count(*) into v_today from prouts where device_id = p_device and created_at > now() - interval '1 day';
   if v_today >= 20 then raise exception 'trop de prouts aujourd''hui'; end if;
-  insert into prouts (device_id, initials, country, species, jury, path, mime)
-  values (p_device, p_initials, p_country, left(coalesce(p_species, ''), 40), greatest(0, least(10000, coalesce(p_jury, 0))), p_path, left(coalesce(p_mime, 'audio/mp4'), 40))
+  insert into prouts (device_id, initials, country, species, jury, path, mime, city)
+  values (p_device, p_initials, p_country, left(coalesce(p_species, ''), 40), greatest(0, least(10000, coalesce(p_jury, 0))), p_path, left(coalesce(p_mime, 'audio/mp4'), 40), nullif(left(trim(coalesce(p_city, '')), 40), ''))
   returning id into v_id;
   return v_id;
 end $$;
 
 -- Classement : par pays (p_country) ou mondial (null). Moyenne bayésienne pour éviter
 -- qu'un seul vote à 5 prenne la tête : (somme + 3×3) / (nb + 3).
-create or replace function top_prouts(p_device uuid, p_country text default null, p_limit int default 50)
+drop function if exists top_prouts(uuid, text, int);
+create function top_prouts(p_device uuid, p_country text default null, p_limit int default 50)
 returns table (
-  id uuid, initials text, country text, species text, jury int, path text, mime text,
+  id uuid, initials text, country text, species text, city text, jury int, path text, mime text,
   votes int, avg numeric, my_stars int, mine boolean, created_at timestamptz
 )
 language sql security definer set search_path = public stable as $$
-  select p.id, p.initials, p.country, p.species, p.jury, p.path, p.mime,
+  select p.id, p.initials, p.country, p.species, p.city, p.jury, p.path, p.mime,
          p.votes_count,
          case when p.votes_count = 0 then 0 else round(p.votes_sum::numeric / p.votes_count, 1) end,
          (select v.stars from votes v where v.prout_id = p.id and v.device_id = p_device),
@@ -184,7 +188,7 @@ begin
   return v_path;
 end $$;
 
-grant execute on function publish_prout(uuid, text, text, text, int, text, text) to anon, authenticated;
+grant execute on function publish_prout(uuid, text, text, text, int, text, text, text) to anon, authenticated;
 grant execute on function top_prouts(uuid, text, int) to anon, authenticated;
 grant execute on function vote_prout(uuid, uuid, int) to anon, authenticated;
 grant execute on function report_prout(uuid, uuid, text) to anon, authenticated;

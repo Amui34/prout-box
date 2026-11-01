@@ -283,6 +283,7 @@ button:active { transform: scale(.96); }
 <div class="screen" id="pubScreen" hidden role="dialog" aria-label="Publier ton prout">
   <h2>PUBLIER ?</h2>
   <p id="pubText">ENVOYER TON PROUT DANS LE TOP PROUTS ?</p>
+  <button class="link" id="pubCity" type="button" hidden></button>
   <p class="status" id="pubStatus"></p>
   <button class="link" id="pubCountry" type="button">CHANGER DE PAYS</button>
   <div class="row">
@@ -817,19 +818,49 @@ button:active { transform: scale(.96); }
   setCountry(country);
 
   // --- publish a recording ---
-  var pubRec = null;
+  var pubRec = null, pubCity = null, pubCityOff = false, citySeq = 0;
+  function pubTextRefresh() {
+    if (!pubRec) return;
+    $('pubText').textContent = 'ENVOYER « ' + pubRec.name + ' · ' + ((pubRec.stats && pubRec.stats.species) || '???') + ' » DANS LE TOP PROUTS ' + flag(country) + ' ' + countryName(country).toUpperCase() + ' ?';
+    var b = $('pubCity');
+    if (pubCity && !pubCityOff) { b.hidden = false; b.textContent = '📍 ' + pubCity.toUpperCase() + ' · TOUCHE POUR RETIRER'; }
+    else if (pubCity && pubCityOff) { b.hidden = false; b.textContent = '📍 SANS MA VILLE · TOUCHE POUR REMETTRE'; }
+    else b.hidden = true;
+  }
+  // Approximate city: position rounded to ~1 km, converted to a city name; only the city name is kept.
+  function locateCity() {
+    var seq = ++citySeq;
+    pubCity = null; pubCityOff = false;
+    if (!navigator.geolocation) return;
+    $('pubStatus').textContent = 'RECHERCHE DE TA VILLE…';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var lat = Math.round(pos.coords.latitude * 100) / 100, lon = Math.round(pos.coords.longitude * 100) / 100;
+      fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lon + '&localityLanguage=fr')
+        .then(function (r) { return r.json(); })
+        .then(function (g) {
+          if (seq !== citySeq) return;
+          var name = g.city || g.locality || g.principalSubdivision || '';
+          if (name) pubCity = name.slice(0, 40);
+          if (g.countryCode && countryName(g.countryCode) !== g.countryCode && g.countryCode !== country) setCountry(g.countryCode);
+          $('pubStatus').textContent = pubCity ? '' : 'VILLE INTROUVABLE, LE PAYS SUFFIT';
+          pubTextRefresh();
+        }).catch(function () { if (seq === citySeq) { $('pubStatus').textContent = ''; pubTextRefresh(); } });
+    }, function () { if (seq === citySeq) { $('pubStatus').textContent = ''; pubTextRefresh(); } }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
+  }
   function openPublish(r) {
     pubRec = r;
-    $('pubText').textContent = 'ENVOYER « ' + r.name + ' · ' + ((r.stats && r.stats.species) || '???') + ' » DANS LE TOP PROUTS ' + flag(country) + ' ' + countryName(country).toUpperCase() + ' ?';
     $('pubStatus').textContent = ''; $('pubOk').disabled = false;
+    pubTextRefresh();
     openScreen('pubScreen');
+    locateCity();
   }
+  $('pubCity').addEventListener('click', function () { pubCityOff = !pubCityOff; blip(pubCityOff ? 400 : 800, .06); pubTextRefresh(); });
   function publish(r) {
     var ext = /mp4|m4a|aac/.test(r.blob.type) ? 'm4a' : /webm/.test(r.blob.type) ? 'webm' : /ogg/.test(r.blob.type) ? 'ogg' : /wav/.test(r.blob.type) ? 'wav' : 'bin';
     var path = device + '/' + r.id + '.' + ext;
     return upload(path, r.blob).then(function () {
-      return rpc('publish_prout', { p_device: device, p_initials: r.name, p_country: country, p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_path: path, p_mime: r.blob.type || 'audio/mp4' });
-    }).then(function (id) { r.remoteId = id; r.country = country; return saveRec(r); });
+      return rpc('publish_prout', { p_device: device, p_initials: r.name, p_country: country, p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_path: path, p_mime: r.blob.type || 'audio/mp4', p_city: (pubCity && !pubCityOff) ? pubCity : null });
+    }).then(function (id) { r.remoteId = id; r.country = country; r.city = (pubCity && !pubCityOff) ? pubCity : null; return saveRec(r); });
   }
   $('pubOk').addEventListener('click', function () {
     if (!pubRec) return;
@@ -888,7 +919,7 @@ button:active { transform: scale(.96); }
   function renderRemote(rows) {
     var ol = $('board'); ol.innerHTML = '';
     rows.forEach(function (row, i) {
-      var li = rowEl(i, row.initials + ' ' + flag(row.country), row.species, '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), row.votes + (row.votes > 1 ? ' VOTES' : ' VOTE'));
+      var li = rowEl(i, row.initials + ' ' + flag(row.country), row.species + (row.city ? ' · 📍 ' + row.city.toUpperCase() : ''), '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), row.votes + (row.votes > 1 ? ' VOTES' : ' VOTE') + (row.my_stars ? ' · TOI ' + row.my_stars : ''));
       var rate = null;
       li.addEventListener('click', function (e) {
         if (rate && rate.contains(e.target)) return;
@@ -897,7 +928,7 @@ button:active { transform: scale(.96); }
         if (!wasOpen) {
           li.classList.add('open');
           rate = document.createElement('div'); rate.className = 'rate';
-          var lab = document.createElement('span'); lab.textContent = row.mine ? 'C’EST TON PROUT' : 'NOTE CE PROUT';
+          var lab = document.createElement('span'); lab.textContent = row.mine ? 'C’EST TON PROUT' : (row.my_stars ? 'TA NOTE : ' + row.my_stars + '/5 · CHANGE-LA ?' : 'NOTE CE PROUT');
           var cr = document.createElement('div'); cr.className = 'crottes';
           var paint = function (n) { Array.prototype.forEach.call(cr.children, function (b, k) { b.classList.toggle('lit', k < n); }); };
           for (var k = 1; k <= 5; k++) (function (k) {
@@ -909,7 +940,8 @@ button:active { transform: scale(.96); }
                 var v = res && res[0]; if (!v) return;
                 row.votes = v.votes; row.avg = v.avg; row.my_stars = k;
                 li.querySelector('.sc').childNodes[0].textContent = '💩 ' + Number(v.avg).toFixed(1);
-                li.querySelector('.sc small').textContent = v.votes + (v.votes > 1 ? ' VOTES' : ' VOTE');
+                li.querySelector('.sc small').textContent = v.votes + (v.votes > 1 ? ' VOTES' : ' VOTE') + ' · TOI ' + k;
+                lab.textContent = 'TA NOTE : ' + k + '/5 · CHANGE-LA ?';
                 $('boardStatus').textContent = 'MERCI POUR TA NOTE !';
               }).catch(function (e) { $('boardStatus').textContent = friendly(e); });
             });

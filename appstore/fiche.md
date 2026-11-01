@@ -75,7 +75,8 @@ Un vrai domaine pourra remplacer ces URL plus tard (elles sont modifiables dans 
 - Collecte de données : **Oui**, uniquement si l'utilisateur publie un prout.
   - **Contenu utilisateur › Audio** : l'enregistrement publié, avec 3 initiales, un pays et le score du jury. Finalité : *Fonctionnalités de l'app* (classement). **Non lié à l'identité** de l'utilisateur (pas de compte, pas d'e-mail), **pas utilisé pour le suivi**.
   - **Identifiants › ID utilisateur** : identifiant aléatoire par appareil (`device_id`), sert à compter un vote par personne et à retrouver ses propres prouts. Non lié à l'identité, pas de suivi.
-  - Rien d'autre : pas de localisation (le pays est choisi à la main), pas de contacts, pas d'analytics, pas de pub.
+  - **Localisation › Position approximative** (depuis la 1.1) : uniquement au moment de publier, si l'utilisateur accepte ; position arrondie à ~1 km, convertie en nom de ville (service BigDataCloud), seul le nom de la ville est stocké. Finalité : *Fonctionnalités de l'app*. Non liée à l'identité, pas de suivi. **À ajouter dans App Store Connect › Confidentialité de l'app avant de soumettre la 1.1.**
+  - Rien d'autre : pas de contacts, pas d'analytics, pas de pub.
 - Les prouts non publiés restent dans IndexedDB sur l'appareil. Les polices sont chargées depuis Google Fonts (pas d'identifiant utilisateur).
 - Micro : uniquement pour enregistrer un prout à la demande (`NSMicrophoneUsageDescription`).
 - Mouvement : uniquement pour détecter le retournement (`NSMotionUsageDescription`).

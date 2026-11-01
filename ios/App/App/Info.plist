@@ -57,6 +57,8 @@
 	<string>Pour enregistrer ton propre prout.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Pour savoir quand tu retournes le téléphone et faire prout.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Pour afficher ta ville (approximative) à côté de ton prout dans le classement. Jamais ta position exacte.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
