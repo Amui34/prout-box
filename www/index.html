@@ -1336,7 +1336,7 @@ button:active { transform: scale(.96); }
     $('gName').placeholder = mode === 'create' ? 'Les Pétomanes' : 'ABCDEF'; $('gName').maxLength = mode === 'create' ? 24 : 6; $('gName').value = '';
     var lastPseudo = ''; try { lastPseudo = localStorage.getItem('proutbox.pseudo') || ''; } catch (e) {}
     $('gPseudo').value = lastPseudo; $('gformStatus').textContent = ''; $('gformOk').disabled = false;
-    closeScreens(); openScreen('gformScreen'); setTimeout(function () { $('gName').focus(); }, 50);
+    closeScreens(); openScreen('gformScreen'); // pas de focus automatique : sur iPhone le clavier + zoom à l'ouverture bloquaient l'écran
   }
   $('gCreateBtn').addEventListener('click', function () { openGform('create'); });
   $('gJoinBtn').addEventListener('click', function () { openGform('join'); });
