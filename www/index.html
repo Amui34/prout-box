@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" id="vp" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#FFD23F">
 <title>Prout Box</title>
 <style>body{margin:0}[hidden]{display:none!important}:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
@@ -32,6 +32,8 @@ body {
   background: var(--sun); color: var(--ink); font-family: var(--body);
   transition: background .2s; overflow: hidden;
   -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+  touch-action: manipulation; /* pas de zoom au double tap : la page restait zoomée et coupée sur iPhone */
+  -webkit-text-size-adjust: 100%;
 }
 body.playing { background: var(--gas); }
 .app {
@@ -184,7 +186,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .gcard b { display: block; font-weight: 400; font-size: 11px; color: var(--gold); margin-bottom: 4px; }
 .gcard small { display: block; font-size: 7px; opacity: .85; line-height: 1.6; }
 .gcard .badge { font-size: 8px; background: var(--neon); color: #fff; padding: 4px 6px 2px; text-shadow: none; }
-.pxinput { width: 100%; max-width: 320px; box-sizing: border-box; font-family: var(--pixel); font-size: 12px; padding: 12px 10px 10px; background: #000; color: #fff; border: 3px solid var(--phosphor); outline: none; text-transform: uppercase; letter-spacing: 1px; margin: 6px 0 14px; }
+.pxinput { width: 100%; max-width: 320px; box-sizing: border-box; font-family: var(--pixel); font-size: 16px; /* 16 px minimum, sinon iOS zoome sur le champ */ padding: 12px 10px 10px; background: #000; color: #fff; border: 3px solid var(--phosphor); outline: none; text-transform: uppercase; letter-spacing: 1px; margin: 6px 0 14px; }
 .pxinput::placeholder { color: rgba(57,255,20,.4); text-transform: none; letter-spacing: 0; }
 .pxinput:focus { border-color: var(--gold); }
 .code { font-size: 22px; color: #fff; letter-spacing: 6px; text-shadow: 0 0 10px var(--phosphor); margin: 6px 0; }
@@ -486,6 +488,10 @@ button:active { transform: scale(.96); }
 <script src="supabase-config.js"></script>
 <script>
 (function () {
+  // Anti-zoom iPhone : pas de pincement (le double tap est coupé par touch-action: manipulation), et on remet
+  // l'échelle à 1 quand un champ perd le focus (sinon la page restait zoomée, coupée, et rien ne remplissait plus l'écran).
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (ev) { document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false }); });
+  document.addEventListener('focusout', function () { var vp = document.getElementById('vp'); if (vp) { var c = vp.content; vp.content = c.replace('maximum-scale=1', 'maximum-scale=1.0001'); setTimeout(function () { vp.content = c; window.scrollTo(0, 0); }, 50); } });
   var SOUNDS = [
     { id: 'trompette', name: 'La Trompette', bang: 'PRRRT\nRRT !' },
     { id: 'coussin', name: 'Le Coussin', bang: 'PFFRRT !' },

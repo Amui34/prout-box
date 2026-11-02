@@ -1,5 +1,5 @@
 • MES EXPLOITS : 14 médailles à décrocher (Prout d'or, Tonitruant, Marathonien, Mitrailleur, Assidu, Fin nez, Imitateur…), touche la médaille en haut à droite.
 • Le DÉFI DU JOUR, un thème différent chaque jour, directement depuis l'écran principal.
 • Correctif : l'enregistrement de ton prout fonctionne à nouveau (le micro était bloqué).
-• Un bouton retour en haut de chaque écran, et un affichage ajusté pour les petits et les grands iPhone.
+• Un bouton retour en haut de chaque écran, et un affichage ajusté pour les petits et les grands iPhone. Plus de zoom bloqué sur les champs de texte.
 • Un seul popup de position, plus propre, quand tu publies avec ta ville.

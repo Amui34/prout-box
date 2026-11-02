@@ -20,9 +20,13 @@
 
 ## Texte promotionnel (170 car. max)
 
-Retourne ton téléphone : ça prout. Enregistre ton propre prout, fais-le noter par un jury impitoyable et grimpe au TOP PROUTS.
+Depuis la 1.2 (posé par `node scripts/asc/asc_listing.mjs 1.2`, qui pousse aussi la description de `appstore/description.txt` et les mots-clés) :
+
+Retourne ton téléphone : ça prout. Enregistre ton prout, fais-le noter par un jury impitoyable, défie tes potes et décroche 14 médailles.
 
 ## Description (4000 car. max)
+
+**Source de vérité depuis la 1.2 : `appstore/description.txt`** (ajoute le coussin péteur, la ville, la section TES POTES, TES DÉFIS et MES EXPLOITS). Texte d'origine de la 1.0 ci-dessous.
 
 Prout Box, c'est la boîte à meuh de ton enfance… en version prout.
 
@@ -110,10 +114,15 @@ Pas de compte de démonstration nécessaire. Contact : noamadar.noa@gmail.com.
 
 ## Captures d'écran
 
-Générées par `appstore/shoot.sh` (simulateur iPhone 17 Pro Max, 1320 × 2868 = 6,9") puis habillées par `node appstore/render.mjs`. Résultat dans `appstore/screenshots/`. Les 6,9" suffisent : App Store Connect les redimensionne pour les tailles inférieures.
+Générées par `sh appstore/shoot.sh <nom>` (simulateur iPhone 17 Pro Max, 1320 × 2868 = 6,9", brutes dans `appstore/raw/`) puis habillées par `node appstore/render-sharp.mjs` (posters dans `appstore/screenshots/`, titres dans `SHOTS`) et envoyées par `node scripts/asc/asc_shots.mjs <version>`. Les 6,9" suffisent : App Store Connect les redimensionne pour les tailles inférieures. Une version en attente de révision refuse la suppression des captures (409) : `asc_withdraw.mjs` d'abord, puis `asc_release.mjs` pour resoumettre.
 
-1. La boîte (écran d'accueil)
-2. La boîte retournée, bulle « PRRRT RRT ! », fond vert
-3. Le jury (écran de score)
-4. TOP PROUTS (classement)
-5. Enregistrement en cours
+Les 6 captures de la 1.2 (02/11/2026) :
+
+1. `1-boite` : la boîte (écran d'accueil)
+2. `2-prout` : la boîte retournée, bulle « PRRRT RRT ! », fond vert
+3. `3-jury` : le jury (écran de score, mode démo)
+4. `4-top` : TOP PROUTS (classement FRANCE)
+5. `5-medailles` : MES EXPLOITS (14 médailles)
+6. `6-groupes` : galerie d'un groupe (« LES PETOMANES »)
+
+Trois posters réduits servent aussi la page vitrine (`docs/shot-*.png`).
