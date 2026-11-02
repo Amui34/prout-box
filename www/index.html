@@ -153,6 +153,20 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .clist button { font-family: var(--pixel); font-size: 8px; line-height: 1.4; text-align: left; padding: 10px 8px 8px; background: transparent; color: var(--phosphor); border: 2px solid rgba(57,255,20,.35); cursor: pointer; text-shadow: inherit; }
 .clist button.on { border-color: var(--gold); color: var(--gold); }
 
+/* title row with the medals button on the right */
+.top { position: relative; width: 100%; display: flex; justify-content: center; align-items: center; }
+.medalbtn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--ink); background: var(--white); font-size: 22px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.medalbtn b { position: absolute; top: -7px; right: -7px; min-width: 14px; background: var(--tomato); color: #fff; font: 800 11px/1 var(--body); border: 2px solid var(--ink); border-radius: 10px; padding: 3px 5px; }
+.medalbtn.todo::after { content: ''; position: absolute; bottom: -4px; right: -4px; width: 12px; height: 12px; border-radius: 50%; background: var(--gas); border: 2px solid var(--ink); animation: blink 1.2s steps(2) infinite; }
+.medals { width: 100%; max-width: 360px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 1; min-height: 0; overflow-y: auto; align-content: start; padding-bottom: 6px; }
+.medal { border: 2px solid rgba(57,255,20,.3); padding: 10px 4px 8px; text-align: center; font-size: 7px; line-height: 1.5; color: rgba(57,255,20,.7); text-shadow: none; }
+.medal .ic { display: block; font-size: 26px; line-height: 1; margin-bottom: 6px; filter: grayscale(1) opacity(.35); }
+.medal b { display: block; font-weight: 400; font-size: 8px; margin-bottom: 2px; }
+.medal.on { border-color: var(--gold); color: var(--gold); text-shadow: 0 0 6px rgba(255,230,0,.5); }
+.medal.on .ic { filter: none; }
+.medal.on small { color: var(--phosphor); }
+.medal small { display: block; font-size: 6px; opacity: .8; }
+
 /* two retro buttons side by side under the record button */
 .leads { display: flex; gap: 10px; width: 100%; }
 .leads .lead { flex: 1; font-size: 10px; padding-inline: 4px; white-space: nowrap; }
@@ -232,7 +246,10 @@ button:active { transform: scale(.96); }
 </style>
 
 <div class="app">
-  <h1 id="title">Prout Box</h1>
+  <div class="top">
+    <h1 id="title">Prout Box</h1>
+    <button class="medalbtn" id="medalsBtn" type="button" aria-label="Mes exploits et le défi du jour">🏅<b id="medalCount" hidden></b></button>
+  </div>
 
   <div class="hero">
     <button class="canbtn" id="canBtn" type="button" aria-label="Retourner la boîte">
@@ -450,6 +467,15 @@ button:active { transform: scale(.96); }
     <button class="pxbtn dim" id="gLeave" type="button">Quitter</button>
     <button class="pxbtn" id="groupClose" type="button">Retour</button>
   </div>
+</div>
+
+<!-- Retro screen 8: daily challenge + medals -->
+<div class="screen" id="medalsScreen" hidden role="dialog" aria-label="Mes exploits">
+  <h2>MES EXPLOITS</h2>
+  <div class="defi" id="dailyCard"></div>
+  <div class="medals" id="medalGrid"></div>
+  <p class="status" id="medalStatus"></p>
+  <div class="row"><button class="pxbtn" id="medalsClose" type="button">Retour</button></div>
 </div>
 
 <script src="supabase-config.js"></script>
@@ -821,7 +847,7 @@ button:active { transform: scale(.96); }
   // ================= retro screens =================
   var screenOpen = false;
   function openScreen(id) { screenOpen = true; $(id).hidden = false; }
-  function closeScreens() { screenOpen = false; ['scoreScreen', 'boardScreen', 'pubScreen', 'countryScreen', 'groupsScreen', 'gformScreen', 'groupScreen'].forEach(function (id) { $(id).hidden = true; }); }
+  function closeScreens() { screenOpen = false; ['scoreScreen', 'boardScreen', 'pubScreen', 'countryScreen', 'groupsScreen', 'gformScreen', 'groupScreen', 'medalsScreen'].forEach(function (id) { $(id).hidden = true; }); }
   // One « ‹ » back button at the top left of every retro screen (the score screen keeps Valider / Jeter only).
   var BACK = {
     boardScreen: function () { closeScreens(); },
@@ -829,7 +855,8 @@ button:active { transform: scale(.96); }
     countryScreen: function () { $('countryClose').click(); },
     groupsScreen: function () { closeScreens(); },
     gformScreen: function () { openGroups(); },
-    groupScreen: function () { openGroups(); }
+    groupScreen: function () { openGroups(); },
+    medalsScreen: function () { closeScreens(); }
   };
   Object.keys(BACK).forEach(function (id) {
     var b = document.createElement('button'); b.type = 'button'; b.className = 'back'; b.textContent = '‹'; b.setAttribute('aria-label', 'Retour');
@@ -910,6 +937,8 @@ button:active { transform: scale(.96); }
     mine.push(r); saveRec(r);
     closeScreens();
     index = list().length - 1; show();
+    if (recContext && recContext.kind === 'daily') { recContext = null; X.daily = today(); }
+    exploitRecording(r);
     if (recContext) { var rc = recContext; recContext = null; publishToGroup(r, rc); return; }
     if (online()) { openPublish(r); return; }
     note('Enregistré ! Retourne la boîte pour l’entendre');
@@ -1045,6 +1074,7 @@ button:active { transform: scale(.96); }
     publish(r).then(function () {
       pubRec = null; closeScreens(); jingle();
       note('Publié dans le TOP PROUTS ' + flag(country) + ' !');
+      exploit({ published: true });
       boardTab = 'country'; openBoard();
     }).catch(function (e) { $('pubOk').disabled = false; $('pubStatus').textContent = friendly(e); });
   });
@@ -1302,6 +1332,7 @@ button:active { transform: scale(.96); }
   });
   function openGroup(g) {
     curGroup = g; gTab = 'gallery';
+    if (!X.group) exploit({ group: true });
     $('gTitle').textContent = g.name.toUpperCase();
     $('gCode').textContent = 'CODE : ' + g.code + ' · PARTAGER';
     closeScreens(); openScreen('groupScreen'); loadGroup();
@@ -1418,6 +1449,7 @@ button:active { transform: scale(.96); }
       return rpc('publish_group_prout', { p_device: device, p_group: rc.group.id, p_path: path, p_mime: r.blob.type || 'audio/mp4', p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_kind: rc.kind || 'libre', p_theme: rc.theme || null, p_target: rc.target || null, p_similarity: rc.similarity == null ? null : rc.similarity });
     }).then(function () {
       jingle(); note(''); loadGroup();
+      if (rc.kind === 'imitation') exploit({ imit: Math.max(X.imit, rc.similarity || 0) });
       setTimeout(function () { gStatus(rc.kind === 'imitation' ? 'IMITATION ENVOYÉE : ' + rc.similarity + ' % DE RESSEMBLANCE' : 'PROUT ENVOYÉ DANS LE GROUPE !'); }, 600);
     }).catch(function (e) { loadGroup(); setTimeout(function () { gStatus(friendly(e)); }, 600); });
   }
@@ -1446,7 +1478,7 @@ button:active { transform: scale(.96); }
           Array.prototype.forEach.call(who.children, function (x) { x.disabled = true; if (x.textContent === v.author.toUpperCase()) x.classList.add('hit'); });
           if (!v.correct) b.classList.add('miss');
           result.textContent = v.correct ? 'BIEN JOUÉ ! C’ÉTAIT ' + v.author.toUpperCase() + ' · +1' : 'RATÉ ! C’ÉTAIT ' + v.author.toUpperCase();
-          if (v.correct) jingle(); else blip(180, .3, .08);
+          if (v.correct) { jingle(); exploit({ guesses: X.guesses + 1 }); } else blip(180, .3, .08);
           var next = document.createElement('button'); next.type = 'button'; next.className = 'pxbtn'; next.textContent = 'Suivant'; next.addEventListener('click', renderGuess); box.appendChild(next);
         }).catch(function (e) { done = false; gStatus(friendly(e)); });
       });
@@ -1501,6 +1533,81 @@ button:active { transform: scale(.96); }
   $('groupClose').addEventListener('click', openGroups);
   $('groupsClose').addEventListener('click', function () { closeScreens(); blip(440, .08); });
   $('groupsBtn').addEventListener('click', openGroups);
+
+  // ================= exploits: daily challenge + medals (local, no backend) =================
+  var MEDALS = [
+    { id: 'bronze', ic: '🥉', name: 'PROUT DE BRONZE', how: 'Un prout COSTAUD (4000+)', test: function (x) { return x.best >= 4000; } },
+    { id: 'argent', ic: '🥈', name: 'PROUT D’ARGENT', how: 'Un prout MONSTRUEUX (6000+)', test: function (x) { return x.best >= 6000; } },
+    { id: 'or', ic: '🥇', name: 'PROUT D’OR', how: 'Un prout LÉGENDAIRE (8000+)', test: function (x) { return x.best >= 8000; } },
+    { id: 'fort', ic: '🔊', name: 'TONITRUANT', how: 'Puissance au maximum', test: function (x) { return x.loud >= .95; } },
+    { id: 'long', ic: '⏱️', name: 'MARATHONIEN', how: 'Plus de 3,5 s de prout', test: function (x) { return x.dur >= .9; } },
+    { id: 'rafale', ic: '🔫', name: 'MITRAILLEUR', how: 'Au moins 5 rafales', test: function (x) { return x.bursts >= .5; } },
+    { id: 'jour', ic: '🌞', name: 'PROUT DU JOUR', how: 'Relève le défi du jour', test: function (x) { return !!x.daily; } },
+    { id: 'serie3', ic: '📅', name: 'ASSIDU', how: 'Un prout 3 jours de suite', test: function (x) { return x.streak >= 3; } },
+    { id: 'serie7', ic: '🔥', name: 'INTENABLE', how: 'Un prout 7 jours de suite', test: function (x) { return x.streak >= 7; } },
+    { id: 'dix', ic: '🏆', name: 'COLLECTIONNEUR', how: '10 prouts enregistrés', test: function (x) { return x.count >= 10; } },
+    { id: 'monde', ic: '🌍', name: 'MONDIAL', how: 'Publie dans le TOP PROUTS', test: function (x) { return !!x.published; } },
+    { id: 'potes', ic: '👯', name: 'BANDE DE POTES', how: 'Rejoins un groupe', test: function (x) { return !!x.group; } },
+    { id: 'nez', ic: '🕵️', name: 'FIN NEZ', how: '5 bonnes réponses à Qui a pété ?', test: function (x) { return x.guesses >= 5; } },
+    { id: 'imit', ic: '🎭', name: 'IMITATEUR', how: '80 % de ressemblance', test: function (x) { return x.imit >= 80; } }
+  ];
+  var X = { best: 0, loud: 0, dur: 0, bursts: 0, count: 0, days: [], daily: null, published: false, group: false, guesses: 0, imit: 0, medals: {} };
+  try { var xs = localStorage.getItem('proutbox.exploits'); if (xs) { var o = JSON.parse(xs); for (var k in o) X[k] = o[k]; } } catch (e) {}
+  function today() { return new Date().toISOString().slice(0, 10); }
+  function streak() {
+    var set = {}; X.days.forEach(function (d) { set[d] = 1; });
+    var n = 0, d = new Date(); if (!set[today()]) d.setDate(d.getDate() - 1); // a streak may still be alive if today is not done yet
+    while (set[d.toISOString().slice(0, 10)]) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function saveX() { try { localStorage.setItem('proutbox.exploits', JSON.stringify(X)); } catch (e) {} medalBadge(); }
+  function medalBadge() {
+    var n = Object.keys(X.medals).length;
+    $('medalCount').hidden = n === 0; $('medalCount').textContent = n;
+    $('medalsBtn').classList.toggle('todo', X.daily !== today());
+  }
+  // apply a patch to the stats, unlock what is new, tell the player
+  function exploit(patch) {
+    for (var k in patch) X[k] = patch[k];
+    X.streak = streak();
+    var fresh = [];
+    MEDALS.forEach(function (m) { if (!X.medals[m.id] && m.test(X)) { X.medals[m.id] = today(); fresh.push(m); } });
+    saveX();
+    if (fresh.length) {
+      setTimeout(function () { jingle(); }, 300);
+      var txt = '🏅 Nouvelle médaille : ' + fresh.map(function (m) { return m.ic + ' ' + m.name; }).join(' · ');
+      note(txt); $('pubStatus').textContent = txt.toUpperCase(); $('medalStatus').textContent = txt.toUpperCase();
+    }
+    return fresh;
+  }
+  function exploitRecording(r) {
+    var st = r.stats || {}, days = X.days.slice(); if (days.indexOf(today()) < 0) days.push(today());
+    return exploit({ count: X.count + 1, best: Math.max(X.best, r.score || 0), loud: Math.max(X.loud, st.loud || 0), dur: Math.max(X.dur, st.dur || 0), bursts: Math.max(X.bursts, st.bursts || 0), days: days.slice(-400) });
+  }
+  function openMedals() {
+    closeScreens(); openScreen('medalsScreen'); $('medalStatus').textContent = '';
+    var theme = themeOfDay(), done = X.daily === today();
+    var card = $('dailyCard'); card.innerHTML = '';
+    var h = document.createElement('h3'); h.textContent = '🌞 DÉFI DU JOUR'; card.appendChild(h);
+    var p = document.createElement('p'); p.textContent = 'THÈME : ' + theme + (done ? ' · FAIT ✓' : ' · UN NOUVEAU THÈME CHAQUE JOUR'); card.appendChild(p);
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'pxbtn' + (done ? ' dim' : ''); b.textContent = done ? '● Refaire' : '● Enregistrer';
+    b.addEventListener('click', function () { recContext = { kind: 'daily', theme: theme }; closeScreens(); note('Défi du jour : ' + theme + ' — à toi !'); setTimeout(function () { if (!recording) startRec(); }, 500); });
+    card.appendChild(b);
+    var grid = $('medalGrid'); grid.innerHTML = '';
+    MEDALS.forEach(function (m) {
+      var d = document.createElement('div'); d.className = 'medal' + (X.medals[m.id] ? ' on' : '');
+      var ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = m.ic;
+      var nm = document.createElement('b'); nm.textContent = m.name;
+      var how = document.createElement('small'); how.textContent = X.medals[m.id] ? 'OBTENUE LE ' + X.medals[m.id].split('-').reverse().join('/') : m.how.toUpperCase();
+      d.appendChild(ic); d.appendChild(nm); d.appendChild(how); grid.appendChild(d);
+    });
+    var won = Object.keys(X.medals).length;
+    $('medalStatus').textContent = won + ' / ' + MEDALS.length + ' MÉDAILLES' + (X.streak >= 2 ? ' · SÉRIE : ' + X.streak + ' JOURS' : '');
+    blip(660, .08); setTimeout(function () { blip(990, .12); }, 90);
+  }
+  $('medalsBtn').addEventListener('click', openMedals);
+  $('medalsClose').addEventListener('click', function () { closeScreens(); blip(440, .08); });
+  X.streak = streak(); medalBadge();
 
   // ================= flip the box on screen =================
   var canBtn = $('canBtn'), drag = null, backTimer = null;
