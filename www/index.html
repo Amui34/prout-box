@@ -44,8 +44,12 @@ body.playing { background: var(--gas); }
 h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; letter-spacing: 1px; line-height: 1; }
 
 .hero { position: relative; flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
-.canbtn { background: none; border: none; padding: 0; margin: 0; cursor: grab; touch-action: none; border-radius: 30px; }
-.can { display: block; width: min(240px, 60vw); height: auto; max-height: 46vh; transition: transform .5s cubic-bezier(.4,1.8,.5,1); transform-origin: 50% 55%; }
+/* The box shrinks with the space left in the hero (so the hint never overlaps it), capped by max-height. */
+/* The box height is set by fitCan() in JS: the room left in the hero, capped by --canmax of the screen height. */
+:root { --canmax: .46; }
+.canbtn { background: none; border: none; padding: 0; margin: 0; cursor: grab; touch-action: none; border-radius: 30px; flex: 0 1 auto; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
+.can { width: min(240px, 60vw); transition: transform .5s cubic-bezier(.4,1.8,.5,1); transform-origin: 50% 55%; }
+.hint, .skinlink { flex-shrink: 0; }
 .can.dragging { transition: none; }
 .can.flipped { transform: rotate(180deg); }
 .can.wiggle { animation: wiggle .12s linear infinite; }
@@ -72,7 +76,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .name { flex: 1; min-width: 0; text-align: center; }
 .name b { display: block; font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: .5px; line-height: 1.1; padding-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .name button { background: none; border: none; padding: 4px 8px; font: 800 13px var(--body); color: var(--ink); text-decoration: underline; cursor: pointer; min-height: 32px; }
-.name .tag { display: block; font-family: var(--pixel); font-size: 10px; line-height: 1.6; color: var(--ink); background: var(--gold); border: 2px solid var(--ink); border-radius: 4px; padding: 3px 6px 1px; margin: 4px auto 0; width: max-content; max-width: 100%; }
+.name .tag { display: block; font-family: var(--pixel); font-size: 9px; line-height: 1.6; color: var(--ink); background: var(--gold); border: 2px solid var(--ink); border-radius: 4px; padding: 3px 6px 1px; margin: 4px auto 0; width: max-content; max-width: 100%; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .lead {
   width: 100%; height: 48px; box-sizing: border-box; border: 3px solid var(--ink); border-radius: 12px;
@@ -91,7 +95,8 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .screen::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 2px 4px); }
 .screen::after { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.75)); }
 .screen > * { position: relative; z-index: 1; }
-.screen h2 { margin: 0 0 18px; font: 400 20px/1.4 var(--pixel); color: var(--gold); text-align: center; text-shadow: 3px 3px 0 var(--neon); padding: 0 44px; }
+.screen h2 { margin: 0 0 18px; font: 400 20px/1.4 var(--pixel); color: var(--gold); text-align: center; text-shadow: 3px 3px 0 var(--neon); }
+.back + h2 { padding: 0 44px; } /* leave room for the back button only where there is one */
 /* Back button, same place on every retro screen (top left), big enough for a thumb. */
 .back { position: absolute; top: max(16px, env(safe-area-inset-top, 0px)); left: 12px; z-index: 2; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--phosphor); border: 2px solid var(--phosphor); cursor: pointer; font-family: var(--pixel); font-size: 14px; line-height: 1; text-shadow: inherit; box-shadow: 3px 3px 0 var(--neon); }
 .back:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--neon); }
@@ -171,8 +176,8 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .leads { display: flex; gap: 10px; width: 100%; }
 .leads .lead { flex: 1; font-size: 10px; padding-inline: 4px; white-space: nowrap; }
 .skinlink { margin: -6px 0 0; background: none; border: none; font: 800 12px var(--body); color: var(--ink); text-decoration: underline; cursor: pointer; opacity: .75; }
-.can { display: flex; justify-content: center; }
-.can svg.skin { display: block; width: 100%; height: auto; max-height: inherit; } /* the wrapper's max-height must cap the SVG too */
+.can { display: flex; align-items: center; justify-content: center; }
+.can svg.skin { display: block; width: 100%; height: 100%; } /* scales inside the box set by fitCan(), keeps its ratio */
 
 /* groups */
 .gcard { width: 100%; max-width: 360px; display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 12px 8px; border: 2px solid rgba(57,255,20,.35); margin-bottom: 10px; cursor: pointer; text-align: left; background: transparent; color: var(--phosphor); font-family: var(--pixel); text-shadow: inherit; }
@@ -214,7 +219,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
   .app { gap: 8px; padding-block: 10px 14px; }
   h1 { font-size: 26px; }
   .hero { gap: 6px; }
-  .can { width: min(200px, 52vw); max-height: 36vh; }
+  :root { --canmax: .36; } .can { width: min(200px, 52vw); }
   .hint { font-size: 14px; }
   .skinlink { font-size: 11px; margin-top: -4px; }
   .arrow { width: 44px; height: 44px; }
@@ -227,13 +232,13 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
   .burst span { font-size: 21px; }
 }
 @media (max-height: 580px) {
-  .can { max-height: 30vh; }
+  :root { --canmax: .30; }
   .note { display: none; }
 }
 /* Big phones (Pro Max): let the box breathe and grow with the screen. */
 @media (min-height: 860px) {
   h1 { font-size: 40px; }
-  .can { width: min(300px, 68vw); max-height: 48vh; }
+  :root { --canmax: .48; } .can { width: min(300px, 68vw); }
   .hint { font-size: 19px; }
   .name b { font-size: 30px; }
   .rec { height: 70px; font-size: 24px; }
@@ -640,6 +645,7 @@ button:active { transform: scale(.96); }
     var hasScore = c.kind === 'rec' && c.rec.score != null;
     $('tag').hidden = !hasScore;
     if (hasScore) $('tag').textContent = pad6(c.rec.score) + ' PTS · ' + ((c.rec.stats && c.rec.stats.species) || '???');
+    if (typeof fitCan === 'function') setTimeout(fitCan, 0); // the picker height changes with the tag
     resetDel();
     try { localStorage.setItem('proutbox.pick', c.kind + ':' + c.id); } catch (e) {}
   }
@@ -1037,9 +1043,16 @@ button:active { transform: scale(.96); }
   function locateCity() {
     var seq = ++citySeq;
     pubCity = null; pubCityOff = false;
-    if (!navigator.geolocation) return;
+    // In the iOS app, the Capacitor Geolocation plugin shows only the native iOS prompt
+    // (plain navigator.geolocation would add a second WebKit « localhost » prompt).
+    var cap = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation;
+    if (!cap && !navigator.geolocation) return;
     $('pubStatus').textContent = 'RECHERCHE DE TA VILLE…';
-    navigator.geolocation.getCurrentPosition(function (pos) {
+    var getPos = function (ok, ko, opts) {
+      if (cap) cap.getCurrentPosition(opts).then(ok, ko);
+      else navigator.geolocation.getCurrentPosition(ok, ko, opts);
+    };
+    getPos(function (pos) {
       var lat = Math.round(pos.coords.latitude * 100) / 100, lon = Math.round(pos.coords.longitude * 100) / 100;
       fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lon + '&localityLanguage=fr')
         .then(function (r) { return r.json(); })
@@ -1073,14 +1086,14 @@ button:active { transform: scale(.96); }
     var r = pubRec; $('pubOk').disabled = true; $('pubStatus').textContent = 'ENVOI…';
     publish(r).then(function () {
       pubRec = null; closeScreens(); jingle();
-      note('Publié dans le TOP PROUTS ' + flag(country) + ' !');
       exploit({ published: true });
+      note(withMedal('Publié dans le TOP PROUTS ' + flag(country) + ' !'));
       boardTab = 'country'; openBoard();
     }).catch(function (e) { $('pubOk').disabled = false; $('pubStatus').textContent = friendly(e); });
   });
   $('pubLater').addEventListener('click', function () {
     pubRec = null; closeScreens();
-    note('Enregistré ! Tu pourras le publier depuis TOP PROUTS › MOI');
+    note(withMedal('Enregistré ! Tu pourras le publier depuis TOP PROUTS › MOI'));
     can.classList.add('flipped'); fire().then(flipBackLater);
   });
   $('pubCountry').addEventListener('click', function () { var r = pubRec; openCountry(function () { openPublish(r); }); });
@@ -1575,11 +1588,14 @@ button:active { transform: scale(.96); }
     saveX();
     if (fresh.length) {
       setTimeout(function () { jingle(); }, 300);
-      var txt = '🏅 Nouvelle médaille : ' + fresh.map(function (m) { return m.ic + ' ' + m.name; }).join(' · ');
-      note(txt); $('pubStatus').textContent = txt.toUpperCase(); $('medalStatus').textContent = txt.toUpperCase();
+      medalTxt = '🏅 Nouvelle médaille : ' + fresh.map(function (m) { return m.ic + ' ' + m.name; }).join(' · ');
+      note(medalTxt); $('medalStatus').textContent = medalTxt.toUpperCase();
     }
     return fresh;
   }
+  var medalTxt = '';
+  // the publish screen writes its own notes afterwards: keep the medal line visible with them
+  function withMedal(t) { var out = medalTxt ? t + ' · ' + medalTxt : t; medalTxt = ''; return out; }
   function exploitRecording(r) {
     var st = r.stats || {}, days = X.days.slice(); if (days.indexOf(today()) < 0) days.push(today());
     return exploit({ count: X.count + 1, best: Math.max(X.best, r.score || 0), loud: Math.max(X.loud, st.loud || 0), dur: Math.max(X.dur, st.dur || 0), bursts: Math.max(X.bursts, st.bursts || 0), days: days.slice(-400) });
@@ -1608,6 +1624,18 @@ button:active { transform: scale(.96); }
   $('medalsBtn').addEventListener('click', openMedals);
   $('medalsClose').addEventListener('click', function () { closeScreens(); blip(440, .08); });
   X.streak = streak(); medalBadge();
+
+  // ================= fit the box to the room left (never under the hint, never taller than --canmax) =================
+  function fitCan() {
+    var hero = document.querySelector('.hero');
+    var avail = hero.clientHeight - $('hint').offsetHeight - $('skinBtn').offsetHeight - 24;
+    var natural = can.clientWidth * 340 / 240;
+    var cap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canmax')) || .46;
+    can.style.height = Math.max(90, Math.min(avail, natural, window.innerHeight * cap)) + 'px';
+  }
+  window.addEventListener('resize', fitCan);
+  window.addEventListener('orientationchange', function () { setTimeout(fitCan, 100); });
+  fitCan(); setTimeout(fitCan, 300); // once fonts are in
 
   // ================= flip the box on screen =================
   var canBtn = $('canBtn'), drag = null, backTimer = null;
