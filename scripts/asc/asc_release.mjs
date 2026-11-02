@@ -3,8 +3,9 @@
 //   ex. : node scripts/asc/asc_release.mjs 1.1 3 appstore/notes-1.1.txt
 import fs from 'node:fs';
 import { req, APP, sleep } from './asc_lib.mjs';
-const [VERSION, BUILD, NOTES_FILE] = process.argv.slice(2);
-if (!VERSION || !BUILD) { console.log('usage: asc_release.mjs <version> <build> [notes.txt]'); process.exit(1); }
+const NO_SUBMIT = process.argv.includes('--no-submit'); // prépare la version (notes + build) sans la soumettre
+const [VERSION, BUILD, NOTES_FILE] = process.argv.slice(2).filter(a => !a.startsWith('--'));
+if (!VERSION || !BUILD) { console.log('usage: asc_release.mjs <version> <build> [notes.txt] [--no-submit]'); process.exit(1); }
 const NOTES = NOTES_FILE ? fs.readFileSync(NOTES_FILE, 'utf8').trim() : null;
 const die = (what, r) => { console.log('ERREUR', what, r.status, JSON.stringify(r.j).slice(0, 500)); process.exit(1); };
 
@@ -35,6 +36,7 @@ for (let i = 0; i < 40; i++) {
 if (!build || build.attributes.processingState !== 'VALID') { console.log('build pas VALID, relancer plus tard'); process.exit(1); }
 let r = await req('PATCH', `/v1/appStoreVersions/${v.id}`, { data: { type: 'appStoreVersions', id: v.id, attributes: { releaseType: 'AFTER_APPROVAL' }, relationships: { build: { data: { type: 'builds', id: build.id } } } } });
 if (r.status >= 300) die('attache build', r); console.log('3) build', BUILD, 'attaché');
+if (NO_SUBMIT) { console.log('4) pas de soumission (--no-submit) : version prête, à soumettre plus tard'); process.exit(0); }
 
 // 4) soumission
 let subs = await req('GET', `/v1/reviewSubmissions?filter[app]=${APP}&filter[state]=READY_FOR_REVIEW&limit=5`); let SUB = (subs.j.data || [])[0]?.id;
