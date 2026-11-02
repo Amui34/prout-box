@@ -64,8 +64,9 @@ Première version : six prouts classiques, enregistrement de ton prout, jury à 
 
 | Champ | Valeur |
 |---|---|
-| URL d'assistance | https://amui34.github.io/prout-box/ (GitHub Pages, dossier `docs/`) |
+| URL d'assistance | https://amui34.github.io/prout-box/assistance.html (FAQ + contact, source `docs/assistance.html`) |
 | URL de politique de confidentialité | https://amui34.github.io/prout-box/privacy.html (source : `docs/privacy.html`) |
+| Conditions d'utilisation | https://amui34.github.io/prout-box/cgu.html (éditeur Amuï studio ; l'EULA standard Apple s'applique en complément) |
 | URL marketing (facultatif) | https://amui34.github.io/prout-box/ |
 
 Un vrai domaine pourra remplacer ces URL plus tard (elles sont modifiables dans App Store Connect à tout moment).

@@ -1,1 +1,3 @@
-Correctif : l'enregistrement de ton prout fonctionne à nouveau dans l'app (le micro était bloqué par le mode « son même en silencieux »). Tu peux de nouveau enregistrer, faire noter par le jury, publier dans le TOP PROUTS et dans tes groupes.
+• Correctif : l'enregistrement de ton prout fonctionne à nouveau (le micro était bloqué par le mode « son même en silencieux »).
+• Un bouton retour en haut de chaque écran : on ne se perd plus dans les groupes ou le classement.
+• Affichage ajusté pour les petits et les grands iPhone.
