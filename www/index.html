@@ -98,7 +98,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .screen::after { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.75)); }
 .screen > * { position: relative; z-index: 1; }
 .screen h2 { margin: 0 0 18px; font: 400 20px/1.4 var(--pixel); color: var(--gold); text-align: center; text-shadow: 3px 3px 0 var(--neon); }
-.back + h2 { padding: 0 44px; } /* leave room for the back button only where there is one */
+.back + h2 { padding: 0 48px; min-height: 48px; display: flex; align-items: center; justify-content: center; } /* room for the back button (44 px + ombre) : rien ne passe dessous */
 /* Back button, same place on every retro screen (top left), big enough for a thumb. */
 .back { position: absolute; top: max(16px, env(safe-area-inset-top, 0px)); left: 12px; z-index: 2; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--phosphor); border: 2px solid var(--phosphor); cursor: pointer; font-family: var(--pixel); font-size: 14px; line-height: 1; text-shadow: inherit; box-shadow: 3px 3px 0 var(--neon); }
 .back:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--neon); }
@@ -151,7 +151,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .board .rate .actions { display: flex; gap: 18px; }
 .link { background: none; border: none; color: var(--gold); font-family: var(--pixel); font-size: 9px; text-decoration: underline; cursor: pointer; padding: 6px; text-shadow: inherit; }
 .link.danger { color: #FF7A7A; }
-.tabs { display: flex; gap: 8px; margin: -6px 0 10px; width: 100%; max-width: 360px; }
+.tabs { display: flex; gap: 8px; margin: 0 0 10px; width: 100%; max-width: 360px; }
 .tab { flex: 1; font-family: var(--pixel); font-size: 8px; line-height: 1.3; padding: 10px 4px 8px; background: transparent; color: var(--phosphor); border: 2px solid rgba(57,255,20,.4); cursor: pointer; text-shadow: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tab.on { border-color: var(--gold); color: var(--gold); box-shadow: 3px 3px 0 var(--neon); }
 .status { font-size: 8px; color: #9FF; min-height: 14px; margin-top: 8px; }
