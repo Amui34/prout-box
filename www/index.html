@@ -477,8 +477,11 @@ button:active { transform: scale(.96); }
     w(36, 'data'); v.setUint32(40, n * 2, true);
     return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
   }
+  // iOS 17+ : catégorie de la session audio. 'playback' = sonne même en mode silencieux ;
+  // 'play-and-record' = obligatoire pendant la capture micro (sinon InvalidStateError).
+  function setAudioSession(t) { try { if (navigator.audioSession) navigator.audioSession.type = t; } catch (e) {} }
   function mediaUnlock() {
-    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    if (!recording) setAudioSession('playback');
     try {
       if (!silentEl) { silentEl = document.createElement('audio'); silentEl.setAttribute('playsinline', ''); silentEl.loop = true; silentEl.src = silentWavUrl(); }
       var p = silentEl.play(); if (p && p.catch) p.catch(function () {});
@@ -659,8 +662,12 @@ button:active { transform: scale(.96); }
   }
   function startRec() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-      note('Micro bloqué ici. Ouvre la Prout Box dans ton navigateur'); return;
+      note('Micro indisponible sur ce navigateur'); return;
     }
+    // iOS (WKWebView) : la session audio « playback » (astuce mode silencieux) interdit la capture →
+    // InvalidStateError « AudioSession category is not compatible with audio capture ». On passe en
+    // play-and-record le temps de l'enregistrement, puis on revient à playback (voir onstop / catch).
+    setAudioSession('play-and-record');
     navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true } }).then(function (stream) {
       recStream = stream; chunks = [];
       var types = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'];
@@ -670,6 +677,7 @@ button:active { transform: scale(.96); }
       mediaRec.onstop = function () {
         recStream.getTracks().forEach(function (t) { t.stop(); });
         recording = false; clearInterval(tick); clearTimeout(stopT); setRecUI(false);
+        setAudioSession('playback');
         var blob = new Blob(chunks, { type: mediaRec.mimeType || type || 'audio/webm' });
         if (!blob.size) return;
         var r = { id: String(Date.now()), name: '', blob: blob, created: Date.now() };
@@ -682,7 +690,8 @@ button:active { transform: scale(.96); }
       tick = setInterval(function () { setRecUI(true, Math.min(6, Math.floor((Date.now() - recStart) / 1000))); }, 250);
       stopT = setTimeout(stopRec, 6000);
     }).catch(function (err) {
-      note(err && err.name === 'NotAllowedError' ? 'Accès au micro refusé' : 'Micro bloqué ici. Ouvre la Prout Box dans ton navigateur');
+      setAudioSession('playback');
+      note(err && err.name === 'NotAllowedError' ? 'Accès au micro refusé (Réglages › Prout Box › Micro)' : 'Micro indisponible (' + ((err && err.name) || 'erreur') + ')');
     });
   }
   function stopRec() { if (mediaRec && mediaRec.state !== 'inactive') mediaRec.stop(); }
