@@ -36,6 +36,9 @@ create table if not exists prouts (
   created_at    timestamptz not null default now()
 );
 alter table prouts add column if not exists city text; -- ajout 1.1 (bases créées avant)
+alter table prouts add column if not exists approved boolean not null default false; -- 1.3 : un prout n'entre au classement qu'après validation (admin_decide)
+update prouts set approved = true where not approved and created_at < '2026-11-03'; -- les prouts publiés avant la 1.3 restent en ligne
+create index if not exists prouts_pending_idx on prouts (created_at) where not approved and not hidden;
 create index if not exists prouts_country_idx on prouts (country) where not hidden;
 create index if not exists prouts_created_idx on prouts (created_at desc);
 
@@ -139,7 +142,7 @@ language sql security definer set search_path = public stable as $$
          p.device_id = p_device,
          p.created_at
   from prouts p
-  where not p.hidden and (p_country is null or p.country = p_country)
+  where not p.hidden and p.approved and (p_country is null or p.country = p_country)  -- approved : validé à la main (1.3)
   order by (p.votes_sum + 9.0) / (p.votes_count + 3) desc, p.votes_count desc, p.created_at desc
   limit greatest(1, least(100, p_limit));
 $$;
@@ -438,9 +441,107 @@ grant execute on function delete_group_prout(uuid, uuid) to anon, authenticated;
 grant execute on function report_group_prout(uuid, uuid) to anon, authenticated;
 revoke execute on function _member(uuid, uuid) from public, anon, authenticated;
 
+-- ═════════════════════════════════════════════════════════════════════════
+--  VRAIS PROUTS (1.3) : validation avant publication + page d'admin + pionniers
+--  Un prout publié est invisible (approved = false) tant que l'admin ne l'a pas écouté.
+--  L'admin s'identifie avec un jeton (uuid) stocké dans `admins`, JAMAIS dans ce fichier
+--  (dépôt public) : à insérer une fois à la main depuis le dashboard :
+--      insert into admins (token, label) values ('<uuid généré>', 'Noa');
+--  La page docs/admin.html (GitHub Pages) demande ce jeton et appelle admin_queue / admin_decide.
+-- ═════════════════════════════════════════════════════════════════════════
+
+create table if not exists admins (
+  token      uuid primary key,
+  label      text not null default '',
+  created_at timestamptz not null default now()
+);
+alter table admins enable row level security;
+
+-- Les 1000 premiers appareils (mission « Pionnier ») : on retient l'ordre d'arrivée.
+create table if not exists pioneers (
+  device_id  uuid primary key,
+  created_at timestamptz not null default now()
+);
+alter table pioneers enable row level security;
+
+-- Mes prouts en ligne : état de validation, pour l'onglet MOI (EN VALIDATION / EN LIGNE / REFUSÉ)
+create or replace function my_prouts(p_device uuid)
+returns table (id uuid, approved boolean, hidden boolean, votes int, avg numeric)
+language sql security definer set search_path = public stable as $$
+  select p.id, p.approved, p.hidden, p.votes_count,
+         case when p.votes_count = 0 then 0 else round(p.votes_sum::numeric / p.votes_count, 1) end
+  from prouts p where p.device_id = p_device;
+$$;
+
+-- Rang de pionnier (1 = premier appareil) ; idempotent, le rang ne change jamais.
+create or replace function claim_pioneer(p_device uuid) returns int
+language plpgsql security definer set search_path = public as $$
+declare v_rank int;
+begin
+  insert into pioneers (device_id) values (p_device) on conflict do nothing;
+  select count(*) into v_rank from pioneers where created_at <= (select created_at from pioneers where device_id = p_device);
+  return v_rank;
+end $$;
+
+-- Admin : la file (prouts à valider, puis prouts signalés), 200 max.
+create or replace function admin_queue(p_token uuid)
+returns table (id uuid, initials text, country text, city text, species text, jury int, path text, mime text,
+               votes int, reports int, approved boolean, hidden boolean, created_at timestamptz)
+language sql security definer set search_path = public stable as $$
+  select p.id, p.initials, p.country, p.city, p.species, p.jury, p.path, p.mime,
+         p.votes_count, p.reports_count, p.approved, p.hidden, p.created_at
+  from prouts p
+  where exists (select 1 from admins a where a.token = p_token)
+    and ((not p.approved and not p.hidden) or p.reports_count > 0)
+  order by p.approved, p.created_at
+  limit 200;
+$$;
+
+-- Admin : décider. 'ok' = publié (signalements effacés), 'hide' = masqué (gardé en base),
+-- 'delete' = supprimé (renvoie le chemin du fichier, que la page efface ensuite via l'API Storage).
+create or replace function admin_decide(p_token uuid, p_prout uuid, p_action text) returns text
+language plpgsql security definer set search_path = public as $$
+declare v_path text;
+begin
+  if not exists (select 1 from admins a where a.token = p_token) then raise exception 'jeton invalide'; end if;
+  if p_action = 'ok' then
+    update prouts set approved = true, hidden = false, reports_count = 0 where id = p_prout;
+    delete from reports where prout_id = p_prout;
+  elsif p_action = 'hide' then
+    update prouts set hidden = true where id = p_prout;
+  elsif p_action = 'delete' then
+    delete from prouts where id = p_prout returning path into v_path;
+    return v_path;
+  else
+    raise exception 'action inconnue';
+  end if;
+  return null;
+end $$;
+
+-- Admin : quelques compteurs pour l'en-tête de la page.
+create or replace function admin_stats(p_token uuid) returns json
+language sql security definer set search_path = public stable as $$
+  select case when exists (select 1 from admins a where a.token = p_token) then json_build_object(
+    'pending',  (select count(*) from prouts where not approved and not hidden),
+    'reported', (select count(*) from prouts where reports_count > 0),
+    'online',   (select count(*) from prouts where approved and not hidden),
+    'hidden',   (select count(*) from prouts where hidden),
+    'pioneers', (select count(*) from pioneers),
+    'groups',   (select count(*) from groups)
+  ) else null end;
+$$;
+
+grant execute on function my_prouts(uuid) to anon, authenticated;
+grant execute on function claim_pioneer(uuid) to anon, authenticated;
+grant execute on function admin_queue(uuid) to anon, authenticated;
+grant execute on function admin_decide(uuid, uuid, text) to anon, authenticated;
+grant execute on function admin_stats(uuid) to anon, authenticated;
+
 -- ─────────────────────────────────────────────────────────────────────────
---  MODÉRATION (à la main, depuis le dashboard)
+--  MODÉRATION (à la main, depuis le dashboard ; sinon docs/admin.html)
 -- ─────────────────────────────────────────────────────────────────────────
+--  File d'attente :          select id, initials, country, species, created_at from prouts where not approved and not hidden order by created_at;
+--  Valider :                 update prouts set approved = true where id = '<uuid>';
 --  Voir les signalements :   select p.initials, p.country, p.reports_count, r.* from reports r join prouts p on p.id = r.prout_id order by r.created_at desc;
 --  Masquer un prout :        update prouts set hidden = true where id = '<uuid>';
 --  Réhabiliter :             update prouts set hidden = false, reports_count = 0 where id = '<uuid>'; delete from reports where prout_id = '<uuid>';

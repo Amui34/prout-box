@@ -116,6 +116,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 
 .bigscore { font-size: 34px; line-height: 1; color: #fff; text-shadow: 0 0 12px var(--phosphor), 0 0 24px var(--phosphor); margin: 6px 0 12px; letter-spacing: 2px; }
 .verdict { color: var(--neon); text-shadow: 0 0 8px var(--neon); font-size: 13px; min-height: 22px; text-align: center; }
+.verdict.bad, .fun .bad { color: #FF7A7A; text-shadow: 0 0 8px rgba(255,122,122,.6); }
 .jury { width: 100%; max-width: 340px; margin: 14px 0 4px; display: flex; flex-direction: column; gap: 12px; }
 .judge { display: grid; grid-template-columns: 36px 1fr; gap: 4px 10px; align-items: center; opacity: 0; transform: translateX(-14px); transition: opacity .25s, transform .25s; }
 .judge.in { opacity: 1; transform: none; }
@@ -165,14 +166,35 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .medalbtn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--ink); background: var(--white); font-size: 22px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
 .medalbtn b { position: absolute; top: -7px; right: -7px; min-width: 14px; background: var(--tomato); color: #fff; font: 800 11px/1 var(--body); border: 2px solid var(--ink); border-radius: 10px; padding: 3px 5px; }
 .medalbtn.todo::after { content: ''; position: absolute; bottom: -4px; right: -4px; width: 12px; height: 12px; border-radius: 50%; background: var(--gas); border: 2px solid var(--ink); animation: blink 1.2s steps(2) infinite; }
-.medals { width: 100%; max-width: 360px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 1; min-height: 0; overflow-y: auto; align-content: start; padding-bottom: 6px; }
-.medal { border: 2px solid rgba(57,255,20,.3); padding: 10px 4px 8px; text-align: center; font-size: 7px; line-height: 1.5; color: rgba(57,255,20,.7); text-shadow: none; }
+.xbody { width: 100%; max-width: 360px; flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 6px; }
+.xbody .hint { font-size: 8px; color: #9FF; margin: 0 0 10px; }
+.rank { width: 100%; max-width: 360px; text-align: center; margin: -6px 0 12px; }
+.rank b { display: block; font-weight: 400; font-size: 11px; color: var(--gold); text-shadow: 0 0 8px rgba(255,230,0,.5); }
+.rank small { display: block; font-size: 7px; color: #9FF; margin: 4px 0 6px; }
+.bar { height: 8px; border: 2px solid rgba(57,255,20,.45); background: rgba(0,0,0,.4); }
+.bar i { display: block; height: 100%; background: var(--phosphor); box-shadow: 0 0 6px var(--phosphor); transition: width .4s; }
+.medals { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-content: start; }
+.medal { position: relative; border: 2px solid rgba(57,255,20,.3); padding: 10px 4px 8px; text-align: center; font-size: 7px; line-height: 1.5; color: rgba(57,255,20,.7); text-shadow: none; }
 .medal .ic { display: block; font-size: 26px; line-height: 1; margin-bottom: 6px; filter: grayscale(1) opacity(.35); }
 .medal b { display: block; font-weight: 400; font-size: 8px; margin-bottom: 2px; }
+.medal em { display: block; font-style: normal; font-size: 5px; letter-spacing: 1px; margin-top: 5px; opacity: .8; }
 .medal.on { border-color: var(--gold); color: var(--gold); text-shadow: 0 0 6px rgba(255,230,0,.5); }
 .medal.on .ic { filter: none; }
 .medal.on small { color: var(--phosphor); }
+.medal.on.new { animation: medalpop 1.2s ease-in-out infinite alternate; }
+@keyframes medalpop { from { box-shadow: 0 0 0 rgba(255,230,0,0); } to { box-shadow: 0 0 14px rgba(255,230,0,.8); } }
 .medal small { display: block; font-size: 6px; opacity: .8; }
+/* rarity colours: RARE cyan, ÉPIQUE neon pink, LÉGENDAIRE gold, MYSTÈRE violet */
+.r-rare.on, .mission.r-rare em { border-color: #5FF; color: #5FF; }
+.r-pique.on, .mission.r-pique em { border-color: var(--neon); color: var(--neon); text-shadow: 0 0 6px rgba(255,46,166,.6); }
+.r-lgendaire.on, .mission.r-lgendaire em { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 12px rgba(255,230,0,.5); }
+.r-mystre.on { border-color: #C58CFF; color: #C58CFF; text-shadow: 0 0 6px rgba(197,140,255,.6); }
+.r-mystre:not(.on) .ic { filter: none; opacity: .5; }
+.mission { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: center; padding: 10px 6px; border-bottom: 2px dashed rgba(57,255,20,.25); text-align: left; }
+.mission .ic { font-size: 20px; line-height: 1; text-align: center; text-shadow: none; }
+.mission b { display: block; font-weight: 400; font-size: 8px; color: var(--gold); margin-bottom: 3px; }
+.mission small { display: block; font-size: 6px; line-height: 1.6; color: rgba(57,255,20,.8); margin-bottom: 5px; }
+.mission em { font-style: normal; font-size: 6px; color: #9FF; white-space: nowrap; text-align: right; line-height: 1.6; }
 
 /* two retro buttons side by side under the record button */
 .leads { display: flex; gap: 10px; width: 100%; }
@@ -268,15 +290,19 @@ button:active { transform: scale(.96); }
             <stop offset="0" stop-color="#FF8A6E"/><stop offset=".55" stop-color="#FF5A3C"/><stop offset="1" stop-color="#C92E16"/>
           </radialGradient>
         </defs>
-        <ellipse cx="120" cy="318" rx="98" ry="12" fill="rgba(42,27,18,.22)"/>
-        <!-- neck -->
-        <path d="M150 262 L212 300 Q226 310 214 318 L160 296 Z" fill="#E8482C" stroke="#2A1B12" stroke-width="5" stroke-linejoin="round"/>
-        <path d="M168 290 L205 309" stroke="#2A1B12" stroke-width="3" stroke-linecap="round" opacity=".5"/>
-        <!-- body -->
-        <path d="M120 60 C40 60 10 130 22 198 C34 268 86 300 136 290 C196 278 236 220 224 152 C214 96 180 60 120 60 Z" fill="url(#cushRed)" stroke="#2A1B12" stroke-width="5" stroke-linejoin="round"/>
-        <path d="M60 110 C78 86 100 78 120 78" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".45"/>
+        <ellipse cx="120" cy="322" rx="104" ry="12" fill="rgba(42,27,18,.22)"/>
+        <!-- the nozzle: a flat rubber tube standing up from the pouch, open at the top (the thing you blow into) -->
+        <path d="M98 132 L94 50 Q94 32 120 32 Q146 32 146 50 L142 132 Z" fill="#E8482C" stroke="#2A1B12" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M107 62 L104 124 M133 62 L136 124" fill="none" stroke="#2A1B12" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+        <ellipse cx="120" cy="50" rx="26" ry="10" fill="#8C1E0C" stroke="#2A1B12" stroke-width="5"/>
+        <ellipse cx="120" cy="50" rx="15" ry="4.5" fill="#2A1B12"/>
+        <!-- the pouch: a fat round pink-red balloon with pleats -->
+        <path d="M120 122 C58 122 14 164 16 218 C18 276 68 314 120 314 C172 314 222 276 224 218 C226 164 182 122 120 122 Z" fill="url(#cushRed)" stroke="#2A1B12" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M52 170 Q40 218 56 270 M188 170 Q200 218 184 270 M86 136 Q70 150 62 175 M154 136 Q170 150 178 175" fill="none" stroke="#2A1B12" stroke-width="3" stroke-linecap="round" opacity=".28"/>
+        <path d="M94 134 Q120 148 146 134" fill="none" stroke="#2A1B12" stroke-width="4" stroke-linecap="round" opacity=".6"/>
+        <path d="M46 186 C56 158 80 140 106 136" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".45"/>
         <!-- mascot -->
-        <g transform="translate(0 6)">
+        <g transform="translate(18 62) scale(.85)">
           <g fill="#2A1B12">
             <circle cx="92" cy="166" r="25"/><circle cx="120" cy="146" r="31"/><circle cx="150" cy="164" r="25"/>
             <circle cx="106" cy="182" r="21"/><circle cx="136" cy="184" r="21"/>
@@ -291,7 +317,7 @@ button:active { transform: scale(.96); }
           <ellipse cx="100" cy="168" rx="6" ry="3.5" fill="#FF8FA3"/><ellipse cx="142" cy="168" rx="6" ry="3.5" fill="#FF8FA3"/>
           <path d="M110 167 Q121 180 132 167" fill="#2A1B12"/>
         </g>
-        <text x="120" y="252" text-anchor="middle" font-family="Luckiest Guy, Arial Black, sans-serif" font-size="30" letter-spacing="2" fill="#FFD23F" stroke="#2A1B12" stroke-width="5" paint-order="stroke" stroke-linejoin="round">PROUT</text>
+        <text x="120" y="292" text-anchor="middle" font-family="Luckiest Guy, Arial Black, sans-serif" font-size="30" letter-spacing="2" fill="#FFD23F" stroke="#2A1B12" stroke-width="5" paint-order="stroke" stroke-linejoin="round">PROUT</text>
       </svg>
       <!-- skin 1: the can -->
       <svg class="skin" id="skinCan" viewBox="0 0 240 340" aria-hidden="true">
@@ -479,8 +505,13 @@ button:active { transform: scale(.96); }
 <!-- Retro screen 8: daily challenge + medals -->
 <div class="screen" id="medalsScreen" hidden role="dialog" aria-label="Mes exploits">
   <h2>MES EXPLOITS</h2>
-  <div class="defi" id="dailyCard"></div>
-  <div class="medals" id="medalGrid"></div>
+  <div class="rank" id="rankBox"></div>
+  <div class="tabs" id="xtabs" role="tablist">
+    <button class="tab on" type="button" data-tab="missions" role="tab">🎯 MISSIONS</button>
+    <button class="tab" type="button" data-tab="medals" role="tab">🏅 MÉDAILLES</button>
+    <button class="tab" type="button" data-tab="mystery" role="tab">❓ MYSTÈRES</button>
+  </div>
+  <div class="xbody" id="xbody"></div>
   <p class="status" id="medalStatus"></p>
   <div class="row"><button class="pxbtn" id="medalsClose" type="button">Retour</button></div>
 </div>
@@ -678,6 +709,7 @@ button:active { transform: scale(.96); }
     if (recording || screenOpen) return Promise.resolve(0);
     if (!unlockAudio()) { note('Le son ne marche pas sur ce navigateur'); return Promise.resolve(0); }
     var c = current();
+    trackFlip();
     if (c.kind === 'rec') {
       playingUntil = Date.now() + 1500;
       return playRecording(c.rec).then(function (d) { showPlaying(c.bang, d); return d; })
@@ -774,7 +806,7 @@ button:active { transform: scale(.96); }
   // ================= the prout-o-meter: a score out of 10 000 =================
   // Decoded offline (no user gesture needed), then measured in 20 ms windows:
   // loudness (avg RMS of the noisy part), active duration, peak, and number of bursts.
-  function analyzeBlob(blob) {
+  function analyzeBlob(blob, synthetic) {
     return blob.arrayBuffer().then(function (ab) {
       var OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
       var oc = new OAC(1, 1, 44100);
@@ -790,8 +822,39 @@ button:active { transform: scale(.96); }
       }
       var dur = active / 50, loud = Math.min(1, (active ? sum / active : 0) / .2);
       var pk = Math.min(1, peak / .9), dd = Math.min(1, dur / 4), bb = Math.min(10, bursts);
-      return judge({ score: Math.round(loud * 5000 + dd * 3000 + pk * 1500 + bb * 50), loud: loud, dur: dd, peak: pk, bursts: bb / 10 });
+      var st = { score: Math.round(loud * 5000 + dd * 3000 + pk * 1500 + bb * 50), loud: loud, dur: dd, peak: pk, bursts: bb / 10, len: Math.round(buf.duration * 10) / 10 };
+      st.voice = synthetic ? 0 : voiceScore(d, buf.sampleRate, th); // 0-100 : à quel point ça ressemble à une voix
+      st.recale = st.voice >= 40; // vrais prouts : une voix (ou un chant) est gardée sur le téléphone mais jamais publiée
+      return judge(st);
     });
+  }
+  // Détecteur de voix (« vrais prouts ») : une voix a une hauteur stable entre 95 et 400 Hz (autocorrélation
+  // normalisée > 0,6 sur des fenêtres de 40 ms) et de l'énergie au-dessus de 400 Hz (formants) ; un prout est un
+  // bruit grave et irrégulier. Score = part de fenêtres « voisées » × stabilité de la hauteur. Signal ramené à ~11 kHz.
+  function voiceScore(d, sr, th) {
+    var k = Math.max(1, Math.round(sr / 11025)), n = Math.floor(d.length / k), x = new Float32Array(n), y = new Float32Array(n), i, j;
+    for (i = 0; i < n; i++) { var s = 0; for (j = 0; j < k; j++) s += d[i * k + j]; x[i] = s / k; }
+    var fs = sr / k, a = Math.exp(-2 * Math.PI * 400 / fs), lp = 0;
+    for (i = 0; i < n; i++) { lp = a * lp + (1 - a) * x[i]; y[i] = x[i] - lp; } // passe-haut 400 Hz
+    var W = Math.floor(fs * .04), minLag = Math.floor(fs / 400), maxLag = Math.floor(fs / 95);
+    var act = 0, voiced = 0, stable = 0, prevF = 0;
+    for (var s0 = 0; s0 + W <= n; s0 += W >> 1) {
+      var e = 0, eh = 0;
+      for (i = 0; i < W; i++) { e += x[s0 + i] * x[s0 + i]; eh += y[s0 + i] * y[s0 + i]; }
+      if (Math.sqrt(e / W) <= th) { prevF = 0; continue; }
+      act++;
+      var best = 0, bestLag = 1;
+      for (var lag = minLag; lag <= maxLag; lag++) {
+        var r = 0, p = 0, q = 0;
+        for (i = 0; i + lag < W; i++) { var u = x[s0 + i], v = x[s0 + i + lag]; r += u * v; p += u * u; q += v * v; }
+        var c = r / (Math.sqrt(p * q) || 1); if (c > best) { best = c; bestLag = lag; }
+      }
+      var f = fs / bestLag;
+      if (best >= .6 && eh / e >= .2) { voiced++; if (prevF && Math.abs(f - prevF) / prevF < .12) stable++; prevF = f; } else prevF = 0;
+    }
+    if (act < 8) return 0;
+    var vr = voiced / act, stb = voiced ? stable / voiced : 0;
+    return Math.round(100 * vr * (.4 + .6 * stb));
   }
   function pad6(n) { return ('000000' + Math.max(0, Math.round(n))).slice(-6); }
 
@@ -919,7 +982,8 @@ button:active { transform: scale(.96); }
         total += st.jury[i].n;
         if (i === JURY.length - 1) {
           $('juryTotal').textContent = 'JURY : ' + total + '/30';
-          $('fun').innerHTML = 'MAGNITUDE : ' + st.fun.mag + ' SUR L\'ÉCHELLE DE RICHTER DU SLIP<br>PIGEONS EFFRAYÉS : ' + st.fun.pigeons + '<br>DISTANCE DE SÉCURITÉ : ' + st.fun.dist + ' M';
+          $('fun').innerHTML = 'MAGNITUDE : ' + st.fun.mag + ' SUR L\'ÉCHELLE DE RICHTER DU SLIP<br>PIGEONS EFFRAYÉS : ' + st.fun.pigeons + '<br>DISTANCE DE SÉCURITÉ : ' + st.fun.dist + ' M'
+            + (st.recale ? '<br><span class="bad">LE JURY LE GARDE SUR CE TÉLÉPHONE MAIS REFUSE DE LE PUBLIER (VOIX ' + st.voice + ' %)</span>' : '');
           jingle();
         }
       }, 350 * (i + 1));
@@ -938,7 +1002,7 @@ button:active { transform: scale(.96); }
       $('bigScore').textContent = pad6(r.score * k);
       var tick = Math.floor(k * 16);
       if (tick !== last) { last = tick; blip(260 + tick * 50, .05, .04); }
-      if (k < 1) requestAnimationFrame(step); else { $('verdict').textContent = 'ESPÈCE : ' + st.species; revealJury(st); }
+      if (k < 1) requestAnimationFrame(step); else { $('verdict').classList.toggle('bad', !!st.recale); $('verdict').textContent = st.recale ? 'RECALÉ : ON DIRAIT UNE VOIX, PAS UN PROUT' : 'ESPÈCE : ' + st.species; revealJury(st); }
     })(t0);
   }
   $('scoreOk').addEventListener('click', function () {
@@ -949,8 +1013,9 @@ button:active { transform: scale(.96); }
     mine.push(r); saveRec(r);
     closeScreens();
     index = list().length - 1; show();
-    if (recContext && recContext.kind === 'daily') { recContext = null; X.daily = today(); }
+    if (recContext && recContext.kind === 'daily') { recContext = null; X.daily = today(); X.dailyCount = (X.dailyCount || 0) + 1; }
     exploitRecording(r);
+    if (r.stats && r.stats.recale) { recContext = null; note(withMedal('Gardé sur ce téléphone, mais le jury ne publie pas les voix !')); can.classList.add('flipped'); fire().then(flipBackLater); return; }
     if (recContext) { var rc = recContext; recContext = null; publishToGroup(r, rc); return; }
     if (online()) { openPublish(r); return; }
     note('Enregistré ! Retourne la boîte pour l’entendre');
@@ -1092,9 +1157,9 @@ button:active { transform: scale(.96); }
     var r = pubRec; $('pubOk').disabled = true; $('pubStatus').textContent = 'ENVOI…';
     publish(r).then(function () {
       pubRec = null; closeScreens(); jingle();
-      exploit({ published: true });
-      note(withMedal('Publié dans le TOP PROUTS ' + flag(country) + ' !'));
-      boardTab = 'country'; openBoard();
+      exploit({ published: true, pubCount: (X.pubCount || 0) + 1 });
+      note(withMedal('Envoyé ! Le jury suprême l’écoute avant de l’afficher dans le TOP PROUTS ' + flag(country)));
+      boardTab = 'mine'; openBoard();
     }).catch(function (e) { $('pubOk').disabled = false; $('pubStatus').textContent = friendly(e); });
   });
   $('pubLater').addEventListener('click', function () {
@@ -1164,6 +1229,7 @@ button:active { transform: scale(.96); }
               paint(k); blip(600 + k * 120, .08);
               rpc('vote_prout', { p_device: device, p_prout: row.id, p_stars: k }).then(function (res) {
                 var v = res && res[0]; if (!v) return;
+                if (!row.my_stars) exploit({ votes: (X.votes || 0) + 1 });
                 row.votes = v.votes; row.avg = v.avg; row.my_stars = k;
                 li.querySelector('.sc').childNodes[0].textContent = '💩 ' + Number(v.avg).toFixed(1);
                 li.querySelector('.sc small').textContent = v.votes + (v.votes > 1 ? ' VOTES' : ' VOTE') + ' · TOI ' + k;
@@ -1196,6 +1262,7 @@ button:active { transform: scale(.96); }
             acts.appendChild(rep);
           }
           rate.appendChild(lab); rate.appendChild(cr); rate.appendChild(acts); li.appendChild(rate);
+          if (X.countries.indexOf(row.country) < 0) exploit({ countries: X.countries.concat([row.country]) });
           playRow(li, function () { return playRemote(row); });
         } else { li.classList.remove('open'); if (rate) { rate.remove(); rate = null; } }
       });
@@ -1204,12 +1271,15 @@ button:active { transform: scale(.96); }
     $('boardEmpty').hidden = rows.length > 0;
     $('boardEmpty').innerHTML = 'AUCUN PROUT ICI...<br>SOIS LE PREMIER !';
   }
-  function renderMine() {
+  var mineStatus = {}; // remoteId → {approved, hidden} (my_prouts), refreshed each time the MOI tab opens
+  function renderMine(refreshed) {
     var ol = $('board'); ol.innerHTML = '';
     var rows = mine.slice().sort(function (a, b) { return (b.score || 0) - (a.score || 0) || a.created - b.created; });
     rows.forEach(function (r, i) {
-      var li = rowEl(i, r.name || '???', (r.stats && r.stats.species) || '', pad6(r.score || 0), r.remoteId ? 'EN LIGNE ' + flag(r.country || country) : '');
-      if (online() && !r.remoteId) {
+      var s = r.remoteId && mineStatus[r.remoteId], recale = r.stats && r.stats.recale;
+      var state = !r.remoteId ? (recale ? 'RECALÉ (VOIX)' : '') : !s ? 'EN LIGNE ' + flag(r.country || country) : s.hidden ? 'REFUSÉ' : s.approved ? 'EN LIGNE ' + flag(r.country || country) + (s.votes ? ' · 💩 ' + Number(s.avg).toFixed(1) : '') : '⏳ EN VALIDATION';
+      var li = rowEl(i, r.name || '???', (r.stats && r.stats.species) || '', pad6(r.score || 0), state);
+      if (online() && !r.remoteId && !recale) {
         var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = 'PUBLIER';
         pb.addEventListener('click', function (e) { e.stopPropagation(); openPublish(r); });
         li.querySelector('.sc').appendChild(pb);
@@ -1219,6 +1289,15 @@ button:active { transform: scale(.96); }
     });
     $('boardEmpty').hidden = rows.length > 0;
     $('boardEmpty').innerHTML = 'AUCUN PROUT...<br>ENREGISTRE LE TIEN !';
+    if (!refreshed && online() && rows.some(function (r) { return r.remoteId; })) {
+      var seq = boardSeq;
+      rpc('my_prouts', { p_device: device }).then(function (list) {
+        if (seq !== boardSeq || boardTab !== 'mine') return;
+        mineStatus = {}; (list || []).forEach(function (x) { mineStatus[x.id] = x; });
+        rows.forEach(function (r) { if (r.remoteId && !mineStatus[r.remoteId]) { r.remoteId = null; saveRec(r); } }); // supprimé par le jury suprême
+        renderMine(true);
+      }).catch(function () {});
+    }
   }
   function loadBoard() {
     var seq = ++boardSeq;
@@ -1273,7 +1352,7 @@ button:active { transform: scale(.96); }
     note('Mode démo : 4 prouts arrivent…');
     Promise.all(demo.map(function (d, i) {
       return renderPreset(d[1]).then(function (blob) {
-        return analyzeBlob(blob).then(function (st) {
+        return analyzeBlob(blob, true).then(function (st) {
           return { id: 'demo' + Date.now() + i, name: d[0], blob: blob, created: Date.now() + i, score: st.score, stats: st };
         });
       });
@@ -1286,7 +1365,7 @@ button:active { transform: scale(.96); }
   var titleTaps = 0, titleTimer = null;
   $('title').addEventListener('click', function () {
     clearTimeout(titleTimer); titleTimer = setTimeout(function () { titleTaps = 0; }, 3000);
-    if (++titleTaps >= 5) { titleTaps = 0; seedDemo(); }
+    if (++titleTaps >= 5) { titleTaps = 0; exploit({ flags: flag_('curieux') }); seedDemo(); }
   });
 
   // ================= box skin: can or whoopee cushion =================
@@ -1297,7 +1376,7 @@ button:active { transform: scale(.96); }
     $('skinBtn').textContent = skin === 'can' ? 'Passer au coussin péteur' : 'Revenir à la canette';
     $('canBtn').setAttribute('aria-label', skin === 'can' ? 'Retourner la boîte' : 'Écraser le coussin');
   }
-  $('skinBtn').addEventListener('click', function () { skin = skin === 'can' ? 'cushion' : 'can'; try { localStorage.setItem('proutbox.skin', skin); } catch (e) {} applySkin(); blip(skin === 'can' ? 700 : 500, .08); });
+  $('skinBtn').addEventListener('click', function () { skin = skin === 'can' ? 'cushion' : 'can'; try { localStorage.setItem('proutbox.skin', skin); } catch (e) {} applySkin(); blip(skin === 'can' ? 700 : 500, .08); if (skin === 'cushion' && !X.cushion) exploit({ cushion: true }); });
   applySkin();
 
   // ================= groups: friends, a private gallery, challenges =================
@@ -1347,7 +1426,7 @@ button:active { transform: scale(.96); }
     $('gformOk').disabled = true; $('gformStatus').textContent = 'ENVOI…';
     try { localStorage.setItem('proutbox.pseudo', p); } catch (e) {}
     var call = gformMode === 'create' ? rpc('create_group', { p_device: device, p_name: a, p_pseudo: p }) : rpc('join_group', { p_device: device, p_code: a.toUpperCase(), p_pseudo: p });
-    call.then(function (rows) { jingle(); openGroup(rows[0]); }).catch(function (e) { $('gformOk').disabled = false; $('gformStatus').textContent = friendly(e); });
+    call.then(function (rows) { jingle(); if (gformMode === 'create' && !X.created) exploit({ created: true }); openGroup(rows[0]); }).catch(function (e) { $('gformOk').disabled = false; $('gformStatus').textContent = friendly(e); });
   });
   function openGroup(g) {
     curGroup = g; gTab = 'gallery';
@@ -1443,7 +1522,7 @@ button:active { transform: scale(.96); }
   function pickMineForGroup() {
     var ol = $('gBoard'); ol.innerHTML = ''; gStatus('CHOISIS UN PROUT À ENVOYER DANS LE GROUPE');
     if (!mine.length) { $('gBoardEmpty').hidden = false; $('gBoardEmpty').innerHTML = 'AUCUN PROUT SUR CE TÉLÉPHONE...<br>ENREGISTRE-EN UN D’ABORD !'; return; }
-    mine.slice().sort(function (a, b) { return b.created - a.created; }).forEach(function (r, i) {
+    mine.filter(function (r) { return !(r.stats && r.stats.recale); }).sort(function (a, b) { return b.created - a.created; }).forEach(function (r, i) {
       var li = rowEl(i, r.name || '???', (r.stats && r.stats.species) || '', pad6(r.score || 0), '');
       var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = 'ENVOYER';
       pb.addEventListener('click', function (e) { e.stopPropagation(); publishToGroup(r, { group: curGroup, kind: 'libre' }); });
@@ -1462,13 +1541,13 @@ button:active { transform: scale(.96); }
     var ext = /mp4|m4a|aac/.test(r.blob.type) ? 'm4a' : /webm/.test(r.blob.type) ? 'webm' : /ogg/.test(r.blob.type) ? 'ogg' : /wav/.test(r.blob.type) ? 'wav' : 'bin';
     var path = device + '/g' + r.id + '-' + Date.now().toString(36) + '.' + ext;
     var prep = (rc.kind === 'imitation' && rc.similarity == null)
-      ? renderPreset(rc.target).then(analyzeBlob).then(function (st) { rc.similarity = similarity(r.stats, st); })
+      ? renderPreset(rc.target).then(function (b) { return analyzeBlob(b, true); }).then(function (st) { rc.similarity = similarity(r.stats, st); })
       : Promise.resolve();
     prep.then(function () { return upload(path, r.blob); }).then(function () {
       return rpc('publish_group_prout', { p_device: device, p_group: rc.group.id, p_path: path, p_mime: r.blob.type || 'audio/mp4', p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_kind: rc.kind || 'libre', p_theme: rc.theme || null, p_target: rc.target || null, p_similarity: rc.similarity == null ? null : rc.similarity });
     }).then(function () {
       jingle(); note(''); loadGroup();
-      if (rc.kind === 'imitation') exploit({ imit: Math.max(X.imit, rc.similarity || 0) });
+      if (rc.kind === 'imitation') exploit({ imit: Math.max(X.imit, rc.similarity || 0), imits: (X.imits || 0) + ((rc.similarity || 0) >= 80 ? 1 : 0) });
       setTimeout(function () { gStatus(rc.kind === 'imitation' ? 'IMITATION ENVOYÉE : ' + rc.similarity + ' % DE RESSEMBLANCE' : 'PROUT ENVOYÉ DANS LE GROUPE !'); }, 600);
     }).catch(function (e) { loadGroup(); setTimeout(function () { gStatus(friendly(e)); }, 600); });
   }
@@ -1553,25 +1632,61 @@ button:active { transform: scale(.96); }
   $('groupsClose').addEventListener('click', function () { closeScreens(); blip(440, .08); });
   $('groupsBtn').addEventListener('click', openGroups);
 
-  // ================= exploits: daily challenge + medals (local, no backend) =================
+  // ================= exploits: daily challenge, missions, medals, mysteries (local, no backend except the pioneer rank) =================
+  // Each medal is also a mission: `prog(x)` gives [current, goal] for the progress bar. `pts` feed the rank (titre).
+  // Rarity: COMMUNE (default) / RARE / ÉPIQUE / LÉGENDAIRE. Mysteries (MYSTERIES) stay hidden until won: only a clue shows.
   var MEDALS = [
-    { id: 'bronze', ic: '🥉', name: 'PROUT DE BRONZE', how: 'Un prout COSTAUD (4000+)', test: function (x) { return x.best >= 4000; } },
-    { id: 'argent', ic: '🥈', name: 'PROUT D’ARGENT', how: 'Un prout MONSTRUEUX (6000+)', test: function (x) { return x.best >= 6000; } },
-    { id: 'or', ic: '🥇', name: 'PROUT D’OR', how: 'Un prout LÉGENDAIRE (8000+)', test: function (x) { return x.best >= 8000; } },
-    { id: 'fort', ic: '🔊', name: 'TONITRUANT', how: 'Puissance au maximum', test: function (x) { return x.loud >= .95; } },
-    { id: 'long', ic: '⏱️', name: 'MARATHONIEN', how: 'Plus de 3,5 s de prout', test: function (x) { return x.dur >= .9; } },
-    { id: 'rafale', ic: '🔫', name: 'MITRAILLEUR', how: 'Au moins 5 rafales', test: function (x) { return x.bursts >= .5; } },
-    { id: 'jour', ic: '🌞', name: 'PROUT DU JOUR', how: 'Relève le défi du jour', test: function (x) { return !!x.daily; } },
-    { id: 'serie3', ic: '📅', name: 'ASSIDU', how: 'Un prout 3 jours de suite', test: function (x) { return x.streak >= 3; } },
-    { id: 'serie7', ic: '🔥', name: 'INTENABLE', how: 'Un prout 7 jours de suite', test: function (x) { return x.streak >= 7; } },
-    { id: 'dix', ic: '🏆', name: 'COLLECTIONNEUR', how: '10 prouts enregistrés', test: function (x) { return x.count >= 10; } },
-    { id: 'monde', ic: '🌍', name: 'MONDIAL', how: 'Publie dans le TOP PROUTS', test: function (x) { return !!x.published; } },
-    { id: 'potes', ic: '👯', name: 'BANDE DE POTES', how: 'Rejoins un groupe', test: function (x) { return !!x.group; } },
-    { id: 'nez', ic: '🕵️', name: 'FIN NEZ', how: '5 bonnes réponses à Qui a pété ?', test: function (x) { return x.guesses >= 5; } },
-    { id: 'imit', ic: '🎭', name: 'IMITATEUR', how: '80 % de ressemblance', test: function (x) { return x.imit >= 80; } }
+    { id: 'bronze', ic: '🥉', name: 'PROUT DE BRONZE', how: 'Un prout COSTAUD (4000+)', pts: 20, prog: function (x) { return [x.best, 4000]; } },
+    { id: 'argent', ic: '🥈', name: 'PROUT D’ARGENT', how: 'Un prout MONSTRUEUX (6000+)', pts: 40, rare: 'RARE', prog: function (x) { return [x.best, 6000]; } },
+    { id: 'or', ic: '🥇', name: 'PROUT D’OR', how: 'Un prout LÉGENDAIRE (8000+)', pts: 80, rare: 'ÉPIQUE', prog: function (x) { return [x.best, 8000]; } },
+    { id: 'diamant', ic: '💎', name: 'PROUT DE DIAMANT', how: 'Un score de 9500+', pts: 150, rare: 'LÉGENDAIRE', prog: function (x) { return [x.best, 9500]; } },
+    { id: 'fort', ic: '🔊', name: 'TONITRUANT', how: 'Puissance au maximum', pts: 30, prog: function (x) { return [Math.round(x.loud * 100), 95]; } },
+    { id: 'long', ic: '⏱️', name: 'MARATHONIEN', how: 'Plus de 3,5 s de prout', pts: 30, prog: function (x) { return [Math.round(x.dur * 100), 90]; } },
+    { id: 'rafale', ic: '🔫', name: 'MITRAILLEUR', how: 'Au moins 5 rafales', pts: 30, prog: function (x) { return [Math.round(x.bursts * 10), 5]; } },
+    { id: 'jour', ic: '🌞', name: 'PROUT DU JOUR', how: 'Relève le défi du jour', pts: 20, prog: function (x) { return [x.dailyCount, 1]; } },
+    { id: 'fidele', ic: '📆', name: 'FIDÈLE AU DÉFI', how: '5 défis du jour relevés', pts: 60, rare: 'RARE', prog: function (x) { return [x.dailyCount, 5]; } },
+    { id: 'serie3', ic: '📅', name: 'ASSIDU', how: 'Un prout 3 jours de suite', pts: 30, prog: function (x) { return [x.streak, 3]; } },
+    { id: 'serie7', ic: '🔥', name: 'INTENABLE', how: 'Un prout 7 jours de suite', pts: 80, rare: 'ÉPIQUE', prog: function (x) { return [x.streak, 7]; } },
+    { id: 'serie30', ic: '🗓️', name: 'INDÉBOULONNABLE', how: '30 jours de suite', pts: 200, rare: 'LÉGENDAIRE', prog: function (x) { return [x.streak, 30]; } },
+    { id: 'dix', ic: '🏆', name: 'COLLECTIONNEUR', how: '10 prouts enregistrés', pts: 30, prog: function (x) { return [x.count, 10]; } },
+    { id: 'cent', ic: '💯', name: 'ENCYCLOPÉDIE', how: '50 prouts enregistrés', pts: 100, rare: 'ÉPIQUE', prog: function (x) { return [x.count, 50]; } },
+    { id: 'monde', ic: '🌍', name: 'MONDIAL', how: 'Publie dans le TOP PROUTS', pts: 30, prog: function (x) { return [x.pubCount, 1]; } },
+    { id: 'ambassadeur', ic: '📣', name: 'AMBASSADEUR', how: 'Publie 3 prouts', pts: 40, rare: 'RARE', prog: function (x) { return [x.pubCount, 3]; } },
+    { id: 'critique', ic: '🎯', name: 'CRITIQUE', how: 'Note 10 prouts du TOP', pts: 30, prog: function (x) { return [x.votes, 10]; } },
+    { id: 'globe', ic: '🧭', name: 'GLOBE-TROTTER', how: 'Écoute des prouts de 3 pays', pts: 40, rare: 'RARE', prog: function (x) { return [x.countries.length, 3]; } },
+    { id: 'potes', ic: '👯', name: 'BANDE DE POTES', how: 'Rejoins un groupe', pts: 30, prog: function (x) { return [x.group ? 1 : 0, 1]; } },
+    { id: 'chef', ic: '👑', name: 'CHEF DE BANDE', how: 'Crée un groupe', pts: 30, prog: function (x) { return [x.created ? 1 : 0, 1]; } },
+    { id: 'nez', ic: '🕵️', name: 'FIN NEZ', how: '5 bonnes réponses à Qui a pété ?', pts: 40, prog: function (x) { return [x.guesses, 5]; } },
+    { id: 'truffe', ic: '🐕', name: 'TRUFFE D’OR', how: '20 bonnes réponses à Qui a pété ?', pts: 80, rare: 'ÉPIQUE', prog: function (x) { return [x.guesses, 20]; } },
+    { id: 'imit', ic: '🎭', name: 'IMITATEUR', how: '80 % de ressemblance', pts: 40, prog: function (x) { return [x.imit, 80]; } },
+    { id: 'imit3', ic: '🎪', name: 'ROI DE L’IMITATION', how: '3 imitations à 80 %+', pts: 80, rare: 'ÉPIQUE', prog: function (x) { return [x.imits, 3]; } },
+    { id: 'coussin', ic: '🪑', name: 'COUSSIN PÉTEUR', how: 'Change de boîte', pts: 10, prog: function (x) { return [x.cushion ? 1 : 0, 1]; } },
+    { id: 'retourneur', ic: '🙃', name: 'RETOURNEUR', how: '100 prouts déclenchés', pts: 30, prog: function (x) { return [x.flips, 100]; } },
+    { id: 'pionnier', ic: '🚀', name: 'PIONNIER', how: 'Parmi les 1000 premiers', pts: 150, rare: 'LÉGENDAIRE', label: function (x) { return 'PIONNIER N°' + x.pioneer; },
+      test: function (x) { return x.pioneer > 0 && x.pioneer <= 1000; }, prog: function (x) { return [x.pioneer > 0 && x.pioneer <= 1000 ? 1 : 0, 1]; } }
   ];
-  var X = { best: 0, loud: 0, dur: 0, bursts: 0, count: 0, days: [], daily: null, published: false, group: false, guesses: 0, imit: 0, medals: {} };
+  MEDALS.forEach(function (m) { if (!m.test) m.test = function (x) { var p = m.prog(x); return p[0] >= p[1]; }; });
+  // Mysteries: the name stays hidden ("???") until the flag is set by a secret event.
+  var MYSTERIES = [
+    { id: 'minuit', ic: '🌙', name: 'OISEAU DE NUIT', clue: 'QUAND TOUT LE MONDE DORT…', pts: 50 },
+    { id: 'aube', ic: '🐓', name: 'LÈVE-TÔT', clue: 'AVANT LE CHANT DU COQ', pts: 50 },
+    { id: 'bout', ic: '🧨', name: 'JUSQU’AU BOUT', clue: 'NE LÂCHE RIEN PENDANT 6 SECONDES', pts: 40 },
+    { id: 'silence', ic: '🤫', name: 'LE SILENCIEUX', clue: 'PARFOIS, MOINS C’EST PLUS', pts: 40 },
+    { id: 'sept', ic: '🎰', name: 'JACKPOT', clue: 'UN SCORE QUI FINIT COMME AU CASINO', pts: 60 },
+    { id: 'miroir', ic: '🪞', name: 'MIROIR', clue: 'UN SCORE QUI SE LIT DANS LES DEUX SENS', pts: 60 },
+    { id: 'tourbillon', ic: '🌪️', name: 'TOURBILLON', clue: 'LA TÊTE TE TOURNE ? 10 FOIS EN 1 MINUTE', pts: 40 },
+    { id: 'curieux', ic: '🔍', name: 'LE CURIEUX', clue: 'TOUCHE CE QUI NE SE TOUCHE PAS… CINQ FOIS', pts: 40 },
+    { id: 'vendredi13', ic: '🐈‍⬛', name: 'CHAT NOIR', clue: 'UN JOUR DE MALCHANCE', pts: 80 },
+    { id: 'avril', ic: '🐟', name: 'POISSON D’AVRIL', clue: 'LE JOUR DES FARCES', pts: 80 },
+    { id: 'noel', ic: '🎅', name: 'PÈRE PROUT', clue: 'HO HO HO', pts: 80 },
+    { id: 'treize', ic: '🍀', name: 'LE TREIZIÈME', clue: 'UN NOMBRE DE PROUTS PORTE-BONHEUR', pts: 40 }
+  ];
+  MYSTERIES.forEach(function (m) { m.rare = 'MYSTÈRE'; m.test = function (x) { return !!x.flags[m.id]; }; });
+  var ALL = MEDALS.concat(MYSTERIES);
+  var RANKS = [[0, 'APPRENTI PÉTEUR'], [100, 'PÉTOMANE AMATEUR'], [300, 'PÉTOMANE CONFIRMÉ'], [600, 'MAÎTRE PÉTEUR'], [1000, 'GRAND MAÎTRE DU PROUT'], [1500, 'LÉGENDE DU SLIP']];
+  var X = { best: 0, loud: 0, dur: 0, bursts: 0, count: 0, days: [], daily: null, dailyCount: 0, published: false, pubCount: 0, votes: 0, countries: [], group: false, created: false, guesses: 0, imit: 0, imits: 0, cushion: false, flips: 0, flipTimes: [], pioneer: 0, flags: {}, medals: {} };
   try { var xs = localStorage.getItem('proutbox.exploits'); if (xs) { var o = JSON.parse(xs); for (var k in o) X[k] = o[k]; } } catch (e) {}
+  if (X.published && !X.pubCount) X.pubCount = 1; // données d'avant les missions
   function today() { return new Date().toISOString().slice(0, 10); }
   function streak() {
     var set = {}; X.days.forEach(function (d) { set[d] = 1; });
@@ -1579,6 +1694,8 @@ button:active { transform: scale(.96); }
     while (set[d.toISOString().slice(0, 10)]) { n++; d.setDate(d.getDate() - 1); }
     return n;
   }
+  function points() { var p = 0; ALL.forEach(function (m) { if (X.medals[m.id]) p += m.pts; }); return p; }
+  function rank(p) { var r = RANKS[0], next = null; RANKS.forEach(function (x, i) { if (p >= x[0]) { r = x; next = RANKS[i + 1] || null; } }); return { title: r[1], from: r[0], next: next }; }
   function saveX() { try { localStorage.setItem('proutbox.exploits', JSON.stringify(X)); } catch (e) {} medalBadge(); }
   function medalBadge() {
     var n = Object.keys(X.medals).length;
@@ -1589,12 +1706,14 @@ button:active { transform: scale(.96); }
   function exploit(patch) {
     for (var k in patch) X[k] = patch[k];
     X.streak = streak();
-    var fresh = [];
-    MEDALS.forEach(function (m) { if (!X.medals[m.id] && m.test(X)) { X.medals[m.id] = today(); fresh.push(m); } });
+    var before = rank(points()).title, fresh = [];
+    ALL.forEach(function (m) { if (!X.medals[m.id] && m.test(X)) { X.medals[m.id] = today(); fresh.push(m); } });
     saveX();
     if (fresh.length) {
       setTimeout(function () { jingle(); }, 300);
-      medalTxt = '🏅 Nouvelle médaille : ' + fresh.map(function (m) { return m.ic + ' ' + m.name; }).join(' · ');
+      var after = rank(points()).title;
+      medalTxt = '🏅 ' + (fresh.length > 1 ? 'Nouvelles médailles' : 'Nouvelle médaille') + ' : ' + fresh.map(function (m) { return m.ic + ' ' + (m.label ? m.label(X) : m.name); }).join(' · ')
+        + (after !== before ? ' · 👑 Nouveau titre : ' + after : '');
       note(medalTxt); $('medalStatus').textContent = medalTxt.toUpperCase();
     }
     return fresh;
@@ -1602,34 +1721,98 @@ button:active { transform: scale(.96); }
   var medalTxt = '';
   // the publish screen writes its own notes afterwards: keep the medal line visible with them
   function withMedal(t) { var out = medalTxt ? t + ' · ' + medalTxt : t; medalTxt = ''; return out; }
+  function flag_(id) { if (!X.flags[id]) { var f = {}; for (var k in X.flags) f[k] = X.flags[k]; f[id] = today(); return f; } return X.flags; }
   function exploitRecording(r) {
     var st = r.stats || {}, days = X.days.slice(); if (days.indexOf(today()) < 0) days.push(today());
-    return exploit({ count: X.count + 1, best: Math.max(X.best, r.score || 0), loud: Math.max(X.loud, st.loud || 0), dur: Math.max(X.dur, st.dur || 0), bursts: Math.max(X.bursts, st.bursts || 0), days: days.slice(-400) });
+    var d = new Date(r.created || Date.now()), h = d.getHours(), flags = X.flags, sc = String(r.score || 0), count = X.count + 1;
+    var set = function (id) { flags = (function (f) { if (f[id]) return f; var o = {}; for (var k in f) o[k] = f[k]; o[id] = today(); return o; })(flags); };
+    if (h < 4) set('minuit');
+    if (h >= 5 && h < 7) set('aube');
+    if (st.len >= 5.8) set('bout');
+    if ((r.score || 0) > 0 && r.score < 300) set('silence');
+    if (/77$/.test(sc)) set('sept');
+    if (sc.length >= 3 && sc === sc.split('').reverse().join('')) set('miroir');
+    if (d.getDay() === 5 && d.getDate() === 13) set('vendredi13');
+    if (d.getMonth() === 3 && d.getDate() === 1) set('avril');
+    if (d.getMonth() === 11 && d.getDate() === 25) set('noel');
+    if (count === 13) set('treize');
+    return exploit({ count: count, best: Math.max(X.best, r.score || 0), loud: Math.max(X.loud, st.loud || 0), dur: Math.max(X.dur, st.dur || 0), bursts: Math.max(X.bursts, st.bursts || 0), days: days.slice(-400), flags: flags });
+  }
+  // a prout was fired (tap or flip): count it, and watch for the "tourbillon" (10 in a minute)
+  function trackFlip() {
+    var now = Date.now(), t = (X.flipTimes || []).filter(function (x) { return now - x < 60000; }); t.push(now);
+    var patch = { flips: (X.flips || 0) + 1, flipTimes: t.slice(-12) };
+    if (t.length >= 10) patch.flags = flag_('tourbillon');
+    exploit(patch);
+  }
+  var xTab = 'missions';
+  function bar(cur, goal) {
+    var b = document.createElement('div'); b.className = 'bar'; var f = document.createElement('i'); f.style.width = Math.max(0, Math.min(100, cur / goal * 100)) + '%'; b.appendChild(f); return b;
+  }
+  function medalEl(m, won) {
+    var d = document.createElement('div'); d.className = 'medal' + (won ? ' on' : '') + (m.rare ? ' r-' + m.rare.replace(/[^A-Z]/g, '').toLowerCase() : '') + (won === today() ? ' new' : '');
+    var ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = won || m.rare !== 'MYSTÈRE' ? m.ic : '❓';
+    var nm = document.createElement('b'); nm.textContent = won ? (m.label ? m.label(X) : m.name) : (m.rare === 'MYSTÈRE' ? '???' : m.name);
+    var how = document.createElement('small'); how.textContent = won ? 'OBTENUE LE ' + won.split('-').reverse().join('/') + ' · +' + m.pts + ' PP' : (m.clue || m.how).toUpperCase();
+    d.appendChild(ic); d.appendChild(nm); d.appendChild(how);
+    if (m.rare) { var r = document.createElement('em'); r.textContent = m.rare; d.appendChild(r); }
+    return d;
+  }
+  function renderExploits() {
+    var body = $('xbody'); body.innerHTML = '';
+    Array.prototype.forEach.call($('xtabs').children, function (t) { t.classList.toggle('on', t.dataset.tab === xTab); });
+    var p = points(), rk = rank(p), box = $('rankBox'); box.innerHTML = '';
+    var t1 = document.createElement('b'); t1.textContent = '👑 ' + rk.title; box.appendChild(t1);
+    var t2 = document.createElement('small'); t2.textContent = p + ' PP' + (rk.next ? ' · ' + (rk.next[0] - p) + ' PP AVANT ' + rk.next[1] : ' · TITRE MAXIMAL'); box.appendChild(t2);
+    box.appendChild(bar(rk.next ? p - rk.from : 1, rk.next ? rk.next[0] - rk.from : 1));
+    if (xTab === 'missions') {
+      var theme = themeOfDay(), done = X.daily === today();
+      var card = document.createElement('div'); card.className = 'defi';
+      var h = document.createElement('h3'); h.textContent = '🌞 DÉFI DU JOUR'; card.appendChild(h);
+      var pp = document.createElement('p'); pp.textContent = 'THÈME : ' + theme + (done ? ' · FAIT ✓' : ' · UN NOUVEAU THÈME CHAQUE JOUR'); card.appendChild(pp);
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'pxbtn' + (done ? ' dim' : ''); b.textContent = done ? '● Refaire' : '● Enregistrer';
+      b.addEventListener('click', function () { recContext = { kind: 'daily', theme: theme }; closeScreens(); note('Défi du jour : ' + theme + ' — à toi !'); setTimeout(function () { if (!recording) startRec(); }, 500); });
+      card.appendChild(b); body.appendChild(card);
+      // missions still open, the closest to completion first; the pioneer one always on top
+      var open = MEDALS.filter(function (m) { return !X.medals[m.id]; });
+      open.sort(function (a, b) { if (a.id === 'pionnier') return -1; if (b.id === 'pionnier') return 1; var pa = a.prog(X), pb = b.prog(X); return pb[0] / pb[1] - pa[0] / pa[1]; });
+      if (!open.length) { var ok = document.createElement('p'); ok.className = 'blink'; ok.textContent = 'TOUTES LES MISSIONS SONT ACCOMPLIES !'; body.appendChild(ok); }
+      open.forEach(function (m) {
+        var pr = m.prog(X), d = document.createElement('div'); d.className = 'mission' + (m.rare ? ' r-' + m.rare.replace(/[^A-Z]/g, '').toLowerCase() : '');
+        var ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = m.ic;
+        var tx = document.createElement('div'); var nm = document.createElement('b'); nm.textContent = m.name; tx.appendChild(nm);
+        var how = document.createElement('small');
+        how.textContent = m.id === 'pionnier' ? (X.pioneer > 1000 ? 'TROP TARD : LES 1000 PLACES SONT PRISES (TU ES N°' + X.pioneer + ')' : X.pioneer ? 'TU ES LE N°' + X.pioneer : online() ? 'OUVRE L’APP AVEC DU RÉSEAU POUR PRENDRE TA PLACE' : 'BIENTÔT DISPONIBLE') : m.how.toUpperCase() + ' · ' + Math.min(pr[0], pr[1]) + ' / ' + pr[1];
+        tx.appendChild(how); tx.appendChild(bar(pr[0], pr[1]));
+        var pts = document.createElement('em'); pts.textContent = '+' + m.pts + ' PP' + (m.rare ? ' · ' + m.rare : '');
+        d.appendChild(ic); d.appendChild(tx); d.appendChild(pts); body.appendChild(d);
+      });
+    } else if (xTab === 'medals') {
+      var grid = document.createElement('div'); grid.className = 'medals';
+      var wonM = ALL.filter(function (m) { return X.medals[m.id]; }).sort(function (a, b) { return X.medals[b.id] < X.medals[a.id] ? -1 : 1; });
+      var lost = MEDALS.filter(function (m) { return !X.medals[m.id]; });
+      wonM.concat(lost).forEach(function (m) { grid.appendChild(medalEl(m, X.medals[m.id])); });
+      body.appendChild(grid);
+    } else {
+      var intro = document.createElement('p'); intro.className = 'hint'; intro.textContent = 'DES MÉDAILLES SECRÈTES. UN INDICE, ET À TOI DE DEVINER.'; body.appendChild(intro);
+      var g2 = document.createElement('div'); g2.className = 'medals';
+      MYSTERIES.forEach(function (m) { g2.appendChild(medalEl(m, X.medals[m.id])); });
+      body.appendChild(g2);
+    }
+    var won = Object.keys(X.medals).length;
+    $('medalStatus').textContent = won + ' / ' + ALL.length + ' MÉDAILLES' + (X.streak >= 2 ? ' · SÉRIE : ' + X.streak + ' JOURS' : '');
   }
   function openMedals() {
     closeScreens(); openScreen('medalsScreen'); $('medalStatus').textContent = '';
-    var theme = themeOfDay(), done = X.daily === today();
-    var card = $('dailyCard'); card.innerHTML = '';
-    var h = document.createElement('h3'); h.textContent = '🌞 DÉFI DU JOUR'; card.appendChild(h);
-    var p = document.createElement('p'); p.textContent = 'THÈME : ' + theme + (done ? ' · FAIT ✓' : ' · UN NOUVEAU THÈME CHAQUE JOUR'); card.appendChild(p);
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'pxbtn' + (done ? ' dim' : ''); b.textContent = done ? '● Refaire' : '● Enregistrer';
-    b.addEventListener('click', function () { recContext = { kind: 'daily', theme: theme }; closeScreens(); note('Défi du jour : ' + theme + ' — à toi !'); setTimeout(function () { if (!recording) startRec(); }, 500); });
-    card.appendChild(b);
-    var grid = $('medalGrid'); grid.innerHTML = '';
-    MEDALS.forEach(function (m) {
-      var d = document.createElement('div'); d.className = 'medal' + (X.medals[m.id] ? ' on' : '');
-      var ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = m.ic;
-      var nm = document.createElement('b'); nm.textContent = m.name;
-      var how = document.createElement('small'); how.textContent = X.medals[m.id] ? 'OBTENUE LE ' + X.medals[m.id].split('-').reverse().join('/') : m.how.toUpperCase();
-      d.appendChild(ic); d.appendChild(nm); d.appendChild(how); grid.appendChild(d);
-    });
-    var won = Object.keys(X.medals).length;
-    $('medalStatus').textContent = won + ' / ' + MEDALS.length + ' MÉDAILLES' + (X.streak >= 2 ? ' · SÉRIE : ' + X.streak + ' JOURS' : '');
+    renderExploits();
     blip(660, .08); setTimeout(function () { blip(990, .12); }, 90);
   }
+  Array.prototype.forEach.call($('xtabs').children, function (t) { t.addEventListener('click', function () { xTab = t.dataset.tab; blip(760, .05); renderExploits(); }); });
   $('medalsBtn').addEventListener('click', openMedals);
   $('medalsClose').addEventListener('click', function () { closeScreens(); blip(440, .08); });
   X.streak = streak(); medalBadge();
+  // pioneer rank: asked once, kept forever (the server remembers the order of arrival)
+  if (online() && !X.pioneer) rpc('claim_pioneer', { p_device: device }).then(function (n) { if (n > 0) exploit({ pioneer: n }); }).catch(function () {});
 
   // ================= fit the box to the room left (never under the hint, never taller than --canmax) =================
   function fitCan() {

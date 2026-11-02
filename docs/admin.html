@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A0A1F">
+<title>Prout Box – Jury suprême</title>
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>
+  :root { --crt: #0A0A1F; --ph: #39FF14; --neon: #FF2EA6; --gold: #FFE600; --pixel: 'Press Start 2P', monospace; }
+  body { margin: 0; background: var(--crt); color: var(--ph); font-family: var(--pixel); font-size: 10px; line-height: 1.7; text-shadow: 0 0 6px rgba(57,255,20,.6); padding: max(20px, env(safe-area-inset-top)) 14px 40px; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 2px 4px); }
+  main { position: relative; max-width: 520px; margin: 0 auto; }
+  h1 { font: 400 16px/1.4 var(--pixel); color: var(--gold); text-shadow: 3px 3px 0 var(--neon); text-align: center; margin: 0 0 6px; }
+  .sub { text-align: center; font-size: 8px; color: #9FF; margin-bottom: 18px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+  .stats div { border: 2px solid rgba(57,255,20,.35); padding: 10px 4px 8px; text-align: center; font-size: 7px; }
+  .stats b { display: block; font-weight: 400; font-size: 16px; color: #fff; margin-bottom: 4px; }
+  input { width: 100%; box-sizing: border-box; font-family: var(--pixel); font-size: 16px; padding: 12px 10px; background: #000; color: #fff; border: 3px solid var(--ph); outline: none; margin: 6px 0 12px; }
+  button { font-family: var(--pixel); font-size: 9px; line-height: 1; padding: 11px 12px 9px; cursor: pointer; text-transform: uppercase; background: transparent; color: var(--ph); border: 3px solid var(--ph); box-shadow: 3px 3px 0 var(--neon); text-shadow: inherit; }
+  button.dim { color: #9AA; border-color: #9AA; box-shadow: 3px 3px 0 #445; text-shadow: none; }
+  button.bad { color: #FF7A7A; border-color: #FF7A7A; box-shadow: 3px 3px 0 #622; text-shadow: none; }
+  button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--neon); }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .tabs { display: flex; gap: 8px; margin: 0 0 12px; }
+  .tabs button { flex: 1; font-size: 8px; box-shadow: none; border-width: 2px; border-color: rgba(57,255,20,.4); }
+  .tabs button.on { border-color: var(--gold); color: var(--gold); box-shadow: 3px 3px 0 var(--neon); }
+  ol { list-style: none; margin: 0; padding: 0; }
+  li { border-bottom: 2px dashed rgba(57,255,20,.25); padding: 12px 0 14px; }
+  li b { color: var(--gold); font-weight: 400; font-size: 12px; }
+  li small { display: block; font-size: 7px; color: #9FF; margin: 4px 0 8px; line-height: 1.8; }
+  li .flag { color: #FF7A7A; }
+  audio { width: 100%; margin: 4px 0 10px; filter: invert(1) hue-rotate(90deg); }
+  .status { min-height: 16px; font-size: 8px; color: #9FF; text-align: center; margin: 10px 0; }
+  .empty { text-align: center; color: var(--gold); margin: 30px 0; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>JURY SUPRÊME</h1>
+  <p class="sub">PROUT BOX · VALIDATION DES PROUTS AVANT LE TOP PROUTS</p>
+
+  <section id="login">
+    <p>TON JETON D'ADMIN (RESTE SUR CET APPAREIL) :</p>
+    <input id="token" type="password" autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+    <div class="row"><button id="enter" type="button">Entrer</button></div>
+  </section>
+
+  <section id="panel" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="tabs">
+      <button type="button" class="on" data-tab="pending" id="tabPending">⏳ À VALIDER</button>
+      <button type="button" data-tab="reported" id="tabReported">🚩 SIGNALÉS</button>
+    </div>
+    <ol id="list"></ol>
+    <p class="empty" id="empty" hidden>RIEN À JUGER. BRAVO !</p>
+    <p class="status" id="status"></p>
+    <div class="row"><button id="reload" type="button" class="dim">Recharger</button><button id="logout" type="button" class="dim">Sortir</button></div>
+  </section>
+</main>
+<script>
+(function () {
+  // Même projet que www/supabase-config.js (clé publique). Tout passe par les RPC admin_* qui vérifient le jeton.
+  var SB = { url: 'https://ufiwiuhtjtmiglishmgl.supabase.co', anonKey: 'sb_publishable_a2mw94570qkiU1Dbop2_fA_3DvBAYrT' };
+  var $ = function (id) { return document.getElementById(id); };
+  var token = '', tab = 'pending', rows = [];
+  try { token = localStorage.getItem('proutbox.admin') || ''; } catch (e) {}
+  function headers(extra) { var h = { apikey: SB.anonKey, Authorization: 'Bearer ' + SB.anonKey }; for (var k in extra) h[k] = extra[k]; return h; }
+  function rpc(fn, args) {
+    return fetch(SB.url + '/rest/v1/rpc/' + fn, { method: 'POST', headers: headers({ 'Content-Type': 'application/json' }), body: JSON.stringify(args) })
+      .then(function (r) { return r.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {} if (!r.ok) throw new Error((j && (j.message || j.hint)) || ('HTTP ' + r.status)); return j; }); });
+  }
+  function status(t) { $('status').textContent = t || ''; }
+  function fmt(d) { var x = new Date(d); return x.toLocaleDateString('fr-FR') + ' ' + x.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); }
+  function flag(cc) { return String.fromCodePoint(0x1F1E6 + cc.charCodeAt(0) - 65, 0x1F1E6 + cc.charCodeAt(1) - 65); }
+  function render() {
+    var ol = $('list'); ol.innerHTML = '';
+    var shown = rows.filter(function (r) { return tab === 'pending' ? (!r.approved && !r.hidden) : r.reports > 0; });
+    shown.forEach(function (r) {
+      var li = document.createElement('li');
+      var b = document.createElement('b'); b.textContent = r.initials + ' ' + flag(r.country) + (r.city ? ' · ' + r.city.toUpperCase() : '') + ' · ' + r.species; li.appendChild(b);
+      var s = document.createElement('small');
+      s.textContent = 'SCORE ' + r.jury + ' · ' + fmt(r.created_at) + ' · ' + r.votes + ' VOTE(S)' + (r.reports ? ' · ' : '') + (r.approved ? ' · EN LIGNE' : ' · PAS ENCORE EN LIGNE') + (r.hidden ? ' · MASQUÉ' : '');
+      if (r.reports) { var f = document.createElement('span'); f.className = 'flag'; f.textContent = r.reports + ' SIGNALEMENT(S)'; s.appendChild(f); }
+      li.appendChild(s);
+      var a = document.createElement('audio'); a.controls = true; a.preload = 'none'; a.src = SB.url + '/storage/v1/object/public/prouts/' + r.path; li.appendChild(a);
+      var row = document.createElement('div'); row.className = 'row';
+      var ok = document.createElement('button'); ok.type = 'button'; ok.textContent = r.approved ? '✓ Garder' : '✓ Publier';
+      var hide = document.createElement('button'); hide.type = 'button'; hide.className = 'dim'; hide.textContent = r.hidden ? 'Masqué' : 'Masquer'; hide.disabled = r.hidden;
+      var del = document.createElement('button'); del.type = 'button'; del.className = 'bad'; del.textContent = 'Supprimer';
+      ok.addEventListener('click', function () { decide(r, 'ok', li); });
+      hide.addEventListener('click', function () { decide(r, 'hide', li); });
+      del.addEventListener('click', function () { if (del.dataset.armed) decide(r, 'delete', li); else { del.dataset.armed = '1'; del.textContent = 'Sûr ?'; setTimeout(function () { del.dataset.armed = ''; del.textContent = 'Supprimer'; }, 3000); } });
+      row.appendChild(ok); row.appendChild(hide); row.appendChild(del); li.appendChild(row);
+      ol.appendChild(li);
+    });
+    $('empty').hidden = shown.length > 0;
+    $('tabPending').classList.toggle('on', tab === 'pending'); $('tabReported').classList.toggle('on', tab === 'reported');
+  }
+  function decide(r, action, li) {
+    status('…');
+    rpc('admin_decide', { p_token: token, p_prout: r.id, p_action: action }).then(function (path) {
+      if (action === 'delete' && path) fetch(SB.url + '/storage/v1/object/prouts/' + path, { method: 'DELETE', headers: headers({}) }).catch(function () {});
+      rows = rows.filter(function (x) { return x.id !== r.id; });
+      status(action === 'ok' ? 'PUBLIÉ DANS LE TOP PROUTS' : action === 'hide' ? 'MASQUÉ' : 'SUPPRIMÉ, FICHIER EFFACÉ');
+      render(); loadStats();
+    }).catch(function (e) { status('ERREUR : ' + e.message); });
+  }
+  function loadStats() {
+    rpc('admin_stats', { p_token: token }).then(function (s) {
+      if (!s) throw new Error('jeton invalide');
+      var box = $('stats'); box.innerHTML = '';
+      [['À VALIDER', s.pending], ['SIGNALÉS', s.reported], ['EN LIGNE', s.online], ['MASQUÉS', s.hidden], ['PIONNIERS', s.pioneers], ['GROUPES', s.groups]].forEach(function (p) {
+        var d = document.createElement('div'); var b = document.createElement('b'); b.textContent = p[1]; d.appendChild(b); d.appendChild(document.createTextNode(p[0])); box.appendChild(d);
+      });
+    }).catch(function (e) { status('ERREUR : ' + e.message); });
+  }
+  function load() {
+    status('CHARGEMENT…');
+    return rpc('admin_queue', { p_token: token }).then(function (r) { rows = r || []; status(''); render(); loadStats(); })
+      .catch(function (e) { status('ERREUR : ' + e.message); if (/jeton/.test(e.message)) logout(); });
+  }
+  function enter() {
+    token = $('token').value.trim(); if (!token) return;
+    try { localStorage.setItem('proutbox.admin', token); } catch (e) {}
+    $('login').hidden = true; $('panel').hidden = false; load();
+  }
+  function logout() { token = ''; try { localStorage.removeItem('proutbox.admin'); } catch (e) {} $('panel').hidden = true; $('login').hidden = false; $('token').value = ''; }
+  $('enter').addEventListener('click', enter);
+  $('token').addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+  $('reload').addEventListener('click', load);
+  $('logout').addEventListener('click', logout);
+  $('tabPending').addEventListener('click', function () { tab = 'pending'; render(); });
+  $('tabReported').addEventListener('click', function () { tab = 'reported'; render(); });
+  if (token) { $('login').hidden = true; $('panel').hidden = false; load(); }
+})();
+</script>
+</body>
+</html>
