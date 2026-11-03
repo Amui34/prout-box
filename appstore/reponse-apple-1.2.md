@@ -2,6 +2,8 @@
 
 Soumission `64f56121-4d29-40c6-83f9-50bae74a8c45`. Message d'Apple : « The app is primarily a fart or burp app and does not add significant value to the App Store. […] We encourage you to reconsider the app concept. » Avertissement « Extended Review » : ne pas resoumettre le même build, ne pas multiplier les soumissions.
 
+**Texte (1) envoyé le 04/11/2026 (via Chrome, depuis le compte de Noa).** L'appel (2) reste à déposer par Noa sur le formulaire Apple.
+
 Deux textes ci-dessous : **(1)** la réponse dans le fil de la soumission (App Store Connect › Vérification de l'app › Soumission du 2 nov. 18 h 44 › « Répondre à l'équipe de vérification des apps »), **(2)** l'appel formel (https://developer.apple.com/contact/app-store/?topic=appeal, « Appeal an App Review decision »). Envoyer (1) d'abord, puis (2) le même jour.
 
 ---
