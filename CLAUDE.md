@@ -95,6 +95,10 @@ Fond jaune soleil `#FFD23F`, vert gaz `#8BD450` pendant le prout, rouge tomate `
 - Prochaine version : `npm run sync:ios` → bump `CURRENT_PROJECT_VERSION` (> 7) et `MARKETING_VERSION` → archive / export / `altool` (README) → `asc_contact.mjs`, `asc_listing.mjs`, `asc_shots.mjs` si la fiche change → `asc_release.mjs`. Pièges : pas d'emoji dans la description, `whatsNew` interdit sur une 1re version.
 - Dépôt GitHub public `Amui34/prout-box`, site vitrine (lien App Store, 3 captures `docs/shot-*.png`, groupes, médailles) + pages légales sur GitHub Pages (`docs/`).
 
+## Équipe d'agents (04/11/2026)
+
+Six agents dans `.claude/agents/` (frontmatter `name`, `description`, `tools`, `model`), lancés par l'outil Agent ou appelés par leur nom : **apple** (App Store Connect, scripts `asc_*`, réponses à la révision), **testeur** (simulateur Pro Max, parcours complets, ne modifie pas le code), **backend** (schéma Supabase, RPC, modération), **moderateur** (lit la file et les compteurs, ne décide rien), **design** (canette, coussin, icône, posters, vitrine), **redaction** (fiche, notes, pages légales, textes Apple). Tâche planifiée `prout-box-matin` (9 h chaque jour, `~/.claude/scheduled-tasks/`) : `node scripts/morning.mjs` = état App Store + file de modération, résumé en 10 lignes. Le refus 4.3(b) et les textes de réponse/appel sont dans `appstore/reponse-apple-1.2.md`.
+
 ## Idées pour la suite
 
 - Publier sur l'App Store (même procédure qu'Oplaa : archive + export + `altool`, voir README.md), ou en PWA sur le web.
