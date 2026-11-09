@@ -95,6 +95,18 @@ Fond jaune soleil `#FFD23F`, vert gaz `#8BD450` pendant le prout, rouge tomate `
 - Prochaine version : `npm run sync:ios` → bump `CURRENT_PROJECT_VERSION` (> 7) et `MARKETING_VERSION` → archive / export / `altool` (README) → `asc_contact.mjs`, `asc_listing.mjs`, `asc_shots.mjs` si la fiche change → `asc_release.mjs`. Pièges : pas d'emoji dans la description, `whatsNew` interdit sur une 1re version.
 - Dépôt GitHub public `Amui34/prout-box`, site vitrine (lien App Store, 3 captures `docs/shot-*.png`, groupes, médailles) + pages légales sur GitHub Pages (`docs/`).
 
+## Identité publique (règle du 09/11/2026, skill publier-app-store)
+
+**La société en façade, le nom de Noa dans le code, jamais son Gmail perso.** Source unique : `appstore/identite.json` (société `SAS NOMAD`, copyright `2026 SAS NOMAD`, crédit « Conçu et développé par Noa Madar », contact `contact@proutbox.com`, domaine `proutbox.com` acheté le 09/11/2026 chez OVH avec l'hébergement gratuit pour la boîte mail, identité git anonyme).
+
+- `LICENSE` à la racine ; pages `docs/` (accueil, assistance, CGU, confidentialité) : éditeur SAS NOMAD, crédit Noa Madar, contact `contact@proutbox.com`. Plus aucun `@gmail.com` ni « Amuï studio » dans `docs/`, `www/`, `appstore/`.
+- `git config` local : `Noa Madar <330400090+Amui34@users.noreply.github.com>` (les anciens commits gardent le Gmail, on ne réécrit pas l'historique).
+- `asc_release.mjs` pose le copyright de `identite.json` sur la version ; `asc_contact.mjs` met l'alias en e-mail du contact de vérification (refuse un Gmail). Les versions 1.0 à 1.2, déjà approuvées, gardent « © 2026 Noa Madar » : ce sera corrigé par la 1.3.
+- Polices embarquées (`www/fonts/*.woff2`, copiées de `@fontsource`, `@font-face` en tête de `www/index.html`) : plus aucune requête Google Fonts dans l'app.
+- Simulateur dédié « Prout Box 17 Pro Max », UDID dans `.sim-udid` (`appstore/shoot.sh` et les agents l'utilisent) ; l'ancien Pro Max partagé `6147B886…` n'est plus à utiliser. Groupe TestFlight interne « Interne » créé (titulaire du compte ajouté).
+- Restent à Noa : créer la boîte `contact@proutbox.com` dans l'espace client OVH ; compte Apple encore en « Personne physique » le 09/11/2026 (le store affiche « Noa Madar » comme vendeur) → D-U-N-S de SAS NOMAD puis conversion en « Organization ».
+- À faire ensuite : servir le site sur `proutbox.com` (proxy Caddy du VPS, skill mettre-en-ligne-proxy), puis passer les URL de la fiche (assistance, confidentialité, marketing) sur le domaine avec la 1.3. Tant que la fiche pointe sur `amui34.github.io/prout-box/`, ne pas passer le dépôt en privé (GitHub Pages s'arrêterait).
+
 ## Équipe d'agents (04/11/2026)
 
 Six agents dans `.claude/agents/` (frontmatter `name`, `description`, `tools`, `model`), lancés par l'outil Agent ou appelés par leur nom : **apple** (App Store Connect, scripts `asc_*`, réponses à la révision), **testeur** (simulateur Pro Max, parcours complets, ne modifie pas le code), **backend** (schéma Supabase, RPC, modération), **moderateur** (lit la file et les compteurs, ne décide rien), **design** (canette, coussin, icône, posters, vitrine), **redaction** (fiche, notes, pages légales, textes Apple). Tâche planifiée `prout-box-matin` (9 h chaque jour, `~/.claude/scheduled-tasks/`) : `node scripts/morning.mjs` = état App Store + file de modération, résumé en 10 lignes. Le refus 4.3(b) et les textes de réponse/appel sont dans `appstore/reponse-apple-1.2.md`.

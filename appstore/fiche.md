@@ -14,7 +14,7 @@
 | Catégorie secondaire | Jeux › Famille |
 | Prix | Gratuit |
 | Classification d'âge | déclarée par API : humour grossier « peu fréquent / léger », contenu généré par les utilisateurs : oui, tout le reste : non |
-| Droits d'auteur | © 2026 Noa Madar |
+| Droits d'auteur | 2026 SAS NOMAD (source : `appstore/identite.json`) |
 | App Store Connect | app id **6827309393**, bundle ID resource `MFL357LM76`, équipe `772LDD7BCT` |
 | Version 1.0 | build 2 approuvée le 28/10/2026, en vente depuis le 31/10/2026 — https://apps.apple.com/fr/app/prout-box/id6827309393, publication automatique après approbation |
 
@@ -70,7 +70,7 @@ Première version : six prouts classiques, enregistrement de ton prout, jury à 
 |---|---|
 | URL d'assistance | https://amui34.github.io/prout-box/assistance.html (FAQ + contact, source `docs/assistance.html`) |
 | URL de politique de confidentialité | https://amui34.github.io/prout-box/privacy.html (source : `docs/privacy.html`) |
-| Conditions d'utilisation | https://amui34.github.io/prout-box/cgu.html (éditeur Amuï studio ; l'EULA standard Apple s'applique en complément) |
+| Conditions d'utilisation | https://amui34.github.io/prout-box/cgu.html (éditeur SAS NOMAD ; l'EULA standard Apple s'applique en complément) |
 | URL marketing (facultatif) | https://amui34.github.io/prout-box/ |
 
 Un vrai domaine pourra remplacer ces URL plus tard (elles sont modifiables dans App Store Connect à tout moment).
@@ -94,7 +94,7 @@ Tout est en place côté app et base : à décrire dans les notes de révision.
 - Signalement : lien « SIGNALER » sur chaque prout (double tap de confirmation), masquage automatique à partir de 3 signalements distincts, table `reports` consultable.
 - Blocage : un prout signalé disparaît immédiatement de l'écran de la personne qui signale ; masquage global dès 3 signalements ; masquage manuel possible (`update prouts set hidden = true`).
 - Suppression : l'auteur peut retirer son prout (« SUPPRIMER »), fichier compris.
-- Contact de modération : noamadar.noa@gmail.com (dans la politique de confidentialité).
+- Contact de modération : contact@proutbox.com (dans la politique de confidentialité).
 - Conditions d'utilisation : à afficher sur la page vitrine (« En publiant un prout, tu acceptes qu'il soit écouté et noté par tout le monde, et retiré s'il est signalé »).
 
 ## Groupes (1.1) — ce qui change pour Apple
@@ -110,7 +110,7 @@ Notes pour l'équipe de révision (à coller) :
 
 > L'app est une « boîte à meuh » humoristique. Pour tester : retournez l'iPhone (ou touchez la boîte à l'écran) pour entendre un prout. « Enregistrer mon prout » utilise le micro (6 s max) ; le prout enregistré est noté par un jury humoristique, puis l'utilisateur peut le publier (ou non) dans le classement « TOP PROUTS » de son pays, où tout le monde peut l'écouter et le noter de 1 à 5. Aucun compte requis. Modération du contenu utilisateur : filtre d'initiales, bouton « SIGNALER » sur chaque prout (masquage automatique à 3 signalements), suppression par l'auteur, contact dans la politique de confidentialité. Pour remplir le classement sans micro : touchez 5 fois le titre « Prout Box » (mode démo, 4 prouts générés), puis onglet « MOI » › « PUBLIER ».
 
-Pas de compte de démonstration nécessaire. Contact : noamadar.noa@gmail.com.
+Pas de compte de démonstration nécessaire. Contact : contact@proutbox.com.
 
 ## Captures d'écran
 

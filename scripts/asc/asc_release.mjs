@@ -7,13 +7,14 @@ const NO_SUBMIT = process.argv.includes('--no-submit'); // prépare la version (
 const [VERSION, BUILD, NOTES_FILE] = process.argv.slice(2).filter(a => !a.startsWith('--'));
 if (!VERSION || !BUILD) { console.log('usage: asc_release.mjs <version> <build> [notes.txt] [--no-submit]'); process.exit(1); }
 const NOTES = NOTES_FILE ? fs.readFileSync(NOTES_FILE, 'utf8').trim() : null;
+const IDENT = JSON.parse(fs.readFileSync(new URL('../../appstore/identite.json', import.meta.url), 'utf8')); // société en façade
 const die = (what, r) => { console.log('ERREUR', what, r.status, JSON.stringify(r.j).slice(0, 500)); process.exit(1); };
 
 // 1) version
 const vs = await req('GET', `/v1/apps/${APP}/appStoreVersions?filter[platform]=IOS&limit=10`);
 let v = (vs.j.data || []).find(x => x.attributes.versionString === VERSION);
 if (!v) {
-  const c = await req('POST', '/v1/appStoreVersions', { data: { type: 'appStoreVersions', attributes: { platform: 'IOS', versionString: VERSION, releaseType: 'AFTER_APPROVAL' }, relationships: { app: { data: { type: 'apps', id: APP } } } } });
+  const c = await req('POST', '/v1/appStoreVersions', { data: { type: 'appStoreVersions', attributes: { platform: 'IOS', versionString: VERSION, releaseType: 'AFTER_APPROVAL', copyright: IDENT.copyright }, relationships: { app: { data: { type: 'apps', id: APP } } } } });
   if (c.status >= 300) die('création version', c); v = c.j.data; console.log('1) version', VERSION, 'créée');
 } else console.log('1) version', VERSION, 'existe :', v.attributes.appVersionState || v.attributes.appStoreState);
 
@@ -34,7 +35,7 @@ for (let i = 0; i < 40; i++) {
   console.log('3) build', BUILD, ':', build ? build.attributes.processingState : 'pas encore visible', '… 30 s'); await sleep(30000);
 }
 if (!build || build.attributes.processingState !== 'VALID') { console.log('build pas VALID, relancer plus tard'); process.exit(1); }
-let r = await req('PATCH', `/v1/appStoreVersions/${v.id}`, { data: { type: 'appStoreVersions', id: v.id, attributes: { releaseType: 'AFTER_APPROVAL' }, relationships: { build: { data: { type: 'builds', id: build.id } } } } });
+let r = await req('PATCH', `/v1/appStoreVersions/${v.id}`, { data: { type: 'appStoreVersions', id: v.id, attributes: { releaseType: 'AFTER_APPROVAL', copyright: IDENT.copyright }, relationships: { build: { data: { type: 'builds', id: build.id } } } } });
 if (r.status >= 300) die('attache build', r); console.log('3) build', BUILD, 'attaché');
 if (NO_SUBMIT) { console.log('4) pas de soumission (--no-submit) : version prête, à soumettre plus tard'); process.exit(0); }
 

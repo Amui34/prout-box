@@ -1,0 +1,11 @@
+{
+  "_": "Identité publique de Prout Box. La société en façade, le nom de Noa dans le code, jamais son Gmail perso.",
+  "societe": "SAS NOMAD",
+  "copyright": "2026 SAS NOMAD",
+  "credit": "Conçu et développé par Noa Madar",
+  "contact": "contact@proutbox.com",
+  "_contact": "Alias public de l'appli sur son domaine (proutbox.com, acheté le 09/11/2026 chez OVH). Ne jamais y mettre un Gmail personnel.",
+  "domaine": "proutbox.com",
+  "git_name": "Noa Madar",
+  "git_email": "330400090+Amui34@users.noreply.github.com"
+}

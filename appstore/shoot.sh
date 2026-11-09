@@ -5,7 +5,7 @@
 # Pour remplir le classement sans micro : 5 taps sur le titre « Prout Box » (mode démo).
 set -e
 cd "$(dirname "$0")"
-DEVICE="${DEVICE:-iPhone 17 Pro Max}"
+DEVICE="${DEVICE:-$(cat ../.sim-udid 2>/dev/null || echo "Prout Box 17 Pro Max")}"  # simulateur dédié au projet
 mkdir -p raw
 xcrun simctl io "$DEVICE" screenshot --type=png "raw/$1.png"
 echo "✓ raw/$1.png"
