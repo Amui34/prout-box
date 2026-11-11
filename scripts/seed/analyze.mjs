@@ -4,7 +4,8 @@ import fs from 'node:fs'; import path from 'node:path';
 const [html, ...dirs] = process.argv.slice(2);
 const src = fs.readFileSync(html, 'utf8');
 const grab = name => { const m = src.match(new RegExp('  function ' + name + '\\([^)]*\\) \\{[\\s\\S]*?\\n  \\}\\n')); if (!m) throw new Error(name + ' introuvable'); return m[0]; };
-const { voiceScore, species } = new Function(grab('voiceScore') + grab('species') + 'return { voiceScore, species };')();
+const { voiceCheck, species } = new Function(grab('fftInPlace') + grab('voiceCheck') + grab('species') + 'return { voiceCheck, species };')();
+const voiceScore = (d, sr, th) => voiceCheck(d, sr, th).voice;
 function analyze(d, sr) {                                  // copie conforme de la boucle d'analyzeBlob
   const win = Math.max(1, Math.floor(sr / 50)); let peak = 0, th = .03, active = 0, bursts = 0, gap = 99, sum = 0;
   for (let i = 0; i < d.length; i += win) { let s = 0; const n = Math.min(win, d.length - i); for (let j = 0; j < n; j++) { const x = d[i + j]; s += x * x; if (x > peak) peak = x; else if (-x > peak) peak = -x; } const rms = Math.sqrt(s / n); if (rms > th) { active++; sum += rms; if (gap >= 3) bursts++; gap = 0; } else gap++; }
@@ -20,4 +21,4 @@ for (const dir of dirs) for (const f of fs.readdirSync(dir).filter(f => /^\d+\.w
   console.log(`${path.basename(dir).padEnd(6)} ${f}  ${String(st.len).padStart(4)} s  score ${String(st.score).padStart(5)}  voix ${String(st.voice).padStart(3)} %  rafales ${st.bursts * 10}  ${st.species}`);
 }
 fs.writeFileSync(path.join(path.dirname(dirs[0]), 'analysis.json'), JSON.stringify(out, null, 1));
-const v = out.filter(o => o.voice >= 40).length; console.log(`\n${out.length} clips, ${v} recalés par le détecteur de voix (${Math.round(v / out.length * 100)} %)`);
+const v = out.filter(o => o.voice >= 45).length; console.log(`\n${out.length} clips, ${v} au-dessus de 45 % de son chanté, donc laissés à une écoute humaine (${Math.round(v / out.length * 100)} %)`);

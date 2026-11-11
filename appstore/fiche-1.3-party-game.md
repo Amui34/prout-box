@@ -30,7 +30,7 @@ MISSIONS, MÉDAILLES ET TITRES
 27 médailles à décrocher (Prout d'or, Marathonien, Fin nez, Chef de bande…), 12 médailles mystères à deviner, et des titres qui montent avec tes exploits, d'Apprenti péteur à Légende du slip. Les 1000 premiers joueurs reçoivent la médaille Pionnier.
 
 TOP PROUTS
-Publie ton prout dans le classement de ton pays ou du monde : tout le monde l'écoute et le note de 1 à 5. Chaque prout publié est validé par un modérateur avant d'apparaître, les voix sont refusées, et tu peux retirer le tien quand tu veux.
+Publie ton prout dans le classement de ton pays ou du monde : tout le monde l'écoute et le note de 1 à 5. Chaque prout publié est contrôlé avant d'apparaître, les voix sont refusées, et tu peux retirer le tien quand tu veux.
 
 LA BOÎTE
 Et pour s'échauffer : retourne ton téléphone, ça prout. Six prouts classiques synthétisés en direct, canette ou coussin péteur au choix.
@@ -54,7 +54,7 @@ Dans `appstore/render-sharp.mjs`, renommer/ordonner `SHOTS` en conséquence (pr�
 
 ## Notes de révision (à mettre dans « Remarques »)
 
-Prout Box is a party game built around user recordings: a three-judge comic jury scores each recording, friends play "Qui a pété ?" in private groups (6-letter code), daily and imitation challenges, missions and medals, and a worldwide ranking by country where every public recording is approved by the developer before it is shown (voice detection refuses speech; report, automatic hiding and author deletion are available). Demo without an account: tap the title "Prout Box" five times on the main screen to generate four recordings and open the jury, then TOP PROUTS and GROUPES. No login required.
+Prout Box is a party game built around user recordings: a three-judge comic jury scores each recording, friends play "Qui a pété ?" in private groups (6-letter code), daily and imitation challenges, missions and medals, and a worldwide ranking by country where every public recording goes through an automated check before it is shown (speech is refused, doubtful recordings are held for manual review by the developer; report, automatic hiding and author deletion are available). Demo without an account: tap the title "Prout Box" five times on the main screen to generate four recordings and open the jury, then TOP PROUTS and GROUPES. No login required.
 
 ## Dans l'app (build 8, optionnel mais cohérent)
 

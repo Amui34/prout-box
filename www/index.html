@@ -834,38 +834,60 @@ button:active { transform: scale(.96); }
       var dur = active / 50, loud = Math.min(1, (active ? sum / active : 0) / .2);
       var pk = Math.min(1, peak / .9), dd = Math.min(1, dur / 4), bb = Math.min(10, bursts);
       var st = { score: Math.round(loud * 5000 + dd * 3000 + pk * 1500 + bb * 50), loud: loud, dur: dd, peak: pk, bursts: bb / 10, len: Math.round(buf.duration * 10) / 10 };
-      st.voice = synthetic ? 0 : voiceScore(d, buf.sampleRate, th); // 0-100 : à quel point ça ressemble à une voix
-      st.recale = st.voice >= 40; // vrais prouts : une voix (ou un chant) est gardée sur le téléphone mais jamais publiée
+      var vc = synthetic ? { voice: 0, verdict: 'prout' } : voiceCheck(d, buf.sampleRate, th);
+      st.voice = vc.voice;                 // 0-100 : part du son qui est « chantée »
+      st.vverdict = vc.verdict;            // 'prout', 'doute' (le robot de modération laissera une écoute humaine trancher) ou 'voix'
+      st.recale = vc.verdict === 'voix';   // une phrase parlée est gardée sur le téléphone mais jamais publiée
       return judge(st);
     });
   }
-  // Détecteur de voix (« vrais prouts ») : une voix a une hauteur stable entre 95 et 400 Hz (autocorrélation
-  // normalisée > 0,6 sur des fenêtres de 40 ms) et de l'énergie au-dessus de 400 Hz (formants) ; un prout est un
-  // bruit grave et irrégulier. Score = part de fenêtres « voisées » × stabilité de la hauteur. Signal ramené à ~11 kHz.
-  function voiceScore(d, sr, th) {
-    var k = Math.max(1, Math.round(sr / 11025)), n = Math.floor(d.length / k), x = new Float32Array(n), y = new Float32Array(n), i, j;
-    for (i = 0; i < n; i++) { var s = 0; for (j = 0; j < k; j++) s += d[i * k + j]; x[i] = s / k; }
-    var fs = sr / k, a = Math.exp(-2 * Math.PI * 400 / fs), lp = 0;
-    for (i = 0; i < n; i++) { lp = a * lp + (1 - a) * x[i]; y[i] = x[i] - lp; } // passe-haut 400 Hz
-    var W = Math.floor(fs * .04), minLag = Math.floor(fs / 400), maxLag = Math.floor(fs / 95);
-    var act = 0, voiced = 0, stable = 0, prevF = 0;
-    for (var s0 = 0; s0 + W <= n; s0 += W >> 1) {
-      var e = 0, eh = 0;
-      for (i = 0; i < W; i++) { e += x[s0 + i] * x[s0 + i]; eh += y[s0 + i] * y[s0 + i]; }
-      if (Math.sqrt(e / W) <= th) { prevF = 0; continue; }
-      act++;
-      var best = 0, bestLag = 1;
-      for (var lag = minLag; lag <= maxLag; lag++) {
-        var r = 0, p = 0, q = 0;
-        for (i = 0; i + lag < W; i++) { var u = x[s0 + i], v = x[s0 + i + lag]; r += u * v; p += u * u; q += v * v; }
-        var c = r / (Math.sqrt(p * q) || 1); if (c > best) { best = c; bestLag = lag; }
-      }
-      var f = fs / bestLag;
-      if (best >= .6 && eh / e >= .2) { voiced++; if (prevF && Math.abs(f - prevF) / prevF < .12) stable++; prevF = f; } else prevF = 0;
+  // Détecteur de voix (« vrais prouts »), calibré le 11/11/2026 sur 47 vrais pets (archives Yle) et 26 voix de synthèse.
+  // Signal ramené à ~11 kHz, fenêtres de 40 ms toutes les 20 ms. Trois mesures sur les fenêtres audibles :
+  //   voisé : part des fenêtres « chantées » (autocorrélation normalisée ≥ 0,6 pour une hauteur de 60 à 400 Hz) ;
+  //   flux  : à quel point le timbre change d'une fenêtre à l'autre (une phrase articule, un prout non) ;
+  //   étalement du centre spectral (les consonnes font sauter le centre vers l'aigu).
+  // Verdict : 'voix' si c'est clairement une phrase (voisé ≥ 80 %, flux ≥ 0,6, étalement ≥ 400 Hz, au moins 0,5 s) ;
+  //           'prout' si voisé < 45 % (aucune des 26 voix ne descend sous 56 %) ; sinon 'doute' (prout très « chantant »
+  //           ou voix brève : c'est une écoute humaine qui tranche, voir scripts/moderate.mjs).
+  function fftInPlace(re, im) {
+    var n = re.length, i, j, k, len, bit, t;
+    for (i = 1, j = 0; i < n; i++) { bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+    for (len = 2; len <= n; len <<= 1) {
+      var ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang), h = len >> 1;
+      for (i = 0; i < n; i += len) { var cr = 1, ci = 0; for (k = 0; k < h; k++) { var ur = re[i + k], ui = im[i + k], vr = re[i + k + h] * cr - im[i + k + h] * ci, vi = re[i + k + h] * ci + im[i + k + h] * cr; re[i + k] = ur + vr; im[i + k] = ui + vi; re[i + k + h] = ur - vr; im[i + k + h] = ui - vi; t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t; } }
     }
-    if (act < 8) return 0;
-    var vr = voiced / act, stb = voiced ? stable / voiced : 0;
-    return Math.round(100 * vr * (.4 + .6 * stb));
+  }
+  function voiceCheck(d, sr, th) {
+    var k = Math.max(1, Math.round(sr / 11025)), n = Math.floor(d.length / k), x = new Float32Array(n), i, j, q, b;
+    for (i = 0; i < n; i++) { var s = 0; for (j = 0; j < k; j++) s += d[i * k + j]; x[i] = s / k; }
+    var fs = sr / k, N = 512, hop = Math.floor(fs * .02), W = Math.floor(fs * .04), minLag = Math.floor(fs / 400), maxLag = Math.floor(fs / 60);
+    var edges = [0, 150, 300, 500, 750, 1000, 1400, 1900, 2500, 3300, 4300, 5500].map(function (f) { return Math.round(f / (fs / N)); });
+    var act = 0, voiced = 0, prev = null, flux = 0, nflux = 0, cents = [];
+    for (var s0 = 0; s0 + W <= n; s0 += hop) {
+      var e = 0; for (i = 0; i < W; i++) e += x[s0 + i] * x[s0 + i];
+      if (Math.sqrt(e / W) <= th) { prev = null; continue; }
+      act++;
+      var re = new Float32Array(N), im = new Float32Array(N);
+      for (i = 0; i < W; i++) re[i] = x[s0 + i] * (.5 - .5 * Math.cos(2 * Math.PI * i / (W - 1)));
+      fftInPlace(re, im);
+      var tot = 0, cen = 0, bands = new Float32Array(edges.length - 1);
+      for (b = 1; b < N / 2; b++) { var p = re[b] * re[b] + im[b] * im[b]; tot += p; cen += p * b * fs / N; for (q = 0; q < bands.length; q++) if (b >= edges[q] && b < edges[q + 1]) { bands[q] += p; break; } }
+      cents.push(cen / (tot || 1));
+      var bs = 0; for (q = 0; q < bands.length; q++) { bands[q] = Math.log(bands[q] + 1e-9); bs += bands[q]; }
+      for (q = 0; q < bands.length; q++) bands[q] -= bs / bands.length;
+      if (prev) { var f = 0; for (q = 0; q < bands.length; q++) f += Math.abs(bands[q] - prev[q]); flux += f / bands.length; nflux++; }
+      prev = bands;
+      var best = 0;
+      for (var lag = minLag; lag <= maxLag; lag++) { var r = 0, pp = 0, qq = 0; for (i = 0; i + lag < W; i++) { var u = x[s0 + i], v = x[s0 + i + lag]; r += u * v; pp += u * u; qq += v * v; } var c = r / (Math.sqrt(pp * qq) || 1); if (c > best) best = c; }
+      if (best >= .6) voiced++;
+    }
+    if (act < 8) return { voice: 0, verdict: 'prout', flux: 0, spread: 0 }; // presque rien d'audible : pas de quoi juger
+    var vr = voiced / act, cm = 0, cv = 0;
+    for (i = 0; i < cents.length; i++) cm += cents[i]; cm /= cents.length;
+    for (i = 0; i < cents.length; i++) cv += (cents[i] - cm) * (cents[i] - cm);
+    var spread = Math.sqrt(cv / cents.length), fl = nflux ? flux / nflux : 0;
+    var verdict = (vr >= .8 && fl >= .6 && spread >= 400 && act >= 25) ? 'voix' : vr < .45 ? 'prout' : 'doute';
+    return { voice: Math.round(vr * 100), verdict: verdict, flux: Math.round(fl * 100) / 100, spread: Math.round(spread) };
   }
   function pad6(n) { return ('000000' + Math.max(0, Math.round(n))).slice(-6); }
 
