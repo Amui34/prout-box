@@ -24,8 +24,14 @@ try {
   const s = await rpc('admin_stats', { p_token: token });
   if (!s) { console.log('jeton admin refusé'); process.exit(0); }
   console.log(`à valider : ${s.pending} · signalés : ${s.reported} · en ligne : ${s.online} · masqués : ${s.hidden} · pionniers : ${s.pioneers} · groupes : ${s.groups}`);
+  if (s.db_bytes != null) {   // offre gratuite Supabase : 500 Mo de base, 1 Go de fichiers (à revérifier dans le dashboard si l'offre change)
+    const mo = n => (n / 1048576).toFixed(1), pct = (n, max) => Math.round(n / max * 100);
+    console.log(`monde : ${s.countries} pays (${(s.top_countries || []).map(c => c.country + ' ' + c.n).join(', ')}) · ${s.new_24h} publié(s) en 24 h · ${s.votes} votes · ${s.group_prouts} prouts de groupe`);
+    console.log(`place : base ${mo(s.db_bytes)} Mo (${pct(s.db_bytes, 500 * 1048576)} % de 500 Mo) · fichiers ${mo(s.storage_bytes)} Mo en ${s.storage_files} fichiers (${pct(s.storage_bytes, 1024 * 1048576)} % de 1 Go)`);
+    if (pct(s.db_bytes, 500 * 1048576) >= 70 || pct(s.storage_bytes, 1024 * 1048576) >= 70) console.log('⚠ PLUS DE 70 % DE L’OFFRE GRATUITE : prévoir le passage à l’offre payante ou un ménage');
+  }
   const q = await rpc('admin_queue', { p_token: token });
-  if (!q.length) console.log('file vide, rien à juger.');
+  if (!q.length) console.log('file vide, rien à juger (le robot scripts/moderate.mjs trie toutes les 10 minutes).');
   for (const p of q) {
     const d = new Date(p.created_at);
     console.log(`- ${p.initials} ${p.country}${p.city ? ' · ' + p.city : ''} · ${p.species || '?'} · score ${p.jury} · ${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} · ${p.votes} vote(s)${p.reports ? ' · ⚠ ' + p.reports + ' signalement(s)' : ''}${p.approved ? ' · en ligne' : ' · EN ATTENTE'}${p.hidden ? ' · masqué' : ''}`);

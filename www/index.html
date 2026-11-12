@@ -106,7 +106,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 /* Back button, same place on every retro screen (top left), big enough for a thumb. */
 .back { position: absolute; top: max(16px, env(safe-area-inset-top, 0px)); left: 12px; z-index: 2; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--phosphor); border: 2px solid var(--phosphor); cursor: pointer; font-family: var(--pixel); font-size: 14px; line-height: 1; text-shadow: inherit; box-shadow: 3px 3px 0 var(--neon); }
 .back:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--neon); }
-@media (max-height: 700px) { .screen { font-size: 10px; } .screen h2 { font-size: 16px; } .bigscore { font-size: 28px; } .slot b { font-size: 22px; width: 38px; } .pxbtn { font-size: 10px; padding: 11px 12px 9px; } }
+@media (max-height: 700px) { .screen { font-size: 10px; } .screen h2 { font-size: 16px; } .bigscore { font-size: 28px; } .pxbtn { font-size: 10px; padding: 11px 12px 9px; } }
 .screen p { margin: 0; text-align: center; }
 .blink { animation: rblink 1s steps(2) infinite; }
 @keyframes rblink { 50% { opacity: 0; } }
@@ -130,10 +130,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .judge q { quotes: none; font-size: 9px; line-height: 1.6; color: var(--phosphor); }
 .fun { font-size: 8px; line-height: 2; color: #9FF; text-align: center; margin: 10px 0 14px; text-shadow: 0 0 6px rgba(153,255,255,.5); }
 .total { font-size: 10px; color: #fff; margin-top: 6px; }
-.initials { display: flex; gap: 14px; margin: 12px 0 6px; }
-.slot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.slot button { background: none; border: none; color: var(--gold); font-family: var(--pixel); font-size: 16px; padding: 6px 12px; cursor: pointer; text-shadow: inherit; }
-.slot b { display: block; width: 44px; text-align: center; font: 400 28px/1 var(--pixel); color: #fff; border-bottom: 4px solid var(--neon); padding: 8px 0 6px; }
+#nameIn { text-align: center; margin: 10px 0 0; }
 
 .board { list-style: none; margin: 0; padding: 0; width: 100%; max-width: 360px; flex: 1; min-height: 0; overflow-y: auto; }
 .board li { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 10px 6px; border-bottom: 2px dashed rgba(57,255,20,.25); cursor: pointer; }
@@ -168,6 +165,8 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 /* title row with the medals button on the right */
 .top { position: relative; width: 100%; display: flex; justify-content: center; align-items: center; }
 .medalbtn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--ink); background: var(--white); font-size: 22px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.langbtn { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--ink); background: var(--white); color: var(--ink); font: 900 13px/1 var(--body); cursor: pointer; padding: 0; }
+.board li.sep { display: block; text-align: center; font-size: 8px; line-height: 1.8; color: #9FF; text-shadow: none; cursor: default; border-bottom: none; padding: 16px 6px 4px; }
 .medalbtn b { position: absolute; top: -7px; right: -7px; min-width: 14px; background: var(--tomato); color: #fff; font: 800 11px/1 var(--body); border: 2px solid var(--ink); border-radius: 10px; padding: 3px 5px; }
 .medalbtn.todo::after { content: ''; position: absolute; bottom: -4px; right: -4px; width: 12px; height: 12px; border-radius: 50%; background: var(--gas); border: 2px solid var(--ink); animation: blink 1.2s steps(2) infinite; }
 .xbody { width: 100%; max-width: 360px; flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 6px; }
@@ -280,6 +279,7 @@ button:active { transform: scale(.96); }
 
 <div class="app">
   <div class="top">
+    <button class="langbtn" id="langBtn" type="button" aria-label="Changer de langue" hidden>FR</button>
     <h1 id="title">Prout Box</h1>
     <button class="medalbtn" id="medalsBtn" type="button" aria-label="Mes exploits et le défi du jour">🏅<b id="medalCount" hidden></b></button>
   </div>
@@ -401,8 +401,8 @@ button:active { transform: scale(.96); }
 
   <button class="rec" id="recBtn" type="button"><span class="dot"></span><span id="recLabel">Enregistrer mon prout</span></button>
   <div class="leads">
-    <button class="lead" id="boardBtn" type="button">★ TOP PROUTS</button>
     <button class="lead" id="groupsBtn" type="button">👯 GROUPES</button>
+    <button class="lead" id="boardBtn" type="button">★ TOP PROUTS</button>
   </div>
   <p class="note" id="note" aria-live="polite"></p>
 </div>
@@ -416,8 +416,9 @@ button:active { transform: scale(.96); }
   <div class="jury" id="jury" aria-live="polite"></div>
   <div class="total" id="juryTotal"></div>
   <div class="fun" id="fun"></div>
-  <p class="blink">ENTRE TES INITIALES</p>
-  <div class="initials" id="initials"></div>
+  <p class="blink">TON NOM</p>
+  <input class="pxinput" id="nameIn" maxlength="12" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="PROUTMAN" aria-label="Ton nom dans le classement">
+  <p class="status" id="scoreStatus"></p>
   <div class="row">
     <button class="pxbtn" id="scoreOk" type="button">Valider</button>
     <button class="pxbtn dim" id="scoreTrash" type="button">Jeter</button>
@@ -528,12 +529,39 @@ button:active { transform: scale(.96); }
 </div>
 
 <script src="supabase-config.js"></script>
+<script src="lang-en.js"></script>
+<script src="lang-es.js"></script>
 <script>
 (function () {
   // Anti-zoom iPhone : pas de pincement (le double tap est coupé par touch-action: manipulation), et on remet
   // l'échelle à 1 quand un champ perd le focus (sinon la page restait zoomée, coupée, et rien ne remplissait plus l'écran).
   ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (ev) { document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false }); });
   document.addEventListener('focusout', function () { var vp = document.getElementById('vp'); if (vp) { var c = vp.content; vp.content = c.replace('maximum-scale=1', 'maximum-scale=1.0001'); setTimeout(function () { vp.content = c; window.scrollTo(0, 0); }, 50); } });
+  // ================= langues =================
+  // Le français est la langue source : les textes du code sont les clés. www/lang.js fournit les dictionnaires
+  // (un fichier www/lang-xx.js par langue, qui remplit window.PROUTBOX_I18N.xx). T(texte, valeur…) traduit puis remplace {0}, {1}…
+  // Les données (espèces, répliques du jury, thèmes, médailles) restent en français dans le stockage et sur le
+  // serveur : on ne traduit qu'à l'affichage, donc un prout publié en France s'affiche traduit ailleurs.
+  // Vérifier qu'aucune clé ne manque : node scripts/i18n-check.mjs
+  var I18N = window.PROUTBOX_I18N || {}, LANGS = ['fr'].concat(Object.keys(I18N)), LANG = null;
+  try { LANG = localStorage.getItem('proutbox.lang'); } catch (e) {}
+  if (LANGS.indexOf(LANG) < 0) { var nl = (navigator.language || 'fr').toLowerCase().slice(0, 2); LANG = LANGS.indexOf(nl) >= 0 ? nl : (I18N.en ? 'en' : 'fr'); }
+  var DICT = I18N[LANG] || null;
+  function T(s) { var out = (DICT && s != null && DICT[s] != null) ? DICT[s] : s; for (var i = 1; i < arguments.length; i++) out = String(out).split('{' + (i - 1) + '}').join(arguments[i]); return out; }
+  function P(n, one, many) { return T((LANG === 'fr' ? n > 1 : n !== 1) ? many : one, n); } // pluriel : « 0 vote » en français, « 0 votes » ailleurs
+  function num(v) { return LANG === 'fr' ? v : String(v).replace(',', '.'); }
+  document.documentElement.lang = LANG;
+  if (DICT) (function () { // les textes écrits en dur dans le HTML (aucun contenu de joueur n'est encore affiché à ce stade)
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, nodes = [];
+    while ((n = w.nextNode())) nodes.push(n);
+    nodes.forEach(function (n) { var p = n.parentNode && n.parentNode.nodeName; if (p === 'SCRIPT' || p === 'STYLE' || p === 'text') return; var t = n.nodeValue.trim(); if (t && DICT[t] != null) n.nodeValue = n.nodeValue.replace(t, DICT[t]); });
+    ['aria-label', 'placeholder'].forEach(function (a) { Array.prototype.forEach.call(document.querySelectorAll('[' + a + ']'), function (el) { var v = el.getAttribute(a); if (DICT[v] != null) el.setAttribute(a, DICT[v]); }); });
+  })();
+  (function () { // bouton de langue en haut à gauche : passe à la langue suivante et recharge
+    var b = document.getElementById('langBtn'); if (LANGS.length < 2) return;
+    b.hidden = false; b.textContent = LANG.toUpperCase();
+    b.addEventListener('click', function () { try { localStorage.setItem('proutbox.lang', LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length]); } catch (e) {} location.reload(); });
+  })();
   var SOUNDS = [
     { id: 'trompette', name: 'La Trompette', bang: 'PRRRT\nRRT !' },
     { id: 'coussin', name: 'Le Coussin', bang: 'PFFRRT !' },
@@ -688,11 +716,11 @@ button:active { transform: scale(.96); }
   function current() { var l = list(); index = (index + l.length) % l.length; return l[index]; }
   function show() {
     var c = current();
-    $('soundName').textContent = c.name;
+    $('soundName').textContent = c.kind === 'preset' ? T(c.name) : c.name;
     $('delBtn').hidden = c.kind !== 'rec';
     var hasScore = c.kind === 'rec' && c.rec.score != null;
     $('tag').hidden = !hasScore;
-    if (hasScore) $('tag').textContent = pad6(c.rec.score) + ' PTS · ' + ((c.rec.stats && c.rec.stats.species) || '???');
+    if (hasScore) $('tag').textContent = pad6(c.rec.score) + ' PTS · ' + T((c.rec.stats && c.rec.stats.species) || '???');
     if (typeof fitCan === 'function') setTimeout(fitCan, 0); // the picker height changes with the tag
     resetDel();
     try { localStorage.setItem('proutbox.pick', c.kind + ':' + c.id); } catch (e) {}
@@ -703,7 +731,7 @@ button:active { transform: scale(.96); }
   // ================= one prout =================
   function note(t) { $('note').textContent = t || ''; }
   function showPlaying(text, dur) {
-    $('burstText').textContent = text;
+    $('burstText').textContent = T(text);
     $('burst').classList.add('show');
     try { navigator.vibrate && navigator.vibrate([60, 30, 80, 30, 120]); } catch (e) {}
     document.body.classList.add('playing');
@@ -718,13 +746,13 @@ button:active { transform: scale(.96); }
   }
   function fire() {
     if (recording || screenOpen) return Promise.resolve(0);
-    if (!unlockAudio()) { note('Le son ne marche pas sur ce navigateur'); return Promise.resolve(0); }
+    if (!unlockAudio()) { note(T('Le son ne marche pas sur ce navigateur')); return Promise.resolve(0); }
     var c = current();
     trackFlip();
     if (c.kind === 'rec') {
       playingUntil = Date.now() + 1500;
       return playRecording(c.rec).then(function (d) { showPlaying(c.bang, d); return d; })
-        .catch(function () { note('Impossible de lire ce prout'); return 0; });
+        .catch(function () { note(T('Impossible de lire ce prout')); return 0; });
     }
     var d = playPreset(c.id);
     showPlaying(c.bang, d);
@@ -759,27 +787,27 @@ button:active { transform: scale(.96); }
   function loadRecs() { return store('readonly', function (os) { return os.getAll(); }).catch(function () { return []; }); }
 
   var delTimer = null;
-  function resetDel() { clearTimeout(delTimer); $('delBtn').textContent = 'Supprimer'; $('delBtn').dataset.armed = ''; }
+  function resetDel() { clearTimeout(delTimer); $('delBtn').textContent = T('Supprimer'); $('delBtn').dataset.armed = ''; }
   $('delBtn').addEventListener('click', function () {
     var c = current(); if (c.kind !== 'rec') return;
     if (this.dataset.armed !== '1') {
-      this.dataset.armed = '1'; this.textContent = 'Sûr ? Touche encore';
+      this.dataset.armed = '1'; this.textContent = T('Sûr ? Touche encore');
       delTimer = setTimeout(resetDel, 3000); return;
     }
     mine = mine.filter(function (r) { return r.id !== c.id; });
     deleteRec(c.id);
-    index = 0; show(); note('Prout supprimé');
+    index = 0; show(); note(T('Prout supprimé'));
   });
 
   // ================= record =================
   var mediaRec = null, recStream = null, chunks = [], recStart = 0, tick = null, stopT = null;
   function setRecUI(on, sec) {
     $('recBtn').classList.toggle('on', on);
-    $('recLabel').textContent = on ? ('Stop · 0:0' + sec) : 'Enregistrer mon prout';
+    $('recLabel').textContent = on ? T('Stop · 0:0{0}', sec) : T('Enregistrer mon prout');
   }
   function startRec() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-      note('Micro indisponible sur ce navigateur'); return;
+      note(T('Micro indisponible sur ce navigateur')); return;
     }
     // iOS (WKWebView) : la session audio « playback » (astuce mode silencieux) interdit la capture →
     // InvalidStateError « AudioSession category is not compatible with audio capture ». On passe en
@@ -798,7 +826,7 @@ button:active { transform: scale(.96); }
         var blob = new Blob(chunks, { type: mediaRec.mimeType || type || 'audio/webm' });
         if (!blob.size) return;
         var r = { id: String(Date.now()), name: '', blob: blob, created: Date.now() };
-        note('Analyse du prout…');
+        note(T('Analyse du prout…'));
         analyzeBlob(blob).catch(function () { return { score: 1500, loud: .3, dur: .3, peak: .3, bursts: 1 }; })
           .then(function (st) { r.stats = st; r.score = st.score; note(''); openScore(r); });
       };
@@ -808,7 +836,7 @@ button:active { transform: scale(.96); }
       stopT = setTimeout(stopRec, 6000);
     }).catch(function (err) {
       setAudioSession('playback');
-      note(err && err.name === 'NotAllowedError' ? 'Accès au micro refusé (Réglages › Prout Box › Micro)' : 'Micro indisponible (' + ((err && err.name) || 'erreur') + ')');
+      note(err && err.name === 'NotAllowedError' ? T('Accès au micro refusé (Réglages › Prout Box › Micro)') : T('Micro indisponible ({0})', (err && err.name) || T('erreur')));
     });
   }
   function stopRec() { if (mediaRec && mediaRec.state !== 'inactive') mediaRec.stop(); }
@@ -967,30 +995,23 @@ button:active { transform: scale(.96); }
     medalsScreen: function () { closeScreens(); }
   };
   Object.keys(BACK).forEach(function (id) {
-    var b = document.createElement('button'); b.type = 'button'; b.className = 'back'; b.textContent = '‹'; b.setAttribute('aria-label', 'Retour');
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'back'; b.textContent = '‹'; b.setAttribute('aria-label', T('Retour'));
     b.addEventListener('click', function () { blip(440, .06); BACK[id](); });
     $(id).insertBefore(b, $(id).firstChild);
   });
   document.addEventListener('keydown', function (e) { if (e.key !== 'Escape' || !screenOpen) return; var open = Object.keys(BACK).filter(function (id) { return !$(id).hidden; })[0]; if (open) BACK[open](); });
 
-  // --- score screen + arcade initials ---
-  var pending = null, initials = ['A', 'A', 'A'], LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  try { var si = localStorage.getItem('proutbox.initials'); if (si && si.length === 3) initials = si.split(''); } catch (e) {}
-  (function () {
-    var box = $('initials');
-    initials.forEach(function (_, i) {
-      var slot = document.createElement('div'); slot.className = 'slot';
-      var up = document.createElement('button'), b = document.createElement('b'), down = document.createElement('button');
-      up.type = down.type = 'button'; up.textContent = '▲'; down.textContent = '▼';
-      up.setAttribute('aria-label', 'Lettre suivante'); down.setAttribute('aria-label', 'Lettre précédente');
-      var step = function (dir) { initials[i] = LETTERS[(LETTERS.indexOf(initials[i]) + dir + 26) % 26]; b.textContent = initials[i]; blip(880 + dir * 120, .05); };
-      up.addEventListener('click', function () { step(1); });
-      down.addEventListener('click', function () { step(-1); });
-      b.addEventListener('click', function () { step(1); });
-      b.textContent = initials[i];
-      slot.appendChild(up); slot.appendChild(b); slot.appendChild(down); box.appendChild(slot);
-    });
-  })();
+  // --- score screen + the player's name ---
+  // Depuis la 1.3 le joueur choisit son nom (2 à 12 caractères, affiché en majuscules) au lieu de 3 initiales de borne
+  // d'arcade. Le serveur le filtre (name_ok / publish_prout : mots interdits, voir supabase/schema.sql).
+  var pending = null;
+  function cleanName(v) { return (v || '').replace(/\s+/g, ' ').trim().toUpperCase().slice(0, 12); }
+  function validName(v) {
+    try { return new RegExp('^[\\p{L}\\p{N} ._-]{2,12}$', 'u').test(v) && new RegExp('[\\p{L}\\p{N}]', 'u').test(v); }
+    catch (e) { return /^[A-Z0-9À-Þ ._-]{2,12}$/.test(v); }
+  }
+  try { var sn = localStorage.getItem('proutbox.name') || localStorage.getItem('proutbox.initials') || ''; $('nameIn').value = sn === 'AAA' ? '' : sn; } catch (e) {}
+  $('nameIn').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('nameIn').blur(); } });
   function renderJury(st) {
     var box = $('jury'); box.innerHTML = '';
     var total = 0;
@@ -999,8 +1020,8 @@ button:active { transform: scale(.96); }
       var el = document.createElement('div'); el.className = 'judge';
       var face = document.createElement('span'), who = document.createElement('span'), note = document.createElement('i'), q = document.createElement('q');
       face.className = 'face'; face.textContent = j.face;
-      who.className = 'who'; who.textContent = j.name; note.textContent = v.n + '/10'; who.appendChild(note);
-      q.textContent = v.line;
+      who.className = 'who'; who.textContent = T(j.name); note.textContent = v.n + '/10'; who.appendChild(note);
+      q.textContent = T(v.line);
       el.appendChild(face); el.appendChild(who); el.appendChild(q); box.appendChild(el);
     });
     $('juryTotal').textContent = '';
@@ -1014,9 +1035,9 @@ button:active { transform: scale(.96); }
         kids[i].classList.add('in'); blip(520 + i * 180, .09, .05);
         total += st.jury[i].n;
         if (i === JURY.length - 1) {
-          $('juryTotal').textContent = 'JURY : ' + total + '/30';
-          $('fun').innerHTML = 'MAGNITUDE : ' + st.fun.mag + ' SUR L\'ÉCHELLE DE RICHTER DU SLIP<br>PIGEONS EFFRAYÉS : ' + st.fun.pigeons + '<br>DISTANCE DE SÉCURITÉ : ' + st.fun.dist + ' M'
-            + (st.recale ? '<br><span class="bad">LE JURY LE GARDE SUR CE TÉLÉPHONE MAIS REFUSE DE LE PUBLIER (VOIX ' + st.voice + ' %)</span>' : '');
+          $('juryTotal').textContent = T('JURY : {0}/30', total);
+          $('fun').innerHTML = T('MAGNITUDE : {0} SUR L’ÉCHELLE DE RICHTER DU SLIP', num(st.fun.mag)) + '<br>' + T('PIGEONS EFFRAYÉS : {0}', st.fun.pigeons) + '<br>' + T('DISTANCE DE SÉCURITÉ : {0} M', num(st.fun.dist))
+            + (st.recale ? '<br><span class="bad">' + T('LE JURY LE GARDE SUR CE TÉLÉPHONE MAIS REFUSE DE LE PUBLIER : C’EST UNE VOIX') + '</span>' : '');
           jingle();
         }
       }, 350 * (i + 1));
@@ -1025,7 +1046,7 @@ button:active { transform: scale(.96); }
   function openScore(r) {
     pending = r;
     var st = r.stats;
-    $('bigScore').textContent = '000000'; $('verdict').textContent = '';
+    $('bigScore').textContent = '000000'; $('verdict').textContent = ''; $('scoreStatus').textContent = ''; $('scoreOk').disabled = false;
     renderJury(st);
     $('scoreScreen').scrollTop = 0;
     openScreen('scoreScreen');
@@ -1035,26 +1056,37 @@ button:active { transform: scale(.96); }
       $('bigScore').textContent = pad6(r.score * k);
       var tick = Math.floor(k * 16);
       if (tick !== last) { last = tick; blip(260 + tick * 50, .05, .04); }
-      if (k < 1) requestAnimationFrame(step); else { $('verdict').classList.toggle('bad', !!st.recale); $('verdict').textContent = st.recale ? 'RECALÉ : ON DIRAIT UNE VOIX, PAS UN PROUT' : 'ESPÈCE : ' + st.species; revealJury(st); }
+      if (k < 1) requestAnimationFrame(step); else { $('verdict').classList.toggle('bad', !!st.recale); $('verdict').textContent = st.recale ? T('RECALÉ : ON DIRAIT UNE VOIX, PAS UN PROUT') : T('ESPÈCE : {0}', T(st.species)); revealJury(st); }
     })(t0);
   }
   $('scoreOk').addEventListener('click', function () {
     if (!pending) { closeScreens(); return; }
+    var nm = cleanName($('nameIn').value);
+    if (!validName(nm)) { $('scoreStatus').textContent = T('DONNE-TOI UN NOM : 2 À 12 LETTRES OU CHIFFRES'); blip(180, .2, .06); return; }
+    // le serveur dit si le nom passe son filtre ; hors ligne ou en cas d'erreur on accepte (il sera revérifié à la publication)
+    $('scoreOk').disabled = true; $('scoreStatus').textContent = '';
+    (online() ? rpc('name_ok', { p_name: nm }).catch(function () { return true; }) : Promise.resolve(true)).then(function (ok) {
+      $('scoreOk').disabled = false;
+      if (ok === false) { $('scoreStatus').textContent = T('CE NOM EST REFUSÉ, CHOISIS-EN UN AUTRE'); blip(180, .2, .06); return; }
+      if (pending) acceptScore(nm);
+    });
+  });
+  function acceptScore(nm) {
     var r = pending; pending = null;
-    r.name = initials.join('');
-    try { localStorage.setItem('proutbox.initials', r.name); } catch (e) {}
+    r.name = nm; $('nameIn').value = nm;
+    try { localStorage.setItem('proutbox.name', r.name); } catch (e) {}
     mine.push(r); saveRec(r);
     closeScreens();
     index = list().length - 1; show();
     if (recContext && recContext.kind === 'daily') { recContext = null; X.daily = today(); X.dailyCount = (X.dailyCount || 0) + 1; }
     exploitRecording(r);
-    if (r.stats && r.stats.recale) { recContext = null; note(withMedal('Gardé sur ce téléphone, mais le jury ne publie pas les voix !')); can.classList.add('flipped'); fire().then(flipBackLater); return; }
+    if (r.stats && r.stats.recale) { recContext = null; note(withMedal(T('Gardé sur ce téléphone, mais le jury ne publie pas les voix !'))); can.classList.add('flipped'); fire().then(flipBackLater); return; }
     if (recContext) { var rc = recContext; recContext = null; publishToGroup(r, rc); return; }
     if (online()) { openPublish(r); return; }
-    note('Enregistré ! Retourne la boîte pour l’entendre');
+    note(T('Enregistré ! Retourne la boîte pour l’entendre'));
     can.classList.add('flipped'); fire().then(flipBackLater);
-  });
-  $('scoreTrash').addEventListener('click', function () { var was = pending; pending = null; recContext = null; closeScreens(); if (was) note('Prout jeté'); });
+  }
+  $('scoreTrash').addEventListener('click', function () { var was = pending; pending = null; recContext = null; closeScreens(); if (was) note(T('Prout jeté')); });
 
   // ================= online: Supabase (see supabase/schema.sql) =================
   // No account: a secret device id (uuid in localStorage) is the token for publishing, voting, reporting, deleting.
@@ -1087,42 +1119,34 @@ button:active { transform: scale(.96); }
   function audioUrl(path) { return SB.url + '/storage/v1/object/public/prouts/' + path; }
   function friendly(err) {
     var m = (err && err.message) || '';
-    if (/initiales refus/i.test(m)) return 'CES INITIALES SONT REFUSÉES';
-    if (/trop de/i.test(m)) return 'DOUCEMENT ! RÉESSAIE DEMAIN';
-    if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'HORS LIGNE';
-    return 'OUPS : ' + m.toUpperCase().slice(0, 60);
+    if (/nom refus|initiales refus/i.test(m)) return T('CE NOM EST REFUSÉ, CHOISIS-EN UN AUTRE');
+    if (/trop de/i.test(m)) return T('DOUCEMENT ! RÉESSAIE DEMAIN');
+    if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return T('HORS LIGNE');
+    return T('OUPS : {0}', T(m.toUpperCase().slice(0, 60))); // les messages du serveur sont en français : CODE INCONNU, PSEUDO DÉJÀ PRIS…
   }
 
   // --- countries ---
-  var COUNTRIES = [
-    ['FR', 'France'], ['BE', 'Belgique'], ['CH', 'Suisse'], ['CA', 'Canada'], ['LU', 'Luxembourg'], ['MC', 'Monaco'],
-    ['DE', 'Allemagne'], ['ES', 'Espagne'], ['IT', 'Italie'], ['PT', 'Portugal'], ['GB', 'Royaume-Uni'], ['IE', 'Irlande'], ['NL', 'Pays-Bas'],
-    ['AT', 'Autriche'], ['DK', 'Danemark'], ['SE', 'Suède'], ['NO', 'Norvège'], ['FI', 'Finlande'], ['IS', 'Islande'], ['PL', 'Pologne'],
-    ['CZ', 'Tchéquie'], ['SK', 'Slovaquie'], ['HU', 'Hongrie'], ['RO', 'Roumanie'], ['BG', 'Bulgarie'], ['GR', 'Grèce'], ['HR', 'Croatie'],
-    ['SI', 'Slovénie'], ['RS', 'Serbie'], ['UA', 'Ukraine'], ['TR', 'Turquie'], ['US', 'États-Unis'], ['MX', 'Mexique'], ['BR', 'Brésil'],
-    ['AR', 'Argentine'], ['CL', 'Chili'], ['CO', 'Colombie'], ['PE', 'Pérou'], ['MA', 'Maroc'], ['DZ', 'Algérie'], ['TN', 'Tunisie'],
-    ['SN', 'Sénégal'], ['CI', 'Côte d’Ivoire'], ['CM', 'Cameroun'], ['CD', 'RD Congo'], ['MG', 'Madagascar'], ['MU', 'Maurice'], ['RE', 'La Réunion'],
-    ['GP', 'Guadeloupe'], ['MQ', 'Martinique'], ['GF', 'Guyane'], ['PF', 'Polynésie fr.'], ['NC', 'Nouvelle-Calédonie'], ['ZA', 'Afrique du Sud'],
-    ['EG', 'Égypte'], ['NG', 'Nigeria'], ['KE', 'Kenya'], ['IL', 'Israël'], ['LB', 'Liban'], ['AE', 'Émirats'], ['SA', 'Arabie saoudite'],
-    ['IN', 'Inde'], ['PK', 'Pakistan'], ['CN', 'Chine'], ['JP', 'Japon'], ['KR', 'Corée du Sud'], ['TW', 'Taïwan'], ['VN', 'Vietnam'],
-    ['TH', 'Thaïlande'], ['ID', 'Indonésie'], ['PH', 'Philippines'], ['MY', 'Malaisie'], ['SG', 'Singapour'], ['AU', 'Australie'], ['NZ', 'Nouvelle-Zélande']
-  ];
+  // Tous les pays et territoires (codes ISO 3166-1) ; les noms viennent du téléphone (Intl.DisplayNames), dans la langue de l'app.
+  var CODES = 'AD AE AF AG AI AL AM AO AR AS AT AU AW AZ BA BB BD BE BF BG BH BI BJ BM BN BO BR BS BT BW BY BZ CA CD CF CG CH CI CL CM CN CO CR CU CV CW CY CZ DE DJ DK DM DO DZ EC EE EG ER ES ET FI FJ FM FO FR GA GB GD GE GF GH GI GL GM GN GP GQ GR GT GU GW GY HK HN HR HT HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KI KM KN KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MG MH MK ML MM MN MO MQ MR MT MU MV MW MX MY MZ NA NC NE NG NI NL NO NP NR NZ OM PA PE PF PG PH PK PL PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SI SK SL SM SN SO SR SS ST SV SY SZ TC TD TG TH TJ TL TM TN TO TR TT TV TW TZ UA UG US UY UZ VA VC VE VG VI VN VU WS XK YE YT ZA ZM ZW'.split(' ');
+  var regionNames = null; try { regionNames = new Intl.DisplayNames([LANG], { type: 'region' }); } catch (e) {}
   function flag(cc) { return cc.toUpperCase().replace(/./g, function (c) { return String.fromCodePoint(127397 + c.charCodeAt(0)); }); }
-  function countryName(cc) { for (var i = 0; i < COUNTRIES.length; i++) if (COUNTRIES[i][0] === cc) return COUNTRIES[i][1]; return cc; }
+  function countryName(cc) { try { var n = regionNames && regionNames.of(cc); if (n && n !== cc) return n; } catch (e) {} return cc; }
+  function knownCountry(cc) { return CODES.indexOf(cc) >= 0; }
+  var COUNTRIES = CODES.map(function (c) { return [c, countryName(c)]; }).sort(function (a, b) { return a[1].localeCompare(b[1], LANG); });
   var country = null;
   try { country = localStorage.getItem('proutbox.country'); } catch (e) {}
   if (!country) {
     var loc = (navigator.language || '').toUpperCase().match(/[-_]([A-Z]{2})\b/);
-    if (loc && countryName(loc[1]) !== loc[1]) country = loc[1];
+    if (loc && knownCountry(loc[1])) country = loc[1];
     if (!country) { try { var tz = Intl.DateTimeFormat().resolvedOptions().timeZone; if (/Paris/.test(tz)) country = 'FR'; } catch (e) {} }
-    country = country || 'FR';
+    country = country || (LANG === 'fr' ? 'FR' : LANG === 'es' ? 'ES' : 'US');
   }
   function setCountry(cc) { country = cc; try { localStorage.setItem('proutbox.country', cc); } catch (e) {} $('tabCountry').textContent = flag(cc) + ' ' + countryName(cc).toUpperCase(); }
   var countryBack = null;
   function openCountry(back) {
     countryBack = back || null;
     var box = $('clist'); box.innerHTML = '';
-    COUNTRIES.forEach(function (c) {
+    COUNTRIES.slice().sort(function (a, b) { return (b[0] === country) - (a[0] === country); }).forEach(function (c) { // le pays actuel en premier
       var b = document.createElement('button'); b.type = 'button'; b.textContent = flag(c[0]) + ' ' + c[1].toUpperCase();
       if (c[0] === country) b.className = 'on';
       b.addEventListener('click', function () { setCountry(c[0]); blip(900, .06); closeScreens(); if (countryBack) countryBack(); });
@@ -1137,10 +1161,10 @@ button:active { transform: scale(.96); }
   var pubRec = null, pubCity = null, pubCityOff = false, citySeq = 0;
   function pubTextRefresh() {
     if (!pubRec) return;
-    $('pubText').textContent = 'ENVOYER « ' + pubRec.name + ' · ' + ((pubRec.stats && pubRec.stats.species) || '???') + ' » DANS LE TOP PROUTS ' + flag(country) + ' ' + countryName(country).toUpperCase() + ' ?';
+    $('pubText').textContent = T('ENVOYER « {0} · {1} » DANS LE TOP PROUTS {2} {3} ?', pubRec.name, T((pubRec.stats && pubRec.stats.species) || '???'), flag(country), countryName(country).toUpperCase());
     var b = $('pubCity');
-    if (pubCity && !pubCityOff) { b.hidden = false; b.textContent = '📍 ' + pubCity.toUpperCase() + ' · TOUCHE POUR RETIRER'; }
-    else if (pubCity && pubCityOff) { b.hidden = false; b.textContent = '📍 SANS MA VILLE · TOUCHE POUR REMETTRE'; }
+    if (pubCity && !pubCityOff) { b.hidden = false; b.textContent = T('📍 {0} · TOUCHE POUR RETIRER', pubCity.toUpperCase()); }
+    else if (pubCity && pubCityOff) { b.hidden = false; b.textContent = T('📍 SANS MA VILLE · TOUCHE POUR REMETTRE'); }
     else b.hidden = true;
   }
   // Approximate city: position rounded to ~1 km, converted to a city name; only the city name is kept.
@@ -1151,21 +1175,21 @@ button:active { transform: scale(.96); }
     // (plain navigator.geolocation would add a second WebKit « localhost » prompt).
     var cap = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation;
     if (!cap && !navigator.geolocation) return;
-    $('pubStatus').textContent = 'RECHERCHE DE TA VILLE…';
+    $('pubStatus').textContent = T('RECHERCHE DE TA VILLE…');
     var getPos = function (ok, ko, opts) {
       if (cap) cap.getCurrentPosition(opts).then(ok, ko);
       else navigator.geolocation.getCurrentPosition(ok, ko, opts);
     };
     getPos(function (pos) {
       var lat = Math.round(pos.coords.latitude * 100) / 100, lon = Math.round(pos.coords.longitude * 100) / 100;
-      fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lon + '&localityLanguage=fr')
+      fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lon + '&localityLanguage=' + LANG)
         .then(function (r) { return r.json(); })
         .then(function (g) {
           if (seq !== citySeq) return;
           var name = g.city || g.locality || g.principalSubdivision || '';
           if (name) pubCity = name.slice(0, 40);
-          if (g.countryCode && countryName(g.countryCode) !== g.countryCode && g.countryCode !== country) setCountry(g.countryCode);
-          $('pubStatus').textContent = pubCity ? '' : 'VILLE INTROUVABLE, LE PAYS SUFFIT';
+          if (g.countryCode && knownCountry(g.countryCode) && g.countryCode !== country) setCountry(g.countryCode);
+          $('pubStatus').textContent = pubCity ? '' : T('VILLE INTROUVABLE, LE PAYS SUFFIT');
           pubTextRefresh();
         }).catch(function () { if (seq === citySeq) { $('pubStatus').textContent = ''; pubTextRefresh(); } });
     }, function () { if (seq === citySeq) { $('pubStatus').textContent = ''; pubTextRefresh(); } }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
@@ -1187,17 +1211,17 @@ button:active { transform: scale(.96); }
   }
   $('pubOk').addEventListener('click', function () {
     if (!pubRec) return;
-    var r = pubRec; $('pubOk').disabled = true; $('pubStatus').textContent = 'ENVOI…';
+    var r = pubRec; $('pubOk').disabled = true; $('pubStatus').textContent = T('ENVOI…');
     publish(r).then(function () {
       pubRec = null; closeScreens(); jingle();
       exploit({ published: true, pubCount: (X.pubCount || 0) + 1 });
-      note(withMedal('Envoyé ! Le jury suprême l’écoute avant de l’afficher dans le TOP PROUTS ' + flag(country)));
+      note(withMedal(T('Envoyé ! Il apparaîtra dans le TOP PROUTS {0} après un contrôle rapide', flag(country))));
       boardTab = 'mine'; openBoard();
     }).catch(function (e) { $('pubOk').disabled = false; $('pubStatus').textContent = friendly(e); });
   });
   $('pubLater').addEventListener('click', function () {
     pubRec = null; closeScreens();
-    note(withMedal('Enregistré ! Tu pourras le publier depuis TOP PROUTS › MOI'));
+    note(withMedal(T('Enregistré ! Tu pourras le publier depuis TOP PROUTS › MOI')));
     can.classList.add('flipped'); fire().then(flipBackLater);
   });
   $('pubCountry').addEventListener('click', function () { var r = pubRec; openCountry(function () { openPublish(r); }); });
@@ -1238,12 +1262,14 @@ button:active { transform: scale(.96); }
     Array.prototype.forEach.call($('board').children, function (x) { x.classList.remove('hot'); });
     li.classList.add('hot');
     p().then(function (d) { boardTimer = setTimeout(function () { li.classList.remove('hot'); }, d * 1000); })
-      .catch(function () { li.classList.remove('hot'); $('boardStatus').textContent = 'LECTURE IMPOSSIBLE'; });
+      .catch(function () { li.classList.remove('hot'); $('boardStatus').textContent = T('LECTURE IMPOSSIBLE'); });
   }
-  function renderRemote(rows) {
-    var ol = $('board'); ol.innerHTML = '';
-    rows.forEach(function (row, i) {
-      var li = rowEl(i, row.initials + ' ' + flag(row.country), row.species + (row.city ? ' · 📍 ' + row.city.toUpperCase() : ''), '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), row.votes + (row.votes > 1 ? ' VOTES' : ' VOTE') + (row.my_stars ? ' · TOI ' + row.my_stars : ''));
+  // rows : le classement demandé ; more : le classement mondial, ajouté dessous quand le pays est encore peu peuplé
+  function renderRemote(rows, more) {
+    var ol = $('board'); ol.innerHTML = ''; more = more || [];
+    rows.concat(more).forEach(function (row, i) {
+      if (more.length && i === rows.length) { var sep = document.createElement('li'); sep.className = 'sep'; sep.textContent = rows.length ? T('🌍 ET AILLEURS DANS LE MONDE') : T('PERSONNE ENCORE DANS TON PAYS : SOIS LE PREMIER ! EN ATTENDANT, LE MONDE :'); ol.appendChild(sep); }
+      var li = rowEl(i < rows.length ? i : i - rows.length, row.initials + ' ' + flag(row.country), T(row.species) + (row.city ? ' · 📍 ' + row.city.toUpperCase() : ''), '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), P(row.votes, '{0} VOTE', '{0} VOTES') + (row.my_stars ? T(' · TOI {0}', row.my_stars) : ''));
       var rate = null;
       li.addEventListener('click', function (e) {
         if (rate && rate.contains(e.target)) return;
@@ -1252,22 +1278,22 @@ button:active { transform: scale(.96); }
         if (!wasOpen) {
           li.classList.add('open');
           rate = document.createElement('div'); rate.className = 'rate';
-          var lab = document.createElement('span'); lab.textContent = row.mine ? 'C’EST TON PROUT' : (row.my_stars ? 'TA NOTE : ' + row.my_stars + '/5 · CHANGE-LA ?' : 'NOTE CE PROUT');
+          var lab = document.createElement('span'); lab.textContent = row.mine ? T('C’EST TON PROUT') : (row.my_stars ? T('TA NOTE : {0}/5 · CHANGE-LA ?', row.my_stars) : T('NOTE CE PROUT'));
           var cr = document.createElement('div'); cr.className = 'crottes';
           var paint = function (n) { Array.prototype.forEach.call(cr.children, function (b, k) { b.classList.toggle('lit', k < n); }); };
           for (var k = 1; k <= 5; k++) (function (k) {
-            var b = document.createElement('button'); b.type = 'button'; b.textContent = '💩'; b.setAttribute('aria-label', k + ' sur 5');
+            var b = document.createElement('button'); b.type = 'button'; b.textContent = '💩'; b.setAttribute('aria-label', T('{0} sur 5', k));
             b.addEventListener('click', function () {
-              if (row.mine) { $('boardStatus').textContent = 'ON NE VOTE PAS POUR SOI !'; return; }
+              if (row.mine) { $('boardStatus').textContent = T('ON NE VOTE PAS POUR SOI !'); return; }
               paint(k); blip(600 + k * 120, .08);
               rpc('vote_prout', { p_device: device, p_prout: row.id, p_stars: k }).then(function (res) {
                 var v = res && res[0]; if (!v) return;
                 if (!row.my_stars) exploit({ votes: (X.votes || 0) + 1 });
                 row.votes = v.votes; row.avg = v.avg; row.my_stars = k;
                 li.querySelector('.sc').childNodes[0].textContent = '💩 ' + Number(v.avg).toFixed(1);
-                li.querySelector('.sc small').textContent = v.votes + (v.votes > 1 ? ' VOTES' : ' VOTE') + ' · TOI ' + k;
-                lab.textContent = 'TA NOTE : ' + k + '/5 · CHANGE-LA ?';
-                $('boardStatus').textContent = 'MERCI POUR TA NOTE !';
+                li.querySelector('.sc small').textContent = P(v.votes, '{0} VOTE', '{0} VOTES') + T(' · TOI {0}', k);
+                lab.textContent = T('TA NOTE : {0}/5 · CHANGE-LA ?', k);
+                $('boardStatus').textContent = T('MERCI POUR TA NOTE !');
               }).catch(function (e) { $('boardStatus').textContent = friendly(e); });
             });
             cr.appendChild(b);
@@ -1275,21 +1301,21 @@ button:active { transform: scale(.96); }
           paint(row.my_stars || 0);
           var acts = document.createElement('div'); acts.className = 'actions';
           if (row.mine) {
-            var del = document.createElement('button'); del.type = 'button'; del.className = 'link danger'; del.textContent = 'SUPPRIMER';
-            del.addEventListener('click', function () { armed(del, 'SÛR ? RETOUCHE', function () {
+            var del = document.createElement('button'); del.type = 'button'; del.className = 'link danger'; del.textContent = T('SUPPRIMER');
+            del.addEventListener('click', function () { armed(del, T('SÛR ? RETOUCHE'), function () {
               rpc('delete_prout', { p_device: device, p_prout: row.id }).then(function (path) {
                 // the row is gone; now the file is an orphan the Storage policy lets us remove
                 if (path) fetch(SB.url + '/storage/v1/object/prouts/' + path, { method: 'DELETE', headers: sbHeaders({}) }).catch(function () {});
                 li.remove(); mine.forEach(function (r) { if (r.remoteId === row.id) { r.remoteId = null; saveRec(r); } });
-                $('boardStatus').textContent = 'PROUT RETIRÉ DU CLASSEMENT';
+                $('boardStatus').textContent = T('PROUT RETIRÉ DU CLASSEMENT');
               }).catch(function (e) { $('boardStatus').textContent = friendly(e); });
             }); });
             acts.appendChild(del);
           } else {
-            var rep = document.createElement('button'); rep.type = 'button'; rep.className = 'link danger'; rep.textContent = 'SIGNALER';
-            rep.addEventListener('click', function () { armed(rep, 'SÛR ? RETOUCHE', function () {
+            var rep = document.createElement('button'); rep.type = 'button'; rep.className = 'link danger'; rep.textContent = T('SIGNALER');
+            rep.addEventListener('click', function () { armed(rep, T('SÛR ? RETOUCHE'), function () {
               rpc('report_prout', { p_device: device, p_prout: row.id, p_reason: 'inapproprié' }).then(function () {
-                li.remove(); $('boardStatus').textContent = 'SIGNALÉ, MERCI. ON REGARDE.';
+                li.remove(); $('boardStatus').textContent = T('SIGNALÉ, MERCI. ON REGARDE.');
               }).catch(function (e) { $('boardStatus').textContent = friendly(e); });
             }); });
             acts.appendChild(rep);
@@ -1301,8 +1327,8 @@ button:active { transform: scale(.96); }
       });
       ol.appendChild(li);
     });
-    $('boardEmpty').hidden = rows.length > 0;
-    $('boardEmpty').innerHTML = 'AUCUN PROUT ICI...<br>SOIS LE PREMIER !';
+    $('boardEmpty').hidden = rows.length + more.length > 0;
+    $('boardEmpty').innerHTML = T('AUCUN PROUT ICI...') + '<br>' + T('SOIS LE PREMIER !');
   }
   var mineStatus = {}; // remoteId → {approved, hidden} (my_prouts), refreshed each time the MOI tab opens
   function renderMine(refreshed) {
@@ -1310,10 +1336,10 @@ button:active { transform: scale(.96); }
     var rows = mine.slice().sort(function (a, b) { return (b.score || 0) - (a.score || 0) || a.created - b.created; });
     rows.forEach(function (r, i) {
       var s = r.remoteId && mineStatus[r.remoteId], recale = r.stats && r.stats.recale;
-      var state = !r.remoteId ? (recale ? 'RECALÉ (VOIX)' : '') : !s ? 'EN LIGNE ' + flag(r.country || country) : s.hidden ? 'REFUSÉ' : s.approved ? 'EN LIGNE ' + flag(r.country || country) + (s.votes ? ' · 💩 ' + Number(s.avg).toFixed(1) : '') : '⏳ EN VALIDATION';
-      var li = rowEl(i, r.name || '???', (r.stats && r.stats.species) || '', pad6(r.score || 0), state);
+      var state = !r.remoteId ? (recale ? T('RECALÉ (VOIX)') : '') : !s ? T('EN LIGNE {0}', flag(r.country || country)) : s.hidden ? T('REFUSÉ') : s.approved ? T('EN LIGNE {0}', flag(r.country || country)) + (s.votes ? ' · 💩 ' + Number(s.avg).toFixed(1) : '') : T('⏳ EN VALIDATION');
+      var li = rowEl(i, r.name || '???', T((r.stats && r.stats.species) || ''), pad6(r.score || 0), state);
       if (online() && !r.remoteId && !recale) {
-        var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = 'PUBLIER';
+        var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = T('PUBLIER');
         pb.addEventListener('click', function (e) { e.stopPropagation(); openPublish(r); });
         li.querySelector('.sc').appendChild(pb);
       }
@@ -1321,7 +1347,7 @@ button:active { transform: scale(.96); }
       ol.appendChild(li);
     });
     $('boardEmpty').hidden = rows.length > 0;
-    $('boardEmpty').innerHTML = 'AUCUN PROUT...<br>ENREGISTRE LE TIEN !';
+    $('boardEmpty').innerHTML = T('AUCUN PROUT...') + '<br>' + T('ENREGISTRE LE TIEN !');
     if (!refreshed && online() && rows.some(function (r) { return r.remoteId; })) {
       var seq = boardSeq;
       rpc('my_prouts', { p_device: device }).then(function (list) {
@@ -1336,14 +1362,21 @@ button:active { transform: scale(.96); }
     var seq = ++boardSeq;
     $('board').innerHTML = ''; $('boardEmpty').hidden = true; $('boardStatus').textContent = '';
     Array.prototype.forEach.call($('tabs').children, function (t) { t.classList.toggle('on', t.dataset.tab === boardTab); });
-    $('boardHint').textContent = boardTab === 'mine' ? 'TES PROUTS SUR CE TÉLÉPHONE' : 'TOUCHE UN PROUT POUR L’ÉCOUTER ET LE NOTER';
+    $('boardHint').textContent = boardTab === 'mine' ? T('TES PROUTS SUR CE TÉLÉPHONE') : T('TOUCHE UN PROUT POUR L’ÉCOUTER ET LE NOTER');
     if (boardTab === 'mine') { renderMine(); return; }
-    if (!online()) { $('boardEmpty').hidden = false; $('boardEmpty').innerHTML = 'CLASSEMENT EN LIGNE<br>BIENTÔT DISPONIBLE'; return; }
-    $('boardStatus').textContent = 'CHARGEMENT…';
+    if (!online()) { $('boardEmpty').hidden = false; $('boardEmpty').innerHTML = T('CLASSEMENT EN LIGNE') + '<br>' + T('BIENTÔT DISPONIBLE'); return; }
+    $('boardStatus').textContent = T('CHARGEMENT…');
     rpc('top_prouts', { p_device: device, p_country: boardTab === 'country' ? country : null, p_limit: 50 }).then(function (rows) {
       if (seq !== boardSeq) return;
-      $('boardStatus').textContent = ''; renderRemote(rows || []);
-    }).catch(function (e) { if (seq !== boardSeq) return; $('boardStatus').textContent = friendly(e); $('boardEmpty').hidden = false; $('boardEmpty').innerHTML = 'PAS DE RÉSEAU ?<br>RÉESSAIE PLUS TARD'; });
+      rows = rows || [];
+      // un pays encore peu peuplé : on complète avec le classement mondial, pour qu'il y ait toujours de quoi écouter
+      if (boardTab === 'country' && rows.length < 8) return rpc('top_prouts', { p_device: device, p_country: null, p_limit: 30 }).then(function (w) {
+        if (seq !== boardSeq) return;
+        var seen = {}; rows.forEach(function (r) { seen[r.id] = 1; });
+        $('boardStatus').textContent = ''; renderRemote(rows, (w || []).filter(function (r) { return !seen[r.id]; }));
+      });
+      $('boardStatus').textContent = ''; renderRemote(rows);
+    }).catch(function (e) { if (seq !== boardSeq) return; $('boardStatus').textContent = friendly(e); $('boardEmpty').hidden = false; $('boardEmpty').innerHTML = T('PAS DE RÉSEAU ?') + '<br>' + T('RÉESSAIE PLUS TARD'); });
   }
   function openBoard() {
     if (!online() && boardTab !== 'mine') boardTab = 'mine';
@@ -1382,7 +1415,7 @@ button:active { transform: scale(.96); }
   }
   function seedDemo() {
     var demo = [['NOA', 'rafale'], ['ZOE', 'trompette'], ['LEO', 'discret'], ['MAX', 'mouille']];
-    note('Mode démo : 4 prouts arrivent…');
+    note(T('Mode démo : 4 prouts arrivent…'));
     Promise.all(demo.map(function (d, i) {
       return renderPreset(d[1]).then(function (blob) {
         return analyzeBlob(blob, true).then(function (st) {
@@ -1393,7 +1426,7 @@ button:active { transform: scale(.96); }
       recs.forEach(function (r) { mine.push(r); saveRec(r); });
       note(''); show();
       openScore(recs[0]); pending = null; // review only: both buttons just close
-    }).catch(function () { note('Démo impossible ici'); });
+    }).catch(function () { note(T('Démo impossible ici')); });
   }
   var titleTaps = 0, titleTimer = null;
   $('title').addEventListener('click', function () {
@@ -1406,8 +1439,8 @@ button:active { transform: scale(.96); }
   try { skin = localStorage.getItem('proutbox.skin') || 'can'; } catch (e) {}
   function applySkin() {
     $('skinCan').style.display = skin === 'can' ? 'block' : 'none'; $('skinCushion').style.display = skin === 'cushion' ? 'block' : 'none'; // SVG elements have no .hidden
-    $('skinBtn').textContent = skin === 'can' ? 'Passer au coussin péteur' : 'Revenir à la canette';
-    $('canBtn').setAttribute('aria-label', skin === 'can' ? 'Retourner la boîte' : 'Écraser le coussin');
+    $('skinBtn').textContent = skin === 'can' ? T('Passer au coussin péteur') : T('Revenir à la canette');
+    $('canBtn').setAttribute('aria-label', skin === 'can' ? T('Retourner la boîte') : T('Écraser le coussin'));
   }
   $('skinBtn').addEventListener('click', function () { skin = skin === 'can' ? 'cushion' : 'can'; try { localStorage.setItem('proutbox.skin', skin); } catch (e) {} applySkin(); blip(skin === 'can' ? 700 : 500, .08); if (skin === 'cushion' && !X.cushion) exploit({ cushion: true }); });
   applySkin();
@@ -1418,21 +1451,21 @@ button:active { transform: scale(.96); }
   function themeOfDay() { var d = new Date(); var n = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); return THEMES[n % THEMES.length]; }
   var curGroup = null, gTab = 'gallery', gSeq = 0, gMembers = [], gRows = [];
   function gStatus(t) { $('gBoardStatus').textContent = t || ''; }
-  function presetName(id) { for (var i = 0; i < SOUNDS.length; i++) if (SOUNDS[i].id === id) return SOUNDS[i].name.toUpperCase(); return (id || '').toUpperCase(); }
+  function presetName(id) { for (var i = 0; i < SOUNDS.length; i++) if (SOUNDS[i].id === id) return T(SOUNDS[i].name).toUpperCase(); return (id || '').toUpperCase(); }
 
   function openGroups() {
-    if (!online()) { note('Les groupes arrivent avec le classement en ligne'); return; }
+    if (!online()) { note(T('Les groupes arrivent avec le classement en ligne')); return; }
     closeScreens(); openScreen('groupsScreen');
-    $('glist').innerHTML = ''; $('gEmpty').hidden = true; $('gStatus').textContent = 'CHARGEMENT…';
+    $('glist').innerHTML = ''; $('gEmpty').hidden = true; $('gStatus').textContent = T('CHARGEMENT…');
     rpc('my_groups', { p_device: device }).then(function (rows) {
       rows = rows || []; $('gStatus').textContent = ''; $('gEmpty').hidden = rows.length > 0;
       rows.forEach(function (g) {
         var b = document.createElement('button'); b.type = 'button'; b.className = 'gcard';
         var left = document.createElement('div'), nm = document.createElement('b'), sm = document.createElement('small');
         nm.textContent = g.name.toUpperCase();
-        sm.textContent = g.members + (g.members > 1 ? ' MEMBRES' : ' MEMBRE') + ' · ' + g.prouts + (g.prouts > 1 ? ' PROUTS' : ' PROUT') + ' · TOI : ' + g.pseudo.toUpperCase();
+        sm.textContent = P(g.members, '{0} MEMBRE', '{0} MEMBRES') + ' · ' + P(g.prouts, '{0} PROUT', '{0} PROUTS') + T(' · TOI : {0}', g.pseudo.toUpperCase());
         left.appendChild(nm); left.appendChild(sm); b.appendChild(left);
-        if (g.to_guess > 0) { var bd = document.createElement('span'); bd.className = 'badge'; bd.textContent = g.to_guess + ' À DEVINER'; b.appendChild(bd); }
+        if (g.to_guess > 0) { var bd = document.createElement('span'); bd.className = 'badge'; bd.textContent = T('{0} À DEVINER', g.to_guess); b.appendChild(bd); }
         b.addEventListener('click', function () { openGroup(g); });
         $('glist').appendChild(b);
       });
@@ -1442,10 +1475,10 @@ button:active { transform: scale(.96); }
   var gformMode = 'create';
   function openGform(mode) {
     gformMode = mode;
-    $('gformTitle').textContent = mode === 'create' ? 'CRÉER UN GROUPE' : 'REJOINDRE UN GROUPE';
-    $('gformHint').textContent = mode === 'create' ? 'UN CODE À PARTAGER SERA GÉNÉRÉ' : 'DEMANDE LE CODE À 6 LETTRES À TES POTES';
-    $('gNameLabel').textContent = mode === 'create' ? 'NOM DU GROUPE' : 'CODE DU GROUPE';
-    $('gName').placeholder = mode === 'create' ? 'Les Pétomanes' : 'ABCDEF'; $('gName').maxLength = mode === 'create' ? 24 : 6; $('gName').value = '';
+    $('gformTitle').textContent = mode === 'create' ? T('CRÉER UN GROUPE') : T('REJOINDRE UN GROUPE');
+    $('gformHint').textContent = mode === 'create' ? T('UN CODE À PARTAGER SERA GÉNÉRÉ') : T('DEMANDE LE CODE À 6 LETTRES À TES POTES');
+    $('gNameLabel').textContent = mode === 'create' ? T('NOM DU GROUPE') : T('CODE DU GROUPE');
+    $('gName').placeholder = mode === 'create' ? T('Les Pétomanes') : 'ABCDEF'; $('gName').maxLength = mode === 'create' ? 24 : 6; $('gName').value = '';
     var lastPseudo = ''; try { lastPseudo = localStorage.getItem('proutbox.pseudo') || ''; } catch (e) {}
     $('gPseudo').value = lastPseudo; $('gformStatus').textContent = ''; $('gformOk').disabled = false;
     closeScreens(); openScreen('gformScreen'); // pas de focus automatique : sur iPhone le clavier + zoom à l'ouverture bloquaient l'écran
@@ -1455,8 +1488,8 @@ button:active { transform: scale(.96); }
   $('gformCancel').addEventListener('click', openGroups);
   $('gformOk').addEventListener('click', function () {
     var a = $('gName').value.trim(), p = $('gPseudo').value.trim();
-    if (!a || !p) { $('gformStatus').textContent = 'REMPLIS LES DEUX CASES'; return; }
-    $('gformOk').disabled = true; $('gformStatus').textContent = 'ENVOI…';
+    if (!a || !p) { $('gformStatus').textContent = T('REMPLIS LES DEUX CASES'); return; }
+    $('gformOk').disabled = true; $('gformStatus').textContent = T('ENVOI…');
     try { localStorage.setItem('proutbox.pseudo', p); } catch (e) {}
     var call = gformMode === 'create' ? rpc('create_group', { p_device: device, p_name: a, p_pseudo: p }) : rpc('join_group', { p_device: device, p_code: a.toUpperCase(), p_pseudo: p });
     call.then(function (rows) { jingle(); if (gformMode === 'create' && !X.created) exploit({ created: true }); openGroup(rows[0]); }).catch(function (e) { $('gformOk').disabled = false; $('gformStatus').textContent = friendly(e); });
@@ -1465,13 +1498,13 @@ button:active { transform: scale(.96); }
     curGroup = g; gTab = 'gallery';
     if (!X.group) exploit({ group: true });
     $('gTitle').textContent = g.name.toUpperCase();
-    $('gCode').textContent = 'CODE : ' + g.code + ' · PARTAGER';
+    $('gCode').textContent = T('CODE : {0} · PARTAGER', g.code);
     closeScreens(); openScreen('groupScreen'); loadGroup();
   }
   $('gCode').addEventListener('click', function () {
-    var txt = 'Rejoins mon groupe « ' + curGroup.name + ' » sur Prout Box avec le code ' + curGroup.code + ' ! https://apps.apple.com/fr/app/prout-box/id6827309393';
+    var txt = T('Rejoins mon groupe « {0} » sur Prout Box avec le code {1} !', curGroup.name, curGroup.code) + ' https://apps.apple.com/app/id6827309393';
     if (navigator.share) navigator.share({ text: txt }).catch(function () {});
-    else if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { gStatus('CODE COPIÉ !'); }, function () {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { gStatus(T('CODE COPIÉ !')); }, function () {});
   });
   Array.prototype.forEach.call($('gtabs').children, function (t) { t.addEventListener('click', function () { gTab = t.dataset.tab; blip(760, .05); loadGroup(); }); });
   function loadGroup() {
@@ -1479,7 +1512,7 @@ button:active { transform: scale(.96); }
     Array.prototype.forEach.call($('gtabs').children, function (t) { t.classList.toggle('on', t.dataset.tab === gTab); });
     $('gBoard').innerHTML = ''; $('gBoard').hidden = gTab === 'guess' || gTab === 'defis';
     $('gGuess').hidden = gTab !== 'guess'; $('gDefis').hidden = gTab !== 'defis';
-    $('gBoardEmpty').hidden = true; gStatus('CHARGEMENT…');
+    $('gBoardEmpty').hidden = true; gStatus(T('CHARGEMENT…'));
     Promise.all([rpc('group_members', { p_device: device, p_group: curGroup.id }), rpc('group_gallery', { p_device: device, p_group: curGroup.id, p_limit: 100 })]).then(function (res) {
       if (seq !== gSeq) return;
       gMembers = res[0] || []; gRows = res[1] || []; gStatus('');
@@ -1491,9 +1524,9 @@ button:active { transform: scale(.96); }
   function renderGallery() {
     var ol = $('gBoard');
     gRows.forEach(function (row, i) {
-      var li = rowEl(i, row.author ? row.author.toUpperCase() : '???', row.species, '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), row.votes + (row.votes > 1 ? ' VOTES' : ' VOTE'));
-      if (row.kind === 'jour') tag2(li, row.theme || 'DÉFI DU JOUR');
-      if (row.kind === 'imitation') tag2(li, 'IMITE ' + presetName(row.target) + ' · ' + (row.similarity || 0) + ' %');
+      var li = rowEl(i, row.author ? row.author.toUpperCase() : '???', T(row.species), '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), P(row.votes, '{0} VOTE', '{0} VOTES'));
+      if (row.kind === 'jour') tag2(li, T(row.theme || 'DÉFI DU JOUR'));
+      if (row.kind === 'imitation') tag2(li, T('IMITE {0} · {1} %', presetName(row.target), row.similarity || 0));
       var rate = null;
       li.addEventListener('click', function (e) {
         if (rate && rate.contains(e.target)) return;
@@ -1503,21 +1536,21 @@ button:active { transform: scale(.96); }
         li.classList.add('open');
         rate = document.createElement('div'); rate.className = 'rate';
         var lab = document.createElement('span');
-        lab.textContent = row.mine ? 'C’EST TON PROUT' : (!row.author ? 'DEVINE D’ABORD QUI A PÉTÉ !' : (row.my_stars ? 'TA NOTE : ' + row.my_stars + '/5' : 'NOTE CE PROUT'));
+        lab.textContent = row.mine ? T('C’EST TON PROUT') : (!row.author ? T('DEVINE D’ABORD QUI A PÉTÉ !') : (row.my_stars ? T('TA NOTE : {0}/5', row.my_stars) : T('NOTE CE PROUT')));
         rate.appendChild(lab);
         if (!row.mine && row.author) {
           var cr = document.createElement('div'); cr.className = 'crottes';
           var paint = function (n) { Array.prototype.forEach.call(cr.children, function (b, k) { b.classList.toggle('lit', k < n); }); };
           for (var k = 1; k <= 5; k++) (function (k) {
-            var b = document.createElement('button'); b.type = 'button'; b.textContent = '💩'; b.setAttribute('aria-label', k + ' sur 5');
+            var b = document.createElement('button'); b.type = 'button'; b.textContent = '💩'; b.setAttribute('aria-label', T('{0} sur 5', k));
             b.addEventListener('click', function () {
               paint(k); blip(600 + k * 120, .08);
               rpc('vote_group_prout', { p_device: device, p_group_prout: row.id, p_stars: k }).then(function (res) {
                 var v = res && res[0]; if (!v) return;
                 row.votes = v.votes; row.avg = v.avg; row.my_stars = k;
                 li.querySelector('.sc').childNodes[0].textContent = '💩 ' + Number(v.avg).toFixed(1);
-                li.querySelector('.sc small').textContent = v.votes + (v.votes > 1 ? ' VOTES' : ' VOTE');
-                lab.textContent = 'TA NOTE : ' + k + '/5';
+                li.querySelector('.sc small').textContent = P(v.votes, '{0} VOTE', '{0} VOTES');
+                lab.textContent = T('TA NOTE : {0}/5', k);
               }).catch(function (e) { gStatus(friendly(e)); });
             });
             cr.appendChild(b);
@@ -1526,18 +1559,18 @@ button:active { transform: scale(.96); }
         }
         var acts = document.createElement('div'); acts.className = 'actions';
         if (row.mine) {
-          var del = document.createElement('button'); del.type = 'button'; del.className = 'link danger'; del.textContent = 'RETIRER';
-          del.addEventListener('click', function () { armed(del, 'SÛR ? RETOUCHE', function () {
+          var del = document.createElement('button'); del.type = 'button'; del.className = 'link danger'; del.textContent = T('RETIRER');
+          del.addEventListener('click', function () { armed(del, T('SÛR ? RETOUCHE'), function () {
             rpc('delete_group_prout', { p_device: device, p_group_prout: row.id }).then(function (path) {
               if (path) fetch(SB.url + '/storage/v1/object/prouts/' + path, { method: 'DELETE', headers: sbHeaders({}) }).catch(function () {});
-              li.remove(); gStatus('PROUT RETIRÉ DU GROUPE');
+              li.remove(); gStatus(T('PROUT RETIRÉ DU GROUPE'));
             }).catch(function (e) { gStatus(friendly(e)); });
           }); });
           acts.appendChild(del);
         } else {
-          var rep = document.createElement('button'); rep.type = 'button'; rep.className = 'link danger'; rep.textContent = 'SIGNALER';
-          rep.addEventListener('click', function () { armed(rep, 'SÛR ? RETOUCHE', function () {
-            rpc('report_group_prout', { p_device: device, p_group_prout: row.id }).then(function () { li.remove(); gStatus('MASQUÉ POUR TOUT LE GROUPE'); }).catch(function (e) { gStatus(friendly(e)); });
+          var rep = document.createElement('button'); rep.type = 'button'; rep.className = 'link danger'; rep.textContent = T('SIGNALER');
+          rep.addEventListener('click', function () { armed(rep, T('SÛR ? RETOUCHE'), function () {
+            rpc('report_group_prout', { p_device: device, p_group_prout: row.id }).then(function () { li.remove(); gStatus(T('MASQUÉ POUR TOUT LE GROUPE')); }).catch(function (e) { gStatus(friendly(e)); });
           }); });
           acts.appendChild(rep);
         }
@@ -1546,18 +1579,18 @@ button:active { transform: scale(.96); }
       });
       ol.appendChild(li);
     });
-    $('gBoardEmpty').hidden = gRows.length > 0; $('gBoardEmpty').innerHTML = 'LA GALERIE EST VIDE...<br>ENVOIE UN PROUT ICI !';
+    $('gBoardEmpty').hidden = gRows.length > 0; $('gBoardEmpty').innerHTML = T('LA GALERIE EST VIDE...') + '<br>' + T('ENVOIE UN PROUT ICI !');
     var add = document.createElement('li'); add.style.display = 'block'; add.style.textAlign = 'center'; add.style.border = 'none';
-    var addb = document.createElement('button'); addb.type = 'button'; addb.className = 'pub'; addb.style.margin = '6px auto 0'; addb.textContent = '+ ENVOYER UN DE MES PROUTS';
+    var addb = document.createElement('button'); addb.type = 'button'; addb.className = 'pub'; addb.style.margin = '6px auto 0'; addb.textContent = T('+ ENVOYER UN DE MES PROUTS');
     addb.addEventListener('click', function (e) { e.stopPropagation(); pickMineForGroup(); });
     add.appendChild(addb); ol.appendChild(add);
   }
   function pickMineForGroup() {
-    var ol = $('gBoard'); ol.innerHTML = ''; gStatus('CHOISIS UN PROUT À ENVOYER DANS LE GROUPE');
-    if (!mine.length) { $('gBoardEmpty').hidden = false; $('gBoardEmpty').innerHTML = 'AUCUN PROUT SUR CE TÉLÉPHONE...<br>ENREGISTRE-EN UN D’ABORD !'; return; }
+    var ol = $('gBoard'); ol.innerHTML = ''; gStatus(T('CHOISIS UN PROUT À ENVOYER DANS LE GROUPE'));
+    if (!mine.length) { $('gBoardEmpty').hidden = false; $('gBoardEmpty').innerHTML = T('AUCUN PROUT SUR CE TÉLÉPHONE...') + '<br>' + T('ENREGISTRE-EN UN D’ABORD !'); return; }
     mine.filter(function (r) { return !(r.stats && r.stats.recale); }).sort(function (a, b) { return b.created - a.created; }).forEach(function (r, i) {
-      var li = rowEl(i, r.name || '???', (r.stats && r.stats.species) || '', pad6(r.score || 0), '');
-      var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = 'ENVOYER';
+      var li = rowEl(i, r.name || '???', T((r.stats && r.stats.species) || ''), pad6(r.score || 0), '');
+      var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = T('ENVOYER');
       pb.addEventListener('click', function (e) { e.stopPropagation(); publishToGroup(r, { group: curGroup, kind: 'libre' }); });
       li.querySelector('.sc').appendChild(pb);
       li.addEventListener('click', function () { playRow(li, function () { return playRecording(r); }); });
@@ -1569,8 +1602,8 @@ button:active { transform: scale(.96); }
     if (!online()) return;
     curGroup = rc.group; gTab = 'gallery';
     closeScreens(); openScreen('groupScreen');
-    $('gTitle').textContent = rc.group.name.toUpperCase(); $('gCode').textContent = 'CODE : ' + rc.group.code + ' · PARTAGER';
-    $('gBoard').innerHTML = ''; $('gBoard').hidden = false; $('gGuess').hidden = true; $('gDefis').hidden = true; gStatus('ENVOI DANS LE GROUPE…');
+    $('gTitle').textContent = rc.group.name.toUpperCase(); $('gCode').textContent = T('CODE : {0} · PARTAGER', rc.group.code);
+    $('gBoard').innerHTML = ''; $('gBoard').hidden = false; $('gGuess').hidden = true; $('gDefis').hidden = true; gStatus(T('ENVOI DANS LE GROUPE…'));
     var ext = /mp4|m4a|aac/.test(r.blob.type) ? 'm4a' : /webm/.test(r.blob.type) ? 'webm' : /ogg/.test(r.blob.type) ? 'ogg' : /wav/.test(r.blob.type) ? 'wav' : 'bin';
     var path = device + '/g' + r.id + '-' + Date.now().toString(36) + '.' + ext;
     var prep = (rc.kind === 'imitation' && rc.similarity == null)
@@ -1581,7 +1614,7 @@ button:active { transform: scale(.96); }
     }).then(function () {
       jingle(); note(''); loadGroup();
       if (rc.kind === 'imitation') exploit({ imit: Math.max(X.imit, rc.similarity || 0), imits: (X.imits || 0) + ((rc.similarity || 0) >= 80 ? 1 : 0) });
-      setTimeout(function () { gStatus(rc.kind === 'imitation' ? 'IMITATION ENVOYÉE : ' + rc.similarity + ' % DE RESSEMBLANCE' : 'PROUT ENVOYÉ DANS LE GROUPE !'); }, 600);
+      setTimeout(function () { gStatus(rc.kind === 'imitation' ? T('IMITATION ENVOYÉE : {0} % DE RESSEMBLANCE', rc.similarity) : T('PROUT ENVOYÉ DANS LE GROUPE !')); }, 600);
     }).catch(function (e) { loadGroup(); setTimeout(function () { gStatus(friendly(e)); }, 600); });
   }
   // --- Qui a pété ? ---
@@ -1589,13 +1622,13 @@ button:active { transform: scale(.96); }
     var box = $('gGuess'); box.innerHTML = '';
     var pool = gRows.filter(function (r) { return !r.mine && !r.author; });
     var others = gMembers.filter(function (m) { return !m.me; });
-    if (!others.length) { box.innerHTML = '<p class="big">INVITE DES POTES !</p><p>PARTAGE LE CODE DU GROUPE, ILS ENVOIENT LEURS PROUTS, ET TU DEVINES QUI A PÉTÉ.</p>'; return; }
-    if (!pool.length) { box.innerHTML = '<p class="big">PLUS RIEN À RENIFLER !</p><p>QUAND TES POTES ENVERRONT DE NOUVEAUX PROUTS, TU POURRAS DEVINER QUI A PÉTÉ.</p>'; return; }
+    if (!others.length) { box.innerHTML = '<p class="big">' + T('INVITE DES POTES !') + '</p><p>' + T('PARTAGE LE CODE DU GROUPE, ILS ENVOIENT LEURS PROUTS, ET TU DEVINES QUI A PÉTÉ.') + '</p>'; return; }
+    if (!pool.length) { box.innerHTML = '<p class="big">' + T('PLUS RIEN À RENIFLER !') + '</p><p>' + T('QUAND TES POTES ENVERRONT DE NOUVEAUX PROUTS, TU POURRAS DEVINER QUI A PÉTÉ.') + '</p>'; return; }
     var row = pool[Math.floor(Math.random() * pool.length)];
-    var title = document.createElement('p'); title.className = 'big'; title.textContent = 'QUI A PÉTÉ ?'; box.appendChild(title);
-    var info = document.createElement('p'); info.textContent = pool.length + (pool.length > 1 ? ' PROUTS À DEVINER · ' : ' PROUT À DEVINER · ') + row.species; box.appendChild(info);
-    var play = document.createElement('button'); play.type = 'button'; play.className = 'pxbtn'; play.textContent = '▶ Écouter'; box.appendChild(play);
-    play.addEventListener('click', function () { if (!unlockAudio()) return; play.textContent = '▶ Réécouter'; playRemote(row).catch(function () { gStatus('LECTURE IMPOSSIBLE'); }); });
+    var title = document.createElement('p'); title.className = 'big'; title.textContent = T('QUI A PÉTÉ ?'); box.appendChild(title);
+    var info = document.createElement('p'); info.textContent = P(pool.length, '{0} PROUT À DEVINER', '{0} PROUTS À DEVINER') + ' · ' + T(row.species); box.appendChild(info);
+    var play = document.createElement('button'); play.type = 'button'; play.className = 'pxbtn'; play.textContent = T('▶ Écouter'); box.appendChild(play);
+    play.addEventListener('click', function () { if (!unlockAudio()) return; play.textContent = T('▶ Réécouter'); playRemote(row).catch(function () { gStatus(T('LECTURE IMPOSSIBLE')); }); });
     var who = document.createElement('div'); who.className = 'who'; box.appendChild(who);
     var result = document.createElement('p'); result.className = 'big'; box.appendChild(result);
     var done = false;
@@ -1608,9 +1641,9 @@ button:active { transform: scale(.96); }
           row.author = v.author; row.author_id = v.author_id; row.guessed = m.id; row.guess_correct = v.correct;
           Array.prototype.forEach.call(who.children, function (x) { x.disabled = true; if (x.textContent === v.author.toUpperCase()) x.classList.add('hit'); });
           if (!v.correct) b.classList.add('miss');
-          result.textContent = v.correct ? 'BIEN JOUÉ ! C’ÉTAIT ' + v.author.toUpperCase() + ' · +1' : 'RATÉ ! C’ÉTAIT ' + v.author.toUpperCase();
+          result.textContent = v.correct ? T('BIEN JOUÉ ! C’ÉTAIT {0} · +1', v.author.toUpperCase()) : T('RATÉ ! C’ÉTAIT {0}', v.author.toUpperCase());
           if (v.correct) { jingle(); exploit({ guesses: X.guesses + 1 }); } else blip(180, .3, .08);
-          var next = document.createElement('button'); next.type = 'button'; next.className = 'pxbtn'; next.textContent = 'Suivant'; next.addEventListener('click', renderGuess); box.appendChild(next);
+          var next = document.createElement('button'); next.type = 'button'; next.className = 'pxbtn'; next.textContent = T('Suivant'); next.addEventListener('click', renderGuess); box.appendChild(next);
         }).catch(function (e) { done = false; gStatus(friendly(e)); });
       });
       who.appendChild(b);
@@ -1621,29 +1654,29 @@ button:active { transform: scale(.96); }
     var box = $('gDefis'); box.innerHTML = '';
     var theme = themeOfDay();
     var d1 = document.createElement('div'); d1.className = 'defi';
-    var h1 = document.createElement('h3'); h1.textContent = '🌞 LE PROUT DU JOUR'; d1.appendChild(h1);
-    var p0 = document.createElement('p'); p0.textContent = 'THÈME : ' + theme + ' · CHACUN ENREGISTRE, LE GROUPE NOTE.'; d1.appendChild(p0);
+    var h1 = document.createElement('h3'); h1.textContent = T('🌞 LE PROUT DU JOUR'); d1.appendChild(h1);
+    var p0 = document.createElement('p'); p0.textContent = T('THÈME : {0} · CHACUN ENREGISTRE, LE GROUPE NOTE.', T(theme)); d1.appendChild(p0);
     var todays = gRows.filter(function (r) { return r.kind === 'jour' && r.theme === theme; });
-    var p1 = document.createElement('p'); p1.textContent = todays.length ? todays.length + (todays.length > 1 ? ' PARTICIPATIONS AUJOURD’HUI' : ' PARTICIPATION AUJOURD’HUI') : 'PERSONNE N’A ENCORE OSÉ.'; d1.appendChild(p1);
-    var b1 = document.createElement('button'); b1.type = 'button'; b1.className = 'pxbtn'; b1.textContent = '● Enregistrer le mien';
+    var p1 = document.createElement('p'); p1.textContent = todays.length ? P(todays.length, '{0} PARTICIPATION AUJOURD’HUI', '{0} PARTICIPATIONS AUJOURD’HUI') : T('PERSONNE N’A ENCORE OSÉ.'); d1.appendChild(p1);
+    var b1 = document.createElement('button'); b1.type = 'button'; b1.className = 'pxbtn'; b1.textContent = T('● Enregistrer le mien');
     b1.addEventListener('click', function () { startChallenge({ group: curGroup, kind: 'jour', theme: theme }); });
     d1.appendChild(b1); box.appendChild(d1);
     var d2 = document.createElement('div'); d2.className = 'defi';
-    var h2 = document.createElement('h3'); h2.textContent = '🎭 L’IMITATEUR'; d2.appendChild(h2);
-    var p2a = document.createElement('p'); p2a.textContent = 'REPRODUIS UN PROUT CLASSIQUE, LE PROUT-O-MÈTRE MESURE LA RESSEMBLANCE.'; d2.appendChild(p2a);
-    var sel = document.createElement('select'); SOUNDS.forEach(function (s) { var o = document.createElement('option'); o.value = s.id; o.textContent = s.name.toUpperCase(); sel.appendChild(o); }); d2.appendChild(sel);
+    var h2 = document.createElement('h3'); h2.textContent = T('🎭 L’IMITATEUR'); d2.appendChild(h2);
+    var p2a = document.createElement('p'); p2a.textContent = T('REPRODUIS UN PROUT CLASSIQUE, LE PROUT-O-MÈTRE MESURE LA RESSEMBLANCE.'); d2.appendChild(p2a);
+    var sel = document.createElement('select'); SOUNDS.forEach(function (s) { var o = document.createElement('option'); o.value = s.id; o.textContent = T(s.name).toUpperCase(); sel.appendChild(o); }); d2.appendChild(sel);
     var best = gRows.filter(function (r) { return r.kind === 'imitation'; }).sort(function (a, b) { return (b.similarity || 0) - (a.similarity || 0); })[0];
-    var p2 = document.createElement('p'); p2.textContent = best ? 'RECORD DU GROUPE : ' + (best.author ? best.author.toUpperCase() : '???') + ' · ' + presetName(best.target) + ' · ' + best.similarity + ' %' : 'AUCUNE IMITATION POUR L’INSTANT.'; d2.appendChild(p2);
+    var p2 = document.createElement('p'); p2.textContent = best ? T('RECORD DU GROUPE : {0} · {1} · {2} %', best.author ? best.author.toUpperCase() : '???', presetName(best.target), best.similarity) : T('AUCUNE IMITATION POUR L’INSTANT.'); d2.appendChild(p2);
     var row2 = document.createElement('div'); row2.className = 'row';
-    var lis = document.createElement('button'); lis.type = 'button'; lis.className = 'pxbtn dim'; lis.textContent = '▶ Modèle';
+    var lis = document.createElement('button'); lis.type = 'button'; lis.className = 'pxbtn dim'; lis.textContent = T('▶ Modèle');
     lis.addEventListener('click', function () { if (!unlockAudio()) return; playPreset(sel.value); });
-    var b2 = document.createElement('button'); b2.type = 'button'; b2.className = 'pxbtn'; b2.textContent = '● Imiter';
+    var b2 = document.createElement('button'); b2.type = 'button'; b2.className = 'pxbtn'; b2.textContent = T('● Imiter');
     b2.addEventListener('click', function () { startChallenge({ group: curGroup, kind: 'imitation', target: sel.value }); });
     row2.appendChild(lis); row2.appendChild(b2); d2.appendChild(row2); box.appendChild(d2);
   }
   function startChallenge(rc) {
     recContext = rc; closeScreens();
-    note(rc.kind === 'jour' ? 'Défi du jour : ' + rc.theme + ' — à toi !' : 'Imite ' + presetName(rc.target) + ' — à toi !');
+    note(rc.kind === 'jour' ? T('Défi du jour : {0} — à toi !', T(rc.theme)) : T('Imite {0} — à toi !', presetName(rc.target)));
     setTimeout(function () { if (!recording) startRec(); }, 500);
   }
   // 0-100 : how close the recording's stats are to the classic's
@@ -1656,11 +1689,11 @@ button:active { transform: scale(.96); }
     var ol = $('gBoard');
     var rows = gMembers.slice().sort(function (a, b) { return b.correct - a.correct || a.guesses - b.guesses || b.prouts - a.prouts; });
     rows.forEach(function (m, i) {
-      ol.appendChild(rowEl(i, m.pseudo.toUpperCase() + (m.me ? ' (TOI)' : ''), m.prouts + (m.prouts > 1 ? ' PROUTS ENVOYÉS' : ' PROUT ENVOYÉ'), '👃 ' + m.correct, m.guesses ? Math.round(m.correct / m.guesses * 100) + ' % DE FLAIR' : 'PAS ENCORE RENIFLÉ'));
+      ol.appendChild(rowEl(i, m.pseudo.toUpperCase() + (m.me ? T(' (TOI)') : ''), P(m.prouts, '{0} PROUT ENVOYÉ', '{0} PROUTS ENVOYÉS'), '👃 ' + m.correct, m.guesses ? T('{0} % DE FLAIR', Math.round(m.correct / m.guesses * 100)) : T('PAS ENCORE RENIFLÉ')));
     });
     $('gBoardEmpty').hidden = rows.length > 0;
   }
-  $('gLeave').addEventListener('click', function () { armed($('gLeave'), 'Sûr ?', function () { rpc('leave_group', { p_device: device, p_group: curGroup.id }).then(openGroups).catch(function (e) { gStatus(friendly(e)); }); }); });
+  $('gLeave').addEventListener('click', function () { armed($('gLeave'), T('Sûr ?'), function () { rpc('leave_group', { p_device: device, p_group: curGroup.id }).then(openGroups).catch(function (e) { gStatus(friendly(e)); }); }); });
   $('groupClose').addEventListener('click', openGroups);
   $('groupsClose').addEventListener('click', function () { closeScreens(); blip(440, .08); });
   $('groupsBtn').addEventListener('click', openGroups);
@@ -1695,7 +1728,7 @@ button:active { transform: scale(.96); }
     { id: 'imit3', ic: '🎪', name: 'ROI DE L’IMITATION', how: '3 imitations à 80 %+', pts: 80, rare: 'ÉPIQUE', prog: function (x) { return [x.imits, 3]; } },
     { id: 'coussin', ic: '🪑', name: 'COUSSIN PÉTEUR', how: 'Change de boîte', pts: 10, prog: function (x) { return [x.cushion ? 1 : 0, 1]; } },
     { id: 'retourneur', ic: '🙃', name: 'RETOURNEUR', how: '100 prouts déclenchés', pts: 30, prog: function (x) { return [x.flips, 100]; } },
-    { id: 'pionnier', ic: '🚀', name: 'PIONNIER', how: 'Parmi les 1000 premiers', pts: 150, rare: 'LÉGENDAIRE', label: function (x) { return 'PIONNIER N°' + x.pioneer; },
+    { id: 'pionnier', ic: '🚀', name: 'PIONNIER', how: 'Parmi les 1000 premiers', pts: 150, rare: 'LÉGENDAIRE', label: function (x) { return T('PIONNIER N°{0}', x.pioneer); },
       test: function (x) { return x.pioneer > 0 && x.pioneer <= 1000; }, prog: function (x) { return [x.pioneer > 0 && x.pioneer <= 1000 ? 1 : 0, 1]; } }
   ];
   MEDALS.forEach(function (m) { if (!m.test) m.test = function (x) { var p = m.prog(x); return p[0] >= p[1]; }; });
@@ -1745,8 +1778,8 @@ button:active { transform: scale(.96); }
     if (fresh.length) {
       setTimeout(function () { jingle(); }, 300);
       var after = rank(points()).title;
-      medalTxt = '🏅 ' + (fresh.length > 1 ? 'Nouvelles médailles' : 'Nouvelle médaille') + ' : ' + fresh.map(function (m) { return m.ic + ' ' + (m.label ? m.label(X) : m.name); }).join(' · ')
-        + (after !== before ? ' · 👑 Nouveau titre : ' + after : '');
+      medalTxt = '🏅 ' + (fresh.length > 1 ? T('Nouvelles médailles') : T('Nouvelle médaille')) + ' : ' + fresh.map(function (m) { return m.ic + ' ' + (m.label ? m.label(X) : T(m.name)); }).join(' · ')
+        + (after !== before ? T(' · 👑 Nouveau titre : {0}', T(after)) : '');
       note(medalTxt); $('medalStatus').textContent = medalTxt.toUpperCase();
     }
     return fresh;
@@ -1785,39 +1818,39 @@ button:active { transform: scale(.96); }
   function medalEl(m, won) {
     var d = document.createElement('div'); d.className = 'medal' + (won ? ' on' : '') + (m.rare ? ' r-' + m.rare.replace(/[^A-Z]/g, '').toLowerCase() : '') + (won === today() ? ' new' : '');
     var ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = won || m.rare !== 'MYSTÈRE' ? m.ic : '❓';
-    var nm = document.createElement('b'); nm.textContent = won ? (m.label ? m.label(X) : m.name) : (m.rare === 'MYSTÈRE' ? '???' : m.name);
-    var how = document.createElement('small'); how.textContent = won ? 'OBTENUE LE ' + won.split('-').reverse().join('/') + ' · +' + m.pts + ' PP' : (m.clue || m.how).toUpperCase();
+    var nm = document.createElement('b'); nm.textContent = won ? (m.label ? m.label(X) : T(m.name)) : (m.rare === 'MYSTÈRE' ? '???' : T(m.name));
+    var how = document.createElement('small'); how.textContent = won ? T('OBTENUE LE {0} · +{1} PP', new Date(won + 'T12:00:00').toLocaleDateString(LANG), m.pts) : T(m.clue || m.how).toUpperCase();
     d.appendChild(ic); d.appendChild(nm); d.appendChild(how);
-    if (m.rare) { var r = document.createElement('em'); r.textContent = m.rare; d.appendChild(r); }
+    if (m.rare) { var r = document.createElement('em'); r.textContent = T(m.rare); d.appendChild(r); }
     return d;
   }
   function renderExploits() {
     var body = $('xbody'); body.innerHTML = '';
     Array.prototype.forEach.call($('xtabs').children, function (t) { t.classList.toggle('on', t.dataset.tab === xTab); });
     var p = points(), rk = rank(p), box = $('rankBox'); box.innerHTML = '';
-    var t1 = document.createElement('b'); t1.textContent = '👑 ' + rk.title; box.appendChild(t1);
-    var t2 = document.createElement('small'); t2.textContent = p + ' PP' + (rk.next ? ' · ' + (rk.next[0] - p) + ' PP AVANT ' + rk.next[1] : ' · TITRE MAXIMAL'); box.appendChild(t2);
+    var t1 = document.createElement('b'); t1.textContent = '👑 ' + T(rk.title); box.appendChild(t1);
+    var t2 = document.createElement('small'); t2.textContent = p + ' PP' + (rk.next ? T(' · {0} PP AVANT {1}', rk.next[0] - p, T(rk.next[1])) : T(' · TITRE MAXIMAL')); box.appendChild(t2);
     box.appendChild(bar(rk.next ? p - rk.from : 1, rk.next ? rk.next[0] - rk.from : 1));
     if (xTab === 'missions') {
       var theme = themeOfDay(), done = X.daily === today();
       var card = document.createElement('div'); card.className = 'defi';
-      var h = document.createElement('h3'); h.textContent = '🌞 DÉFI DU JOUR'; card.appendChild(h);
-      var pp = document.createElement('p'); pp.textContent = 'THÈME : ' + theme + (done ? ' · FAIT ✓' : ' · UN NOUVEAU THÈME CHAQUE JOUR'); card.appendChild(pp);
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'pxbtn' + (done ? ' dim' : ''); b.textContent = done ? '● Refaire' : '● Enregistrer';
-      b.addEventListener('click', function () { recContext = { kind: 'daily', theme: theme }; closeScreens(); note('Défi du jour : ' + theme + ' — à toi !'); setTimeout(function () { if (!recording) startRec(); }, 500); });
+      var h = document.createElement('h3'); h.textContent = T('🌞 DÉFI DU JOUR'); card.appendChild(h);
+      var pp = document.createElement('p'); pp.textContent = T('THÈME : {0}', T(theme)) + (done ? T(' · FAIT ✓') : T(' · UN NOUVEAU THÈME CHAQUE JOUR')); card.appendChild(pp);
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'pxbtn' + (done ? ' dim' : ''); b.textContent = done ? T('● Refaire') : T('● Enregistrer');
+      b.addEventListener('click', function () { recContext = { kind: 'daily', theme: theme }; closeScreens(); note(T('Défi du jour : {0} — à toi !', T(theme))); setTimeout(function () { if (!recording) startRec(); }, 500); });
       card.appendChild(b); body.appendChild(card);
       // missions still open, the closest to completion first; the pioneer one always on top
       var open = MEDALS.filter(function (m) { return !X.medals[m.id]; });
       open.sort(function (a, b) { if (a.id === 'pionnier') return -1; if (b.id === 'pionnier') return 1; var pa = a.prog(X), pb = b.prog(X); return pb[0] / pb[1] - pa[0] / pa[1]; });
-      if (!open.length) { var ok = document.createElement('p'); ok.className = 'blink'; ok.textContent = 'TOUTES LES MISSIONS SONT ACCOMPLIES !'; body.appendChild(ok); }
+      if (!open.length) { var ok = document.createElement('p'); ok.className = 'blink'; ok.textContent = T('TOUTES LES MISSIONS SONT ACCOMPLIES !'); body.appendChild(ok); }
       open.forEach(function (m) {
         var pr = m.prog(X), d = document.createElement('div'); d.className = 'mission' + (m.rare ? ' r-' + m.rare.replace(/[^A-Z]/g, '').toLowerCase() : '');
         var ic = document.createElement('span'); ic.className = 'ic'; ic.textContent = m.ic;
-        var tx = document.createElement('div'); var nm = document.createElement('b'); nm.textContent = m.name; tx.appendChild(nm);
+        var tx = document.createElement('div'); var nm = document.createElement('b'); nm.textContent = T(m.name); tx.appendChild(nm);
         var how = document.createElement('small');
-        how.textContent = m.id === 'pionnier' ? (X.pioneer > 1000 ? 'TROP TARD : LES 1000 PLACES SONT PRISES (TU ES N°' + X.pioneer + ')' : X.pioneer ? 'TU ES LE N°' + X.pioneer : online() ? 'OUVRE L’APP AVEC DU RÉSEAU POUR PRENDRE TA PLACE' : 'BIENTÔT DISPONIBLE') : m.how.toUpperCase() + ' · ' + Math.min(pr[0], pr[1]) + ' / ' + pr[1];
+        how.textContent = m.id === 'pionnier' ? (X.pioneer > 1000 ? T('TROP TARD : LES 1000 PLACES SONT PRISES (TU ES N°{0})', X.pioneer) : X.pioneer ? T('TU ES LE N°{0}', X.pioneer) : online() ? T('OUVRE L’APP AVEC DU RÉSEAU POUR PRENDRE TA PLACE') : T('BIENTÔT DISPONIBLE')) : T(m.how).toUpperCase() + ' · ' + Math.min(pr[0], pr[1]) + ' / ' + pr[1];
         tx.appendChild(how); tx.appendChild(bar(pr[0], pr[1]));
-        var pts = document.createElement('em'); pts.textContent = '+' + m.pts + ' PP' + (m.rare ? ' · ' + m.rare : '');
+        var pts = document.createElement('em'); pts.textContent = '+' + m.pts + ' PP' + (m.rare ? ' · ' + T(m.rare) : '');
         d.appendChild(ic); d.appendChild(tx); d.appendChild(pts); body.appendChild(d);
       });
     } else if (xTab === 'medals') {
@@ -1827,13 +1860,13 @@ button:active { transform: scale(.96); }
       wonM.concat(lost).forEach(function (m) { grid.appendChild(medalEl(m, X.medals[m.id])); });
       body.appendChild(grid);
     } else {
-      var intro = document.createElement('p'); intro.className = 'hint'; intro.textContent = 'DES MÉDAILLES SECRÈTES. UN INDICE, ET À TOI DE DEVINER.'; body.appendChild(intro);
+      var intro = document.createElement('p'); intro.className = 'hint'; intro.textContent = T('DES MÉDAILLES SECRÈTES. UN INDICE, ET À TOI DE DEVINER.'); body.appendChild(intro);
       var g2 = document.createElement('div'); g2.className = 'medals';
       MYSTERIES.forEach(function (m) { g2.appendChild(medalEl(m, X.medals[m.id])); });
       body.appendChild(g2);
     }
     var won = Object.keys(X.medals).length;
-    $('medalStatus').textContent = won + ' / ' + ALL.length + ' MÉDAILLES' + (X.streak >= 2 ? ' · SÉRIE : ' + X.streak + ' JOURS' : '');
+    $('medalStatus').textContent = T('{0} / {1} MÉDAILLES', won, ALL.length) + (X.streak >= 2 ? T(' · SÉRIE : {0} JOURS', X.streak) : '');
   }
   function openMedals() {
     closeScreens(); openScreen('medalsScreen'); $('medalStatus').textContent = '';
@@ -1911,7 +1944,7 @@ button:active { transform: scale(.96); }
     if (!DOE) return;
     var go = function () {
       window.addEventListener('deviceorientation', onOrient);
-      $('hint').textContent = 'Retourne la boîte… ou ton téléphone !';
+      $('hint').textContent = T('Retourne la boîte… ou ton téléphone !');
       try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(function () {}); } catch (e) {}
     };
     if (typeof DOE.requestPermission === 'function') {

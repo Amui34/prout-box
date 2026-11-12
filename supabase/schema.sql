@@ -537,6 +537,190 @@ grant execute on function admin_queue(uuid) to anon, authenticated;
 grant execute on function admin_decide(uuid, uuid, text) to anon, authenticated;
 grant execute on function admin_stats(uuid) to anon, authenticated;
 
+-- ═════════════════════════════════════════════════════════════════════════
+--  MONDE (1.3) : tenir la charge, se nettoyer seul, se surveiller.
+-- ═════════════════════════════════════════════════════════════════════════
+
+-- Classement : la moyenne bayésienne devient une colonne calculée et indexée, par pays et pour le monde,
+-- pour que top_prouts reste un simple parcours d'index quand il y aura des centaines de milliers de prouts.
+alter table prouts add column if not exists rank_score numeric generated always as ((votes_sum + 9.0) / (votes_count + 3)) stored;
+create index if not exists prouts_rank_country_idx on prouts (country, rank_score desc, votes_count desc, created_at desc) where approved and not hidden;
+create index if not exists prouts_rank_world_idx on prouts (rank_score desc, votes_count desc, created_at desc) where approved and not hidden;
+-- Limites anti-abus (20 prouts et 300 votes par jour et par appareil) et « mes prouts » : recherche par appareil.
+create index if not exists prouts_device_idx on prouts (device_id, created_at desc);
+create index if not exists votes_device_idx on votes (device_id, created_at desc);
+
+drop function if exists top_prouts(uuid, text, int);
+create function top_prouts(p_device uuid, p_country text default null, p_limit int default 50)
+returns table (
+  id uuid, initials text, country text, species text, city text, jury int, path text, mime text,
+  votes int, avg numeric, my_stars int, mine boolean, created_at timestamptz
+)
+language sql security definer set search_path = public stable as $$
+  select p.id, p.initials, p.country, p.species, p.city, p.jury, p.path, p.mime,
+         p.votes_count,
+         case when p.votes_count = 0 then 0 else round(p.votes_sum::numeric / p.votes_count, 1) end,
+         (select v.stars from votes v where v.prout_id = p.id and v.device_id = p_device),
+         p.device_id = p_device,
+         p.created_at
+  from prouts p
+  where p.approved and not p.hidden and (p_country is null or p.country = p_country)
+  order by p.rank_score desc, p.votes_count desc, p.created_at desc
+  limit greatest(1, least(100, p_limit));
+$$;
+grant execute on function top_prouts(uuid, text, int) to anon, authenticated;
+
+-- Chiffres publics (page vitrine, communication) : rien de personnel.
+create or replace function public_stats() returns json
+language sql security definer set search_path = public stable as $$
+  select json_build_object(
+    'prouts',    (select count(*) from prouts where approved and not hidden),
+    'countries', (select count(distinct country) from prouts where approved and not hidden),
+    'votes',     (select coalesce(sum(votes_count), 0) from prouts where approved and not hidden),
+    'players',   (select count(*) from pioneers)
+  );
+$$;
+grant execute on function public_stats() to anon, authenticated;
+
+-- Ménage, appelé par le robot (scripts/moderate.mjs) avec le jeton admin.
+-- 1) Prouts masqués depuis plus de 30 jours : supprimés. Renvoie les chemins pour effacer les fichiers.
+create or replace function admin_purge(p_token uuid) returns setof text
+language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (select 1 from admins a where a.token = p_token) then raise exception 'jeton invalide'; end if;
+  return query delete from prouts where hidden and created_at < now() - interval '30 days' returning path;
+  return query delete from group_prouts where hidden and created_at < now() - interval '30 days' returning path;
+end $$;
+-- 2) Fichiers orphelins : déposés dans le bucket mais jamais publiés (ou dont la ligne a disparu), vieux d'un jour.
+--    La policy « suppression des orphelins » autorise ensuite leur effacement par l'API Storage.
+create or replace function admin_orphans(p_token uuid, p_limit int default 200) returns setof text
+language sql security definer set search_path = public stable as $$
+  select o.name from storage.objects o
+  where exists (select 1 from admins a where a.token = p_token)
+    and o.bucket_id = 'prouts' and o.created_at < now() - interval '1 day'
+    and not exists (select 1 from prouts p where p.path = o.name)
+    and not exists (select 1 from group_prouts g where g.path = o.name)
+  order by o.created_at
+  limit greatest(1, least(1000, p_limit));
+$$;
+-- 3) Compteurs : ajoute le poids de la base et du stockage (limites de l'offre gratuite) et la répartition par pays.
+create or replace function admin_stats(p_token uuid) returns json
+language sql security definer set search_path = public stable as $$
+  select case when exists (select 1 from admins a where a.token = p_token) then json_build_object(
+    'pending',  (select count(*) from prouts where not approved and not hidden),
+    'reported', (select count(*) from prouts where reports_count > 0),
+    'online',   (select count(*) from prouts where approved and not hidden),
+    'hidden',   (select count(*) from prouts where hidden),
+    'pioneers', (select count(*) from pioneers),
+    'groups',   (select count(*) from groups),
+    'group_prouts', (select count(*) from group_prouts),
+    'votes',    (select count(*) from votes),
+    'countries', (select count(distinct country) from prouts where approved and not hidden),
+    'top_countries', (select coalesce(json_agg(t), '[]'::json) from (select country, count(*) as n from prouts where approved and not hidden group by country order by count(*) desc limit 8) t),
+    'new_24h',  (select count(*) from prouts where created_at > now() - interval '1 day'),
+    'db_bytes', pg_database_size(current_database()),
+    'storage_bytes', (select coalesce(sum((o.metadata->>'size')::bigint), 0) from storage.objects o where o.bucket_id = 'prouts'),
+    'storage_files', (select count(*) from storage.objects o where o.bucket_id = 'prouts')
+  ) else null end;
+$$;
+grant execute on function admin_purge(uuid) to anon, authenticated;
+grant execute on function admin_orphans(uuid, int) to anon, authenticated;
+grant execute on function admin_stats(uuid) to anon, authenticated;
+
+-- ═════════════════════════════════════════════════════════════════════════
+--  NOMS LIBRES (1.3) : le joueur choisit son nom (2 à 12 caractères) au lieu de 3 initiales.
+--  La colonne garde son nom « initials » (les apps 1.0 à 1.2 l'envoient et la lisent sous ce nom).
+--  Filtre : banned_initials = noms entiers interdits ; banned_words = morceaux interdits n'importe où dans le nom.
+--  La comparaison se fait sans accents, sans chiffres « déguisés » (0→O, 1→I, 3→E, 4→A, 5→S, @→A, $→S) et sans ponctuation.
+-- ═════════════════════════════════════════════════════════════════════════
+alter table prouts drop constraint if exists prouts_initials_check;
+alter table prouts drop constraint if exists prouts_name_check;
+alter table prouts add constraint prouts_name_check check (char_length(initials) between 2 and 12);
+
+create table if not exists banned_words (word text primary key);
+alter table banned_words enable row level security;
+insert into banned_words (word) values
+  ('PUTE'),('PUTAIN'),('PUTA'),('PUTO'),('SALOP'),('CONNARD'),('CONNASSE'),('ENCULE'),('NIQUER'),('NIQUETA'),('COUILLE'),('CHATTE'),('BAISE'),
+  ('PEDOPHILE'),('VIOLEUR'),('NAZI'),('HITLER'),('NEGRE'),('NEGRO'),('BOUGNOUL'),('YOUPIN'),('BICOT'),('TAPETTE'),('TARLOUZE'),('GOUINE'),
+  ('SUCEUR'),('SUCEUSE'),('BRANLEUR'),('MERDE'),('SEXE'),('FUCK'),('BULLSHIT'),('BITCH'),('CUNT'),('NIGGER'),('NIGGA'),('FAGGOT'),('WHORE'),
+  ('SLUT'),('PUSSY'),('PENIS'),('VAGIN'),('PORN'),('RAPIST'),('MIERDA'),('CABRON'),('JODER'),('MARICON'),('ZORRA'),('PENDEJO'),('DAESH')
+on conflict do nothing;
+insert into banned_initials (word) values ('SHIT'),('DICK'),('COCK'),('RAPE'),('VIOL'),('BITE'),('NIQUE'),('PEDE'),('ANAL'),('ANUS'),('CACA'),('PIPI')
+on conflict do nothing;
+
+create or replace function _name_refused(p_name text) returns boolean
+language sql security definer set search_path = public stable as $$
+  with l as (select regexp_replace(translate(upper(coalesce(p_name, '')), 'ÀÂÄÁÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝ01345@$', 'AAAAAACEEEEIIIINOOOOOUUUUYOIEASAS'), '[^A-Z]', '', 'g') as letters)
+  select exists (select 1 from banned_initials b, l where b.word = l.letters)
+      or exists (select 1 from banned_words w, l where l.letters like '%' || w.word || '%');
+$$;
+revoke execute on function _name_refused(text) from public, anon, authenticated;
+
+-- L'app demande « ce nom passe-t-il ? » avant d'enregistrer le prout, pour ne pas découvrir le refus au moment de publier.
+create or replace function name_ok(p_name text) returns boolean
+language sql security definer set search_path = public stable as $$
+  select upper(trim(coalesce(p_name, ''))) ~ '^[[:alnum:] ._-]{2,12}$' and upper(coalesce(p_name, '')) ~ '[[:alnum:]]' and not _name_refused(p_name);
+$$;
+grant execute on function name_ok(text) to anon, authenticated;
+
+create or replace function publish_prout(
+  p_device uuid, p_initials text, p_country text, p_species text, p_jury int, p_path text, p_mime text, p_city text default null
+) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare v_id uuid; v_today int; v_name text := upper(regexp_replace(trim(coalesce(p_initials, '')), '\s+', ' ', 'g'));
+begin
+  if v_name !~ '^[[:alnum:] ._-]{2,12}$' or v_name !~ '[[:alnum:]]' then raise exception 'nom invalide'; end if;
+  if _name_refused(v_name) then raise exception 'nom refusé'; end if;
+  if p_country !~ '^[A-Z]{2}$' then raise exception 'pays invalide'; end if;
+  if p_path !~ ('^' || p_device::text || '/[A-Za-z0-9._-]+$') then raise exception 'chemin invalide'; end if;
+  if not exists (select 1 from storage.objects where bucket_id = 'prouts' and name = p_path) then raise exception 'fichier absent'; end if;
+  select count(*) into v_today from prouts where device_id = p_device and created_at > now() - interval '1 day';
+  if v_today >= 20 then raise exception 'trop de prouts aujourd''hui'; end if;
+  insert into prouts (device_id, initials, country, species, jury, path, mime, city)
+  values (p_device, v_name, p_country, left(coalesce(p_species, ''), 40), greatest(0, least(10000, coalesce(p_jury, 0))), p_path, left(coalesce(p_mime, 'audio/mp4'), 40), nullif(left(trim(coalesce(p_city, '')), 40), ''))
+  returning id into v_id;
+  return v_id;
+end $$;
+grant execute on function publish_prout(uuid, text, text, text, int, text, text, text) to anon, authenticated;
+
+-- Pseudos de groupe : même filtre (l'ancien refusait « Connor » ou « Cassandra » parce qu'ils contenaient 3 lettres interdites).
+create or replace function create_group(p_device uuid, p_name text, p_pseudo text)
+returns table (id uuid, name text, code text, pseudo text)
+language plpgsql security definer set search_path = public as $$
+declare v_code text; v_id uuid; v_pseudo text := left(trim(coalesce(p_pseudo, '')), 12); v_name text := left(trim(coalesce(p_name, '')), 24);
+begin
+  if char_length(v_pseudo) = 0 then raise exception 'pseudo vide'; end if;
+  if _name_refused(v_pseudo) then raise exception 'pseudo refusé'; end if;
+  if char_length(v_name) = 0 then raise exception 'nom vide'; end if;
+  if _name_refused(v_name) then raise exception 'nom refusé'; end if;
+  if (select count(*) from groups g where g.created_by = p_device and g.created_at > now() - interval '1 day') >= 5 then raise exception 'trop de groupes aujourd''hui'; end if;
+  loop
+    v_code := (select string_agg(substr('ABCDEFGHJKLMNPQRSTUVWXYZ', 1 + floor(random() * 24)::int, 1), '') from generate_series(1, 6));
+    exit when not exists (select 1 from groups g where g.code = v_code);
+  end loop;
+  insert into groups (name, code, created_by) values (v_name, v_code, p_device) returning groups.id into v_id;
+  insert into members (group_id, device_id, pseudo) values (v_id, p_device, v_pseudo);
+  return query select v_id, v_name, v_code, v_pseudo;
+end $$;
+
+create or replace function join_group(p_device uuid, p_code text, p_pseudo text)
+returns table (id uuid, name text, code text, pseudo text)
+language plpgsql security definer set search_path = public as $$
+declare g groups; v_pseudo text := left(trim(coalesce(p_pseudo, '')), 12);
+begin
+  select * into g from groups where groups.code = upper(trim(coalesce(p_code, '')));
+  if g.id is null then raise exception 'code inconnu'; end if;
+  if exists (select 1 from members m where m.group_id = g.id and m.device_id = p_device) then
+    return query select g.id, g.name, g.code, m.pseudo from members m where m.group_id = g.id and m.device_id = p_device; return;
+  end if;
+  if char_length(v_pseudo) = 0 then raise exception 'pseudo vide'; end if;
+  if _name_refused(v_pseudo) then raise exception 'pseudo refusé'; end if;
+  if (select count(*) from members m where m.group_id = g.id) >= 30 then raise exception 'groupe complet'; end if;
+  if exists (select 1 from members m where m.group_id = g.id and lower(m.pseudo) = lower(v_pseudo)) then raise exception 'pseudo déjà pris'; end if;
+  insert into members (group_id, device_id, pseudo) values (g.id, p_device, v_pseudo);
+  return query select g.id, g.name, g.code, v_pseudo;
+end $$;
+
 -- ─────────────────────────────────────────────────────────────────────────
 --  MODÉRATION (à la main, depuis le dashboard ; sinon docs/admin.html)
 -- ─────────────────────────────────────────────────────────────────────────

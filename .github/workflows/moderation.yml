@@ -1,5 +1,8 @@
 # Modération automatique du TOP PROUTS : toutes les 10 minutes, le robot écoute les prouts en attente
-# (scripts/moderate.mjs), publie les prouts, refuse les voix évidentes, laisse les cas douteux à Noa.
+# (scripts/moderate.mjs), publie les prouts, refuse les voix évidentes, laisse les cas douteux à Noa, puis fait
+# le ménage (prouts masqués depuis 30 jours, fichiers orphelins).
+# Alerte : tant qu'un prout attend une écoute humaine ou qu'un prout en ligne est signalé, un ticket « Prouts à
+# écouter » reste ouvert (GitHub prévient Noa par e-mail à l'ouverture) ; il se ferme tout seul quand la file est vide.
 # Le jeton admin est le secret PROUTBOX_ADMIN_TOKEN du dépôt (jamais dans le code ni dans les journaux).
 name: Modération des prouts
 on:
@@ -8,6 +11,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  issues: write
 concurrency:
   group: moderation
   cancel-in-progress: false
@@ -28,7 +32,22 @@ jobs:
           node-version: 22
       - name: ffmpeg
         run: command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
-      - name: Écouter la file
+      - name: Écouter la file et faire le ménage
+        id: robot
         env:
           PROUTBOX_ADMIN_TOKEN: ${{ secrets.PROUTBOX_ADMIN_TOKEN }}
         run: node scripts/moderate.mjs
+      - name: Prévenir seulement quand il y a quelque chose à écouter
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WAITING: ${{ steps.robot.outputs.waiting }}
+          REPORTED: ${{ steps.robot.outputs.reported }}
+        run: |
+          open=$(gh issue list --repo "$GITHUB_REPOSITORY" --label moderation --state open --json number -q '.[0].number')
+          todo=$(( ${WAITING:-0} + ${REPORTED:-0} ))
+          if [ "$todo" -gt 0 ] && [ -z "$open" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --label moderation --title "Prouts à écouter" \
+              --body "@${GITHUB_REPOSITORY_OWNER} le robot hésite : ${WAITING:-0} prout(s) en attente d'une écoute, ${REPORTED:-0} signalé(s). À juger sur https://amui34.github.io/prout-box/admin.html — ce ticket se fermera tout seul quand la file sera vide."
+          elif [ "$todo" -eq 0 ] && [ -n "$open" ]; then
+            gh issue close "$open" --repo "$GITHUB_REPOSITORY" --comment "File vide, merci."
+          fi

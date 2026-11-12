@@ -53,9 +53,10 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   if (!token) try { token = fs.readFileSync(path.join(os.homedir(), '.proutbox/admin-token.txt'), 'utf8').trim(); } catch { console.log('jeton admin absent'); process.exit(1); }
   const H = { apikey: key, Authorization: 'Bearer ' + key };
   const rpc = async (fn, args) => { const r = await fetch(`${url}/rest/v1/rpc/${fn}`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify(args) }); if (!r.ok) throw new Error(fn + ' HTTP ' + r.status); const t = await r.text(); return t ? JSON.parse(t) : null; };
-  const queue = ((await rpc('admin_queue', { p_token: token })) || []).filter(p => !p.approved && !p.hidden);
-  if (!queue.length) { console.log('file vide'); process.exit(0); }
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'proutbox-mod-')); const tally = { ok: 0, hide: 0, wait: 0 };
+  const all = (await rpc('admin_queue', { p_token: token })) || [];
+  const queue = all.filter(p => !p.approved && !p.hidden), tally = { ok: 0, hide: 0, wait: 0 };
+  if (!queue.length) console.log('file vide');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'proutbox-mod-'));
   for (const p of queue) {
     const tag = p.id.slice(0, 8); let action = 'wait', why = 'illisible', m = null;
     try {
@@ -68,5 +69,16 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`${tag}  ${action === 'ok' ? 'PUBLIÉ ' : action === 'hide' ? 'REFUSÉ ' : 'EN FILE'}  ${why}` + (m ? `  · ${m.seconds.toFixed(1)} s, chanté à ${m.voice} %, score mesuré ${m.score} (déclaré ${p.jury})` : '') + (DRY ? '  [essai]' : ''));
   }
   fs.rmSync(tmp, { recursive: true, force: true });
-  console.log(`${tally.ok} publié(s), ${tally.hide} refusé(s), ${tally.wait} laissé(s) à une écoute humaine`);
+  if (queue.length) console.log(`${tally.ok} publié(s), ${tally.hide} refusé(s), ${tally.wait} laissé(s) à une écoute humaine`);
+
+  // --- ménage : prouts masqués depuis plus de 30 jours, fichiers déposés mais jamais publiés ---
+  const reported = all.filter(p => p.reports > 0 && !p.hidden).length; let purged = 0, orphans = 0;
+  if (!DRY) try {
+    const del = async name => { const r = await fetch(`${url}/storage/v1/object/prouts/${name}`, { method: 'DELETE', headers: H }); return r.ok; };
+    for (const name of (await rpc('admin_purge', { p_token: token })) || []) { await del(name); purged++; }
+    for (const name of (await rpc('admin_orphans', { p_token: token, p_limit: 200 })) || []) if (await del(name)) orphans++;
+    if (purged || orphans) console.log(`ménage : ${purged} prout(s) masqué(s) depuis 30 jours supprimé(s), ${orphans} fichier(s) orphelin(s) effacé(s)`);
+  } catch (e) { console.log('ménage impossible :', String(e.message).slice(0, 80)); }
+  // --- pour l'alerte (GitHub Actions) : combien de prouts attendent une oreille humaine, combien sont signalés ---
+  if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `waiting=${tally.wait}\nreported=${reported}\n`);
 }
