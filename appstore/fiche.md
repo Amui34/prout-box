@@ -1,5 +1,7 @@
 # Fiche App Store — Prout Box
 
+> **Depuis la 1.3, la source de la fiche est `appstore/listing.mjs`** (nom, sous-titre, promo, mots-clés, description, nouveautés en fr-FR, en-US, es-ES, es-MX, et notes de vérification), poussée par `node scripts/asc/asc_listing.mjs <version>`. Ce fichier garde l'historique de la 1.0 à la 1.2 et les réponses aux questionnaires Apple.
+
 À coller dans App Store Connect (version 1.0). Tout est en français ; l'app est « Français » uniquement pour la v1.
 
 ## Identité

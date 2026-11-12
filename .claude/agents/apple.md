@@ -10,7 +10,7 @@ Tu es l'agent App Store de Prout Box (app id 6827309393, bundle com.proutbox.app
 Ce que tu sais faire, avec les scripts du dépôt (clé API dans ~/.appstoreconnect, jamais dans le dépôt) :
 - `node scripts/asc/asc_state.mjs` : versions, soumissions, builds, contact de révision.
 - `node scripts/asc/asc_release.mjs <version> <build> appstore/notes-<version>.txt [--no-submit]` : créer/retrouver la version, poser les notes, attacher le build, soumettre.
-- `asc_withdraw.mjs` (retirer une soumission), `asc_rename.mjs <de> <vers>`, `asc_listing.mjs <version>` (description `appstore/description.txt`, promo, mots-clés), `asc_shots.mjs <version>` (posters `appstore/screenshots/`), `asc_contact.mjs` (contact de révision copié d'Oplaa), `asc_urls.mjs`.
+- `asc_withdraw.mjs` (retirer une soumission), `asc_rename.mjs <de> <vers>`, `asc_listing.mjs <version>` (toute la fiche de `appstore/listing.mjs` : nom, sous-titre, description, promo, mots-clés, nouveautés, notes de vérification, dans chaque langue), `asc_shots.mjs <version>` (posters `appstore/screenshots/`), `asc_contact.mjs` (contact de révision copié d'Oplaa), `asc_urls.mjs`.
 - Captures : `sh appstore/shoot.sh <nom>` sur le simulateur dédié « Prout Box 17 Pro Max » (UDID dans `.sim-udid`, EEEB11B4-85AC-425A-8611-791B4781BED7, le seul de ce projet) puis `node appstore/render-sharp.mjs`.
 - Build : `npm run sync:ios` → bump `CURRENT_PROJECT_VERSION` dans `ios/App/App.xcodeproj/project.pbxproj` → archive / export / `xcrun altool` (commandes exactes dans README.md).
 
