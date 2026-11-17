@@ -82,7 +82,7 @@
     var shown = rows.filter(function (r) { return tab === 'pending' ? (!r.approved && !r.hidden) : r.reports > 0; });
     shown.forEach(function (r) {
       var li = document.createElement('li');
-      var b = document.createElement('b'); b.textContent = r.initials + ' ' + flag(r.country) + (r.city ? ' · ' + r.city.toUpperCase() : '') + ' · ' + r.species; li.appendChild(b);
+      var b = document.createElement('b'); b.textContent = r.initials + ' ' + flag(r.country) + (r.city ? ' · ' + r.city.toUpperCase() : '') + ' · ' + r.species + (r.title ? ' · « ' + r.title + ' »' : ''); li.appendChild(b);
       var s = document.createElement('small');
       s.textContent = 'SCORE ' + r.jury + ' · ' + fmt(r.created_at) + ' · ' + r.votes + ' VOTE(S)' + (r.reports ? ' · ' : '') + (r.approved ? ' · EN LIGNE' : ' · PAS ENCORE EN LIGNE') + (r.hidden ? ' · MASQUÉ' : '');
       if (r.reports) { var f = document.createElement('span'); f.className = 'flag'; f.textContent = r.reports + ' SIGNALEMENT(S)'; s.appendChild(f); }

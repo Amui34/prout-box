@@ -32,7 +32,7 @@ Et pour s'échauffer : retourne ton téléphone, ça prout. Six prouts classique
 En français, en anglais et en espagnol. Aucun compte, aucune pub, 100 % gratuit. Bon prout !`,
   whatsNew: `• Prout Box parle maintenant français, anglais et espagnol, et le classement accueille tous les pays du monde.
 • Les mini-jeux entre potes ont enfin leur écran : Qui a pété ?, Le prout du jour et L'imitateur, chacun sur sa grande carte.
-• Choisis ton nom : fini les 3 initiales.
+• Choisis ton nom (fini les 3 initiales) et baptise ton prout : trois propositions sur mesure, ou le nom que tu veux.
 • Missions avec barres de progression, 27 médailles, 12 médailles mystères et des titres à gravir.
 • Les 1000 premiers joueurs reçoivent la médaille Pionnier.
 • Un coussin péteur tout neuf.
@@ -68,7 +68,7 @@ And to warm up: flip your phone and it toots. Six classic toots synthesized live
 In English, French and Spanish. No account, no ads, 100% free. Happy tooting!`,
   whatsNew: `• Prout Box now speaks English, French and Spanish, and the ranking welcomes every country in the world.
 • The mini-games with friends finally get their own screen: Who tooted?, Toot of the day and The copycat, each on its own big card.
-• Pick your own name instead of three initials.
+• Pick your own name instead of three initials, and name your toot: three made-to-measure suggestions, or anything you like.
 • Missions with progress bars, 27 medals, 12 secret medals and titles to climb.
 • The first 1000 players receive the Pioneer medal.
 • A brand new whoopee cushion.
@@ -104,7 +104,7 @@ Y para calentar: dale la vuelta al teléfono y suena. Seis pedos clásicos sinte
 En español, inglés y francés. Sin cuenta, sin publicidad, 100 % gratis. ¡Buen provecho!`,
   whatsNew: `• Prout Box ahora habla español, inglés y francés, y la clasificación acoge a todos los países del mundo.
 • Los minijuegos entre amigos por fin tienen su pantalla: ¿Quién ha sido?, El pedo del día y El imitador, cada uno en su tarjeta grande.
-• Elige tu nombre en lugar de tres iniciales.
+• Elige tu nombre en lugar de tres iniciales y bautiza tu pedo: tres propuestas a medida, o el nombre que quieras.
 • Misiones con barras de progreso, 27 medallas, 12 medallas secretas y títulos que escalar.
 • Los primeros 1000 jugadores reciben la medalla Pionero.
 • Un cojín de broma nuevo.
@@ -120,6 +120,6 @@ export const REVIEW_NOTES = `Prout Box is a party game built around user recordi
 
 What is new in 1.3: the app is localized in English, French and Spanish (language button at the top left of the main screen), players choose a name (2 to 12 characters) instead of three initials, missions with progress bars, and a redesigned second skin for the box.
 
-User-generated content safeguards: names go through a server-side blocklist; every public recording goes through an automated check before it is shown (speech is refused, doubtful recordings are held for manual review by the developer); each entry has a Report button, entries are hidden automatically after three reports, authors can delete their own entries, and private groups hide a reported entry immediately. Contact: see the support URL.
+User-generated content safeguards: player names and the optional title of a recording (three suggestions from the app, or free text up to 24 characters) go through a server-side blocklist; every public recording goes through an automated check before it is shown (speech is refused, doubtful recordings are held for manual review by the developer); each entry has a Report button, entries are hidden automatically after three reports, authors can delete their own entries, and private groups hide a reported entry immediately. Contact: see the support URL.
 
 Demo without an account or a microphone: on the main screen, tap the title "Prout Box" five times quickly. Four sample recordings are generated and the jury screen opens. Then open TOP PROUTS / TOP TOOTS and MINI-JEUX / MINI-GAMES (the three group games: Who tooted?, Toot of the day, The copycat). No login is required anywhere in the app.`;

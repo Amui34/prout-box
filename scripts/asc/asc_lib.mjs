@@ -12,11 +12,14 @@ export function tok() {
 }
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 export const req = async (m, u, body) => {
-  let last;
-  for (let a = 1; a <= 3; a++) {
+  // Les pannes passagères d'Apple (500 UNEXPECTED_ERROR, vues le 17/11/2026) sont retentées pour les appels sans
+  // risque de doublon (GET, PATCH, DELETE) ; un POST en erreur 5xx n'est pas rejoué (il pourrait créer deux objets).
+  let last, tries = m === 'POST' ? 3 : 8;
+  for (let a = 1; a <= tries; a++) {
     try {
       const r = await fetch('https://api.appstoreconnect.apple.com' + u, { method: m, headers: { Authorization: 'Bearer ' + tok(), 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(60000) });
       const t = await r.text(); let j; try { j = JSON.parse(t); } catch { j = t; }
+      if (r.status >= 500 && m !== 'POST' && a < tries) { await sleep(4000 * a); continue; }
       return { status: r.status, j };
     } catch (e) { last = e; await sleep(3000 * a); }
   }

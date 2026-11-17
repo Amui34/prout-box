@@ -20,6 +20,7 @@ add('PROUT\nMAISON !');
 for (const m of block('function species(st) {', '  // Adds the jury').matchAll(new RegExp('return ' + LIT, 'g'))) add(un(m[1]));
 for (const m of block('var THEMES = [', '];').matchAll(new RegExp(LIT, 'g'))) add(un(m[1]));
 for (const m of block('var GVIEWS = {', '};').matchAll(new RegExp(': ' + LIT, 'g'))) add(un(m[1]));
+for (const m of block('var TITLES = {', '};').matchAll(new RegExp(LIT, 'g'))) add(un(m[1]));
 for (const m of block('var MEDALS = [', '  var ALL = ').matchAll(new RegExp("(?:name|how|clue|rare): " + LIT, 'g'))) add(un(m[1]));
 add('MYSTÈRE');
 for (const m of block('var RANKS = [', '];').matchAll(new RegExp(LIT, 'g'))) add(un(m[1]));

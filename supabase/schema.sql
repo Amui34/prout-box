@@ -721,6 +721,139 @@ begin
   return query select g.id, g.name, g.code, v_pseudo;
 end $$;
 
+-- ═════════════════════════════════════════════════════════════════════════
+--  NOM DU PROUT (1.3, build 11) : le joueur baptise son prout (propositions de l'app, ou texte libre).
+--  Facultatif, 2 à 24 caractères (lettres de tout alphabet, chiffres, espace et . , ! ? ' ’ : _ -), stocké en
+--  majuscules, passé au même filtre que les noms (_name_refused). Les apps 1.0 à 1.2 n'envoient pas de titre.
+--  Les fonctions qui changent de signature ou de colonnes renvoyées sont supprimées puis recréées.
+-- ═════════════════════════════════════════════════════════════════════════
+alter table prouts add column if not exists title text;
+alter table group_prouts add column if not exists title text;
+
+-- Titre nettoyé (null s'il est vide) ; lève une erreur s'il est invalide ou refusé.
+create or replace function _title_clean(p_title text) returns text
+language plpgsql security definer set search_path = public stable as $$
+declare v text := upper(regexp_replace(trim(coalesce(p_title, '')), '\s+', ' ', 'g'));
+begin
+  if v = '' then return null; end if;
+  if char_length(v) < 2 or char_length(v) > 24 or v !~ '^[[:alnum:] .,!?''’:_-]+$' or v !~ '[[:alnum:]]' then raise exception 'titre invalide'; end if;
+  if _name_refused(v) then raise exception 'titre refusé'; end if;
+  return v;
+end $$;
+revoke execute on function _title_clean(text) from public, anon, authenticated;
+
+-- L'app demande « ce titre passe-t-il ? » avant d'enregistrer le prout.
+create or replace function title_ok(p_title text) returns boolean
+language plpgsql security definer set search_path = public stable as $$
+begin
+  perform _title_clean(p_title); return true;
+exception when others then return false;
+end $$;
+grant execute on function title_ok(text) to anon, authenticated;
+
+drop function if exists publish_prout(uuid, text, text, text, int, text, text, text);
+create or replace function publish_prout(
+  p_device uuid, p_initials text, p_country text, p_species text, p_jury int, p_path text, p_mime text, p_city text default null, p_title text default null
+) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare v_id uuid; v_today int; v_name text := upper(regexp_replace(trim(coalesce(p_initials, '')), '\s+', ' ', 'g')); v_title text := _title_clean(p_title);
+begin
+  if v_name !~ '^[[:alnum:] ._-]{2,12}$' or v_name !~ '[[:alnum:]]' then raise exception 'nom invalide'; end if;
+  if _name_refused(v_name) then raise exception 'nom refusé'; end if;
+  if p_country !~ '^[A-Z]{2}$' then raise exception 'pays invalide'; end if;
+  if p_path !~ ('^' || p_device::text || '/[A-Za-z0-9._-]+$') then raise exception 'chemin invalide'; end if;
+  if not exists (select 1 from storage.objects where bucket_id = 'prouts' and name = p_path) then raise exception 'fichier absent'; end if;
+  select count(*) into v_today from prouts where device_id = p_device and created_at > now() - interval '1 day';
+  if v_today >= 20 then raise exception 'trop de prouts aujourd''hui'; end if;
+  insert into prouts (device_id, initials, country, species, jury, path, mime, city, title)
+  values (p_device, v_name, p_country, left(coalesce(p_species, ''), 40), greatest(0, least(10000, coalesce(p_jury, 0))), p_path, left(coalesce(p_mime, 'audio/mp4'), 40), nullif(left(trim(coalesce(p_city, '')), 40), ''), v_title)
+  returning id into v_id;
+  return v_id;
+end $$;
+grant execute on function publish_prout(uuid, text, text, text, int, text, text, text, text) to anon, authenticated;
+
+drop function if exists top_prouts(uuid, text, int);
+create function top_prouts(p_device uuid, p_country text default null, p_limit int default 50)
+returns table (
+  id uuid, initials text, country text, species text, city text, jury int, path text, mime text,
+  votes int, avg numeric, my_stars int, mine boolean, created_at timestamptz, title text
+)
+language sql security definer set search_path = public stable as $$
+  select p.id, p.initials, p.country, p.species, p.city, p.jury, p.path, p.mime,
+         p.votes_count,
+         case when p.votes_count = 0 then 0 else round(p.votes_sum::numeric / p.votes_count, 1) end,
+         (select v.stars from votes v where v.prout_id = p.id and v.device_id = p_device),
+         p.device_id = p_device,
+         p.created_at, p.title
+  from prouts p
+  where p.approved and not p.hidden and (p_country is null or p.country = p_country)
+  order by p.rank_score desc, p.votes_count desc, p.created_at desc
+  limit greatest(1, least(100, p_limit));
+$$;
+grant execute on function top_prouts(uuid, text, int) to anon, authenticated;
+
+drop function if exists admin_queue(uuid);
+create function admin_queue(p_token uuid)
+returns table (id uuid, initials text, country text, city text, species text, jury int, path text, mime text,
+               votes int, reports int, approved boolean, hidden boolean, created_at timestamptz, title text)
+language sql security definer set search_path = public stable as $$
+  select p.id, p.initials, p.country, p.city, p.species, p.jury, p.path, p.mime,
+         p.votes_count, p.reports_count, p.approved, p.hidden, p.created_at, p.title
+  from prouts p
+  where exists (select 1 from admins a where a.token = p_token)
+    and ((not p.approved and not p.hidden) or p.reports_count > 0)
+  order by p.approved, p.created_at
+  limit 200;
+$$;
+grant execute on function admin_queue(uuid) to anon, authenticated;
+
+drop function if exists publish_group_prout(uuid, uuid, text, text, text, int, text, text, text, int);
+create or replace function publish_group_prout(
+  p_device uuid, p_group uuid, p_path text, p_mime text, p_species text, p_jury int,
+  p_kind text default 'libre', p_theme text default null, p_target text default null, p_similarity int default null, p_title text default null
+) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare me members; v_id uuid; v_title text := _title_clean(p_title);
+begin
+  me := _member(p_device, p_group); if me.id is null then raise exception 'pas membre'; end if;
+  if p_path !~ ('^' || p_device::text || '/[A-Za-z0-9._-]+$') then raise exception 'chemin invalide'; end if;
+  if not exists (select 1 from storage.objects where bucket_id = 'prouts' and name = p_path) then raise exception 'fichier absent'; end if;
+  if (select count(*) from group_prouts p where p.member_id = me.id and p.created_at > now() - interval '1 day') >= 30 then raise exception 'trop de prouts aujourd''hui'; end if;
+  insert into group_prouts (group_id, member_id, path, mime, species, jury, kind, theme, target, similarity, title)
+  values (p_group, me.id, p_path, left(coalesce(p_mime, 'audio/mp4'), 40), left(coalesce(p_species, ''), 40), greatest(0, least(10000, coalesce(p_jury, 0))),
+          coalesce(p_kind, 'libre'), left(p_theme, 60), left(p_target, 20), case when p_similarity is null then null else greatest(0, least(100, p_similarity)) end, v_title)
+  returning id into v_id;
+  return v_id;
+end $$;
+grant execute on function publish_group_prout(uuid, uuid, text, text, text, int, text, text, text, int, text) to anon, authenticated;
+
+drop function if exists group_gallery(uuid, uuid, int);
+create function group_gallery(p_device uuid, p_group uuid, p_limit int default 60)
+returns table (
+  id uuid, path text, mime text, species text, jury int, kind text, theme text, target text, similarity int,
+  author_id uuid, author text, mine boolean, guessed uuid, guess_correct boolean,
+  votes int, avg numeric, my_stars int, created_at timestamptz, title text
+)
+language sql security definer set search_path = public stable as $$
+  with me as (select m.id from members m where m.group_id = p_group and m.device_id = p_device)
+  select p.id, p.path, p.mime, p.species, p.jury, p.kind, p.theme, p.target, p.similarity,
+         case when p.member_id = me.id or q.member_id is not null then p.member_id end,
+         case when p.member_id = me.id or q.member_id is not null then a.pseudo end,
+         p.member_id = me.id,
+         q.guessed_member, q.correct,
+         p.votes_count, case when p.votes_count = 0 then 0 else round(p.votes_sum::numeric / p.votes_count, 1) end,
+         (select v.stars from group_votes v where v.group_prout_id = p.id and v.member_id = me.id),
+         p.created_at, p.title
+  from group_prouts p
+  cross join me
+  join members a on a.id = p.member_id
+  left join guesses q on q.group_prout_id = p.id and q.member_id = me.id
+  where p.group_id = p_group and not p.hidden
+  order by p.created_at desc
+  limit greatest(1, least(200, p_limit));
+$$;
+grant execute on function group_gallery(uuid, uuid, int) to anon, authenticated;
+
 -- ─────────────────────────────────────────────────────────────────────────
 --  MODÉRATION (à la main, depuis le dashboard ; sinon docs/admin.html)
 -- ─────────────────────────────────────────────────────────────────────────

@@ -81,6 +81,7 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 }
 .name { flex: 1; min-width: 0; text-align: center; }
 .name b { display: block; font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: .5px; line-height: 1.1; padding-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.name b.long { font-size: 17px; line-height: 1.15; white-space: normal; } /* nom de prout long (jusqu'à 24 caractères) : deux lignes */
 .name button { background: none; border: none; padding: 4px 8px; font: 800 13px var(--body); color: var(--ink); text-decoration: underline; cursor: pointer; min-height: 32px; }
 .name .tag { display: block; font-family: var(--pixel); font-size: 9px; line-height: 1.6; color: var(--ink); background: var(--gold); border: 2px solid var(--ink); border-radius: 4px; padding: 3px 6px 1px; margin: 4px auto 0; width: max-content; max-width: 100%; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -131,6 +132,13 @@ h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; 
 .fun { font-size: 8px; line-height: 2; color: #9FF; text-align: center; margin: 10px 0 14px; text-shadow: 0 0 6px rgba(153,255,255,.5); }
 .total { font-size: 10px; color: #fff; margin-top: 6px; }
 #nameIn { text-align: center; margin: 10px 0 0; }
+/* le nom du prout : trois propositions à toucher, ou ce qu'on veut dans le champ */
+.lab { font-size: 10px; color: var(--gold); margin-top: 14px !important; }
+.ideas { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; max-width: 340px; margin: 10px 0 0; }
+.ideas button { font-family: var(--pixel); font-size: 8px; line-height: 1.4; padding: 9px 8px 7px; background: transparent; color: var(--phosphor); border: 2px solid rgba(57,255,20,.5); cursor: pointer; text-shadow: inherit; }
+.ideas button.on { border-color: var(--gold); color: var(--gold); box-shadow: 3px 3px 0 var(--neon); }
+.ideas button.dice { border-style: dashed; color: #9FF; border-color: rgba(153,255,255,.5); text-shadow: none; }
+#titleIn { text-align: center; margin: 10px 0 14px; max-width: 372px; padding-inline: 2px; letter-spacing: -1.5px; } /* 24 caractères doivent tenir : champ plus large, lettres resserrées (16 px obligatoires) */
 
 .board { list-style: none; margin: 0; padding: 0; width: 100%; max-width: 360px; flex: 1; min-height: 0; overflow-y: auto; }
 .board li { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 10px 6px; border-bottom: 2px dashed rgba(57,255,20,.25); cursor: pointer; }
@@ -437,6 +445,9 @@ button:active { transform: scale(.96); }
   <div class="jury" id="jury" aria-live="polite"></div>
   <div class="total" id="juryTotal"></div>
   <div class="fun" id="fun"></div>
+  <p class="lab">LE NOM DE TON PROUT</p>
+  <div class="ideas" id="titleIdeas"></div>
+  <input class="pxinput" id="titleIn" maxlength="24" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="OU CE QUE TU VEUX" aria-label="Le nom de ton prout">
   <p class="blink">TON NOM</p>
   <input class="pxinput" id="nameIn" maxlength="12" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="PROUTMAN" aria-label="Ton nom dans le classement">
   <p class="status" id="scoreStatus"></p>
@@ -778,16 +789,17 @@ button:active { transform: scale(.96); }
   // ================= the list of prouts =================
   function list() {
     return SOUNDS.map(function (s) { return { kind: 'preset', id: s.id, name: s.name, bang: s.bang }; })
-      .concat(mine.map(function (r) { return { kind: 'rec', id: r.id, name: r.name, bang: 'PROUT\nMAISON !', rec: r }; }));
+      .concat(mine.map(function (r) { return { kind: 'rec', id: r.id, name: r.title ? T(r.title) : r.name, bang: 'PROUT\nMAISON !', rec: r }; }));
   }
   function current() { var l = list(); index = (index + l.length) % l.length; return l[index]; }
   function show() {
     var c = current();
     $('soundName').textContent = c.kind === 'preset' ? T(c.name) : c.name;
+    $('soundName').classList.toggle('long', $('soundName').textContent.length > 13);
     $('delBtn').hidden = c.kind !== 'rec';
     var hasScore = c.kind === 'rec' && c.rec.score != null;
     $('tag').hidden = !hasScore;
-    if (hasScore) $('tag').textContent = pad6(c.rec.score) + ' PTS · ' + T((c.rec.stats && c.rec.stats.species) || '???');
+    if (hasScore) $('tag').textContent = pad6(c.rec.score) + ' PTS · ' + (c.rec.title ? c.rec.name : T((c.rec.stats && c.rec.stats.species) || '???')); // prout baptisé : le nom en gros, l'auteur ici
     if (typeof fitCan === 'function') setTimeout(fitCan, 0); // the picker height changes with the tag
     resetDel();
     try { localStorage.setItem('proutbox.pick', c.kind + ':' + c.id); } catch (e) {}
@@ -849,7 +861,7 @@ button:active { transform: scale(.96); }
       });
     });
   }
-  function saveRec(r) { return store('readwrite', function (os) { return os.put({ id: r.id, name: r.name, blob: r.blob, created: r.created, score: r.score, stats: r.stats, remoteId: r.remoteId || null, country: r.country || null }); }).catch(function () {}); }
+  function saveRec(r) { return store('readwrite', function (os) { return os.put({ id: r.id, name: r.name, title: r.title || '', blob: r.blob, created: r.created, score: r.score, stats: r.stats, remoteId: r.remoteId || null, country: r.country || null }); }).catch(function () {}); }
   function deleteRec(id) { return store('readwrite', function (os) { return os.delete(id); }).catch(function () {}); }
   function loadRecs() { return store('readonly', function (os) { return os.getAll(); }).catch(function () { return []; }); }
 
@@ -1073,6 +1085,49 @@ button:active { transform: scale(.96); }
   // d'arcade. Le serveur le filtre (name_ok / publish_prout : mots interdits, voir supabase/schema.sql).
   var pending = null;
   function cleanName(v) { return (v || '').replace(/\s+/g, ' ').trim().toUpperCase().slice(0, 12); }
+  // --- le nom du prout (facultatif, 2 à 24 caractères) : l'app en propose trois selon ce que le jury a entendu, le joueur
+  // en touche un ou écrit le sien. Une proposition est stockée en français (clé de traduction, comme les espèces) et
+  // traduite à l'affichage ; un nom écrit par le joueur reste tel quel. Filtré par le serveur (title_ok / publish_prout).
+  var TITLES = {
+    fort: ['LE RÉVEIL DES VOISINS', 'TONNERRE DE BREST', 'LE DÉCOLLAGE', 'ALERTE ROUGE', 'LE BIG BANG', 'LE MUR DU SON'],
+    long: ['LE TGV PARIS-MARSEILLE', 'L’INTERMINABLE', 'LE MARATHON', 'LA LONGUE PLAINTE'],
+    doux: ['LE FURTIF', 'NI VU NI CONNU', 'LE PETIT SOUPIR', 'LE CHUCHOTEUR', 'OUPS'],
+    rafale: ['LE FEU D’ARTIFICE', 'POP-CORN', 'LE SOLO DE BATTERIE', 'LA RAFALE DU SIÈCLE'],
+    tous: ['LE CHEF-D’ŒUVRE', 'SPÉCIAL CASSOULET', 'LE DIMANCHE SOIR', 'SOUVENIR DE CANTINE', 'LE VENT DU NORD', 'L’INVITÉ SURPRISE', 'LA SIGNATURE']
+  };
+  function shuffled(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function titleIdeas(st) {
+    var fit = [];
+    if (st.bursts * 10 >= 3) fit = fit.concat(TITLES.rafale); // st.bursts vaut rafales / 10
+    if (st.loud >= .6) fit = fit.concat(TITLES.fort);
+    if (st.dur >= .6) fit = fit.concat(TITLES.long);
+    if (st.loud < .35 || st.score < 2500) fit = fit.concat(TITLES.doux);
+    return shuffled(fit).slice(0, 2).concat(shuffled(TITLES.tous)).slice(0, 3);
+  }
+  function cleanTitle(v) { return (v || '').replace(/\s+/g, ' ').trim().toUpperCase().slice(0, 24); }
+  function validTitle(v) {
+    try { return new RegExp('^[\\p{L}\\p{N} .,!?\'’:_-]{2,24}$', 'u').test(v) && new RegExp('[\\p{L}\\p{N}]', 'u').test(v); }
+    catch (e) { return v.length >= 2 && v.length <= 24; }
+  }
+  // ce que le joueur a choisi → la clé française si c'est une proposition (affichée traduite), sinon son texte
+  function titleKey(v) {
+    for (var k in TITLES) for (var i = 0; i < TITLES[k].length; i++) if (cleanTitle(T(TITLES[k][i])) === v) return TITLES[k][i];
+    return v;
+  }
+  function proutName(title, species) { return title ? T(title) : T(species || ''); } // le nom affiché d'un prout : son titre, sinon son espèce
+  function showIdeas(st, keep) { // keep : le nom déjà choisi ou tapé, à ne pas écraser
+    var box = $('titleIdeas'), ideas = titleIdeas(st); box.innerHTML = '';
+    var mark = function () { var v = cleanTitle($('titleIn').value); Array.prototype.forEach.call(box.children, function (b) { b.classList.toggle('on', !!b.dataset.t && cleanTitle(b.dataset.t) === v); }); };
+    ideas.forEach(function (k) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = T(k); b.dataset.t = T(k);
+      b.addEventListener('click', function () { $('titleIn').value = cleanTitle(T(k)); blip(700, .05); mark(); });
+      box.appendChild(b);
+    });
+    var d = document.createElement('button'); d.type = 'button'; d.className = 'dice'; d.textContent = T('🎲 AUTRES IDÉES');
+    d.addEventListener('click', function () { blip(520, .05); showIdeas(st, $('titleIn').value || ' '); });
+    box.appendChild(d);
+    $('titleIn').value = keep ? cleanTitle(T(keep)) : cleanTitle(T(ideas[0])); $('titleIn').oninput = mark; mark();
+  }
   function validName(v) {
     try { return new RegExp('^[\\p{L}\\p{N} ._-]{2,12}$', 'u').test(v) && new RegExp('[\\p{L}\\p{N}]', 'u').test(v); }
     catch (e) { return /^[A-Z0-9À-Þ ._-]{2,12}$/.test(v); }
@@ -1114,7 +1169,7 @@ button:active { transform: scale(.96); }
     pending = r;
     var st = r.stats;
     $('bigScore').textContent = '000000'; $('verdict').textContent = ''; $('scoreStatus').textContent = ''; $('scoreOk').disabled = false;
-    renderJury(st);
+    renderJury(st); showIdeas(st, r.title);
     $('scoreScreen').scrollTop = 0;
     openScreen('scoreScreen');
     var t0 = performance.now(), D = 1400, last = -1;
@@ -1130,17 +1185,22 @@ button:active { transform: scale(.96); }
     if (!pending) { closeScreens(); return; }
     var nm = cleanName($('nameIn').value);
     if (!validName(nm)) { $('scoreStatus').textContent = T('DONNE-TOI UN NOM : 2 À 12 LETTRES OU CHIFFRES'); blip(180, .2, .06); return; }
-    // le serveur dit si le nom passe son filtre ; hors ligne ou en cas d'erreur on accepte (il sera revérifié à la publication)
+    var ti = cleanTitle($('titleIn').value); // vide = pas de titre, le prout garde le nom de son espèce
+    if (ti && !validTitle(ti)) { $('scoreStatus').textContent = T('NOM DU PROUT : 2 À 24 LETTRES OU CHIFFRES'); blip(180, .2, .06); return; }
+    ti = titleKey(ti);
+    // le serveur dit si les deux noms passent son filtre ; hors ligne ou en cas d'erreur on accepte (revérifié à la publication)
     $('scoreOk').disabled = true; $('scoreStatus').textContent = '';
-    (online() ? rpc('name_ok', { p_name: nm }).catch(function () { return true; }) : Promise.resolve(true)).then(function (ok) {
+    var ask = function (fn, args) { return online() ? rpc(fn, args).catch(function () { return true; }) : Promise.resolve(true); };
+    Promise.all([ask('name_ok', { p_name: nm }), ti ? ask('title_ok', { p_title: ti }) : true]).then(function (ok) {
       $('scoreOk').disabled = false;
-      if (ok === false) { $('scoreStatus').textContent = T('CE NOM EST REFUSÉ, CHOISIS-EN UN AUTRE'); blip(180, .2, .06); return; }
-      if (pending) acceptScore(nm);
+      if (ok[0] === false) { $('scoreStatus').textContent = T('CE NOM EST REFUSÉ, CHOISIS-EN UN AUTRE'); blip(180, .2, .06); return; }
+      if (ok[1] === false) { $('scoreStatus').textContent = T('CE NOM DE PROUT EST REFUSÉ, CHOISIS-EN UN AUTRE'); blip(180, .2, .06); return; }
+      if (pending) acceptScore(nm, ti);
     });
   });
-  function acceptScore(nm) {
+  function acceptScore(nm, ti) {
     var r = pending; pending = null;
-    r.name = nm; $('nameIn').value = nm;
+    r.name = nm; $('nameIn').value = nm; r.title = ti || '';
     try { localStorage.setItem('proutbox.name', r.name); } catch (e) {}
     mine.push(r); saveRec(r);
     closeScreens();
@@ -1186,6 +1246,7 @@ button:active { transform: scale(.96); }
   function audioUrl(path) { return SB.url + '/storage/v1/object/public/prouts/' + path; }
   function friendly(err) {
     var m = (err && err.message) || '';
+    if (/titre refus|titre invalide/i.test(m)) return T('CE NOM DE PROUT EST REFUSÉ, CHOISIS-EN UN AUTRE');
     if (/nom refus|initiales refus/i.test(m)) return T('CE NOM EST REFUSÉ, CHOISIS-EN UN AUTRE');
     if (/trop de/i.test(m)) return T('DOUCEMENT ! RÉESSAIE DEMAIN');
     if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return T('HORS LIGNE');
@@ -1228,7 +1289,7 @@ button:active { transform: scale(.96); }
   var pubRec = null, pubCity = null, pubCityOff = false, citySeq = 0;
   function pubTextRefresh() {
     if (!pubRec) return;
-    $('pubText').textContent = T('ENVOYER « {0} · {1} » DANS LE TOP PROUTS {2} {3} ?', pubRec.name, T((pubRec.stats && pubRec.stats.species) || '???'), flag(country), countryName(country).toUpperCase());
+    $('pubText').textContent = T('ENVOYER « {0} · {1} » DANS LE TOP PROUTS {2} {3} ?', pubRec.name, proutName(pubRec.title, (pubRec.stats && pubRec.stats.species) || '???'), flag(country), countryName(country).toUpperCase());
     var b = $('pubCity');
     if (pubCity && !pubCityOff) { b.hidden = false; b.textContent = T('📍 {0} · TOUCHE POUR RETIRER', pubCity.toUpperCase()); }
     else if (pubCity && pubCityOff) { b.hidden = false; b.textContent = T('📍 SANS MA VILLE · TOUCHE POUR REMETTRE'); }
@@ -1273,7 +1334,9 @@ button:active { transform: scale(.96); }
     var ext = /mp4|m4a|aac/.test(r.blob.type) ? 'm4a' : /webm/.test(r.blob.type) ? 'webm' : /ogg/.test(r.blob.type) ? 'ogg' : /wav/.test(r.blob.type) ? 'wav' : 'bin';
     var path = device + '/' + r.id + '.' + ext;
     return upload(path, r.blob).then(function () {
-      return rpc('publish_prout', { p_device: device, p_initials: r.name, p_country: country, p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_path: path, p_mime: r.blob.type || 'audio/mp4', p_city: (pubCity && !pubCityOff) ? pubCity : null });
+      var args = { p_device: device, p_initials: r.name, p_country: country, p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_path: path, p_mime: r.blob.type || 'audio/mp4', p_city: (pubCity && !pubCityOff) ? pubCity : null };
+      if (r.title) args.p_title = r.title;
+      return rpc('publish_prout', args);
     }).then(function (id) { r.remoteId = id; r.country = country; r.city = (pubCity && !pubCityOff) ? pubCity : null; return saveRec(r); });
   }
   $('pubOk').addEventListener('click', function () {
@@ -1336,7 +1399,7 @@ button:active { transform: scale(.96); }
     var ol = $('board'); ol.innerHTML = ''; more = more || [];
     rows.concat(more).forEach(function (row, i) {
       if (more.length && i === rows.length) { var sep = document.createElement('li'); sep.className = 'sep'; sep.textContent = rows.length ? T('🌍 ET AILLEURS DANS LE MONDE') : T('PERSONNE ENCORE DANS TON PAYS : SOIS LE PREMIER ! EN ATTENDANT, LE MONDE :'); ol.appendChild(sep); }
-      var li = rowEl(i < rows.length ? i : i - rows.length, row.initials + ' ' + flag(row.country), T(row.species) + (row.city ? ' · 📍 ' + row.city.toUpperCase() : ''), '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), P(row.votes, '{0} VOTE', '{0} VOTES') + (row.my_stars ? T(' · TOI {0}', row.my_stars) : ''));
+      var li = rowEl(i < rows.length ? i : i - rows.length, row.initials + ' ' + flag(row.country), proutName(row.title, row.species) + (row.city ? ' · 📍 ' + row.city.toUpperCase() : ''), '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), P(row.votes, '{0} VOTE', '{0} VOTES') + (row.my_stars ? T(' · TOI {0}', row.my_stars) : ''));
       var rate = null;
       li.addEventListener('click', function (e) {
         if (rate && rate.contains(e.target)) return;
@@ -1404,7 +1467,7 @@ button:active { transform: scale(.96); }
     rows.forEach(function (r, i) {
       var s = r.remoteId && mineStatus[r.remoteId], recale = r.stats && r.stats.recale;
       var state = !r.remoteId ? (recale ? T('RECALÉ (VOIX)') : '') : !s ? T('EN LIGNE {0}', flag(r.country || country)) : s.hidden ? T('REFUSÉ') : s.approved ? T('EN LIGNE {0}', flag(r.country || country)) + (s.votes ? ' · 💩 ' + Number(s.avg).toFixed(1) : '') : T('⏳ EN VALIDATION');
-      var li = rowEl(i, r.name || '???', T((r.stats && r.stats.species) || ''), pad6(r.score || 0), state);
+      var li = rowEl(i, r.name || '???', proutName(r.title, r.stats && r.stats.species), pad6(r.score || 0), state);
       if (online() && !r.remoteId && !recale) {
         var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = T('PUBLIER');
         pb.addEventListener('click', function (e) { e.stopPropagation(); openPublish(r); });
@@ -1481,12 +1544,12 @@ button:active { transform: scale(.96); }
     return oc.startRendering().then(wavBlob);
   }
   function seedDemo() {
-    var demo = [['NOA', 'rafale'], ['ZOE', 'trompette'], ['LEO', 'discret'], ['MAX', 'mouille']];
+    var demo = [['NOA', 'rafale', 'LE FEU D’ARTIFICE'], ['ZOE', 'trompette', 'LE RÉVEIL DES VOISINS'], ['LEO', 'discret', 'NI VU NI CONNU'], ['MAX', 'mouille', 'SPÉCIAL CASSOULET']];
     note(T('Mode démo : 4 prouts arrivent…'));
     Promise.all(demo.map(function (d, i) {
       return renderPreset(d[1]).then(function (blob) {
         return analyzeBlob(blob, true).then(function (st) {
-          return { id: 'demo' + Date.now() + i, name: d[0], blob: blob, created: Date.now() + i, score: st.score, stats: st };
+          return { id: 'demo' + Date.now() + i, name: d[0], title: d[2], blob: blob, created: Date.now() + i, score: st.score, stats: st };
         });
       });
     })).then(function (recs) {
@@ -1648,7 +1711,7 @@ button:active { transform: scale(.96); }
   function renderGallery(rows, add) {
     var ol = $('gBoard');
     rows.forEach(function (row, i) {
-      var li = rowEl(i, row.author ? row.author.toUpperCase() : '???', T(row.species), '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), P(row.votes, '{0} VOTE', '{0} VOTES'));
+      var li = rowEl(i, row.author ? row.author.toUpperCase() : '???', proutName(row.title, row.species), '💩 ' + (row.votes ? Number(row.avg).toFixed(1) : '–'), P(row.votes, '{0} VOTE', '{0} VOTES'));
       if (row.kind === 'jour') tag2(li, T(row.theme || 'DÉFI DU JOUR'));
       if (row.kind === 'imitation') tag2(li, T('IMITE {0} · {1} %', presetName(row.target), row.similarity || 0));
       var rate = null;
@@ -1714,7 +1777,7 @@ button:active { transform: scale(.96); }
     var ol = $('gBoard'); ol.innerHTML = ''; $('gBoardEmpty').hidden = true; gStatus(T('CHOISIS UN PROUT À ENVOYER DANS LE GROUPE'));
     if (!mine.length) { $('gBoardEmpty').hidden = false; $('gBoardEmpty').innerHTML = T('AUCUN PROUT SUR CE TÉLÉPHONE...') + '<br>' + T('ENREGISTRE-EN UN D’ABORD !'); return; }
     mine.filter(function (r) { return !(r.stats && r.stats.recale); }).sort(function (a, b) { return b.created - a.created; }).forEach(function (r, i) {
-      var li = rowEl(i, r.name || '???', T((r.stats && r.stats.species) || ''), pad6(r.score || 0), '');
+      var li = rowEl(i, r.name || '???', proutName(r.title, r.stats && r.stats.species), pad6(r.score || 0), '');
       var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'pub'; pb.textContent = T('ENVOYER');
       pb.addEventListener('click', function (e) { e.stopPropagation(); publishToGroup(r, { group: curGroup, kind: 'libre' }); });
       li.querySelector('.sc').appendChild(pb);
@@ -1735,7 +1798,9 @@ button:active { transform: scale(.96); }
       ? renderPreset(rc.target).then(function (b) { return analyzeBlob(b, true); }).then(function (st) { rc.similarity = similarity(r.stats, st); })
       : Promise.resolve();
     prep.then(function () { return upload(path, r.blob); }).then(function () {
-      return rpc('publish_group_prout', { p_device: device, p_group: rc.group.id, p_path: path, p_mime: r.blob.type || 'audio/mp4', p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_kind: rc.kind || 'libre', p_theme: rc.theme || null, p_target: rc.target || null, p_similarity: rc.similarity == null ? null : rc.similarity });
+      var args = { p_device: device, p_group: rc.group.id, p_path: path, p_mime: r.blob.type || 'audio/mp4', p_species: (r.stats && r.stats.species) || '', p_jury: r.score || 0, p_kind: rc.kind || 'libre', p_theme: rc.theme || null, p_target: rc.target || null, p_similarity: rc.similarity == null ? null : rc.similarity };
+      if (r.title) args.p_title = r.title;
+      return rpc('publish_group_prout', args);
     }).then(function () {
       jingle(); note(''); loadGroup();
       if (rc.kind === 'imitation') exploit({ imit: Math.max(X.imit, rc.similarity || 0), imits: (X.imits || 0) + ((rc.similarity || 0) >= 80 ? 1 : 0) });
@@ -1758,7 +1823,7 @@ button:active { transform: scale(.96); }
     var row = pool[Math.floor(Math.random() * pool.length)];
     var card = document.createElement('div'); card.className = 'defi mystery';
     var h = document.createElement('h3'); h.textContent = T('PROUT MYSTÈRE'); card.appendChild(h);
-    var title = document.createElement('p'); title.className = 'theme'; title.textContent = T(row.species); card.appendChild(title);
+    var title = document.createElement('p'); title.className = 'theme'; title.textContent = proutName(row.title, row.species); card.appendChild(title);
     var play = document.createElement('button'); play.type = 'button'; play.className = 'pxbtn'; play.textContent = T('▶ Écouter'); card.appendChild(play);
     box.appendChild(card);
     var info = document.createElement('p'); info.className = 'ask'; info.textContent = T('À TON AVIS, C’EST QUI ?'); box.appendChild(info);
