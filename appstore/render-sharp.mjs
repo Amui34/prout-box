@@ -11,27 +11,27 @@ const W = 1320, H = 2868;
 // Titres par langue. Captures brutes : appstore/raw/<langue>/<nom>.png → posters : appstore/screenshots/<langue>/proutbox-<nom>.png
 const TITLES = {
   fr: {
-    '1-groupes':  { title: ['TES AMIS,', 'TA GALERIE'],     sub: 'Un groupe privé, un code à 6 lettres' },
+    '1-groupes':  { title: ['3 MINI-JEUX', 'ENTRE POTES'],   sub: 'Un groupe privé, un code à 6 lettres' },
     '2-jury':     { title: ['UN JURY', 'IMPITOYABLE'],      sub: 'Mamie Josette, le Pr. Von Pfft et DJ Flatule' },
     '3-missions': { title: ['39 MÉDAILLES', 'À DÉCROCHER'], sub: 'Missions, médailles mystères et titres' },
     '4-top':      { title: ['LE CLASSEMENT', 'MONDIAL'],    sub: 'Par pays, noté de 1 à 5 par tout le monde' },
-    '5-defis':    { title: ['DES DÉFIS', 'CHAQUE JOUR'],    sub: 'Le prout du jour et l’imitateur' },
+    '5-defis':    { title: ['QUI A', 'PÉTÉ ?'],             sub: 'Écoute le prout, devine le coupable' },
     '6-boite':    { title: ['RETOURNE,', 'ÇA PROUT !'],     sub: 'Et pour s’échauffer : la boîte' }
   },
   en: {
-    '1-groupes':  { title: ['YOUR FRIENDS,', 'YOUR GALLERY'], sub: 'A private group with a 6-letter code' },
+    '1-groupes':  { title: ['3 MINI-GAMES', 'WITH FRIENDS'], sub: 'A private group with a 6-letter code' },
     '2-jury':     { title: ['A MERCILESS', 'JURY'],           sub: 'Granny Josette, Prof. Von Pfft and DJ Flatule' },
     '3-missions': { title: ['39 MEDALS', 'TO EARN'],          sub: 'Missions, secret medals and titles' },
     '4-top':      { title: ['THE WORLD', 'RANKING'],          sub: 'By country, rated from 1 to 5 by everyone' },
-    '5-defis':    { title: ['NEW DARES', 'EVERY DAY'],        sub: 'Toot of the day and the copycat' },
+    '5-defis':    { title: ['WHO', 'TOOTED?'],               sub: 'Listen to the toot, guess the culprit' },
     '6-boite':    { title: ['FLIP IT,', 'IT TOOTS!'],         sub: 'And to warm up: the box' }
   },
   es: {
-    '1-groupes':  { title: ['TUS AMIGOS,', 'TU GALERÍA'],     sub: 'Un grupo privado con un código de 6 letras' },
+    '1-groupes':  { title: ['3 MINIJUEGOS', 'ENTRE AMIGOS'], sub: 'Un grupo privado con un código de 6 letras' },
     '2-jury':     { title: ['UN JURADO', 'IMPLACABLE'],       sub: 'La Abuela Josefina, el Prof. Von Pfft y DJ Flatule' },
     '3-missions': { title: ['39 MEDALLAS', 'POR GANAR'],      sub: 'Misiones, medallas secretas y títulos' },
     '4-top':      { title: ['CLASIFICACIÓN', 'MUNDIAL'],      sub: 'Por país, puntuada del 1 al 5 por todos' },
-    '5-defis':    { title: ['RETOS NUEVOS', 'CADA DÍA'],      sub: 'El pedo del día y el imitador' },
+    '5-defis':    { title: ['¿QUIÉN', 'HA SIDO?'],           sub: 'Escucha el pedo, adivina al culpable' },
     '6-boite':    { title: ['DALE LA VUELTA', 'Y SUENA'],     sub: 'Y para calentar: la caja' }
   }
 };

@@ -31,12 +31,13 @@ Et pour s'échauffer : retourne ton téléphone, ça prout. Six prouts classique
 
 En français, en anglais et en espagnol. Aucun compte, aucune pub, 100 % gratuit. Bon prout !`,
   whatsNew: `• Prout Box parle maintenant français, anglais et espagnol, et le classement accueille tous les pays du monde.
+• Les mini-jeux entre potes ont enfin leur écran : Qui a pété ?, Le prout du jour et L'imitateur, chacun sur sa grande carte.
 • Choisis ton nom : fini les 3 initiales.
 • Missions avec barres de progression, 27 médailles, 12 médailles mystères et des titres à gravir.
 • Les 1000 premiers joueurs reçoivent la médaille Pionnier.
 • Un coussin péteur tout neuf.
 • Un classement plus vivant, avec de vrais enregistrements d'archives pour lancer la partie et un contrôle automatique qui écarte les voix.
-• Corrections : le clavier ne zoome plus l'écran, la flèche retour ne touche plus les onglets.`
+• Corrections : l'app ne reste plus affichée comme un lecteur de musique sur l'écran verrouillé, le clavier ne zoome plus l'écran.`
 };
 
 const en = {
@@ -66,12 +67,13 @@ And to warm up: flip your phone and it toots. Six classic toots synthesized live
 
 In English, French and Spanish. No account, no ads, 100% free. Happy tooting!`,
   whatsNew: `• Prout Box now speaks English, French and Spanish, and the ranking welcomes every country in the world.
+• The mini-games with friends finally get their own screen: Who tooted?, Toot of the day and The copycat, each on its own big card.
 • Pick your own name instead of three initials.
 • Missions with progress bars, 27 medals, 12 secret medals and titles to climb.
 • The first 1000 players receive the Pioneer medal.
 • A brand new whoopee cushion.
 • A livelier ranking, seeded with real archive recordings, and an automatic check that filters out voices.
-• Fixes: the keyboard no longer zooms the screen, the back arrow no longer overlaps the tabs.`
+• Fixes: the app no longer shows up as a music player on the lock screen, and the keyboard no longer zooms the screen.`
 };
 
 const es = {
@@ -101,12 +103,13 @@ Y para calentar: dale la vuelta al teléfono y suena. Seis pedos clásicos sinte
 
 En español, inglés y francés. Sin cuenta, sin publicidad, 100 % gratis. ¡Buen provecho!`,
   whatsNew: `• Prout Box ahora habla español, inglés y francés, y la clasificación acoge a todos los países del mundo.
+• Los minijuegos entre amigos por fin tienen su pantalla: ¿Quién ha sido?, El pedo del día y El imitador, cada uno en su tarjeta grande.
 • Elige tu nombre en lugar de tres iniciales.
 • Misiones con barras de progreso, 27 medallas, 12 medallas secretas y títulos que escalar.
 • Los primeros 1000 jugadores reciben la medalla Pionero.
 • Un cojín de broma nuevo.
 • Una clasificación más viva, con grabaciones reales de archivo para empezar la partida y un control automático que descarta las voces.
-• Correcciones: el teclado ya no amplía la pantalla y la flecha de volver ya no toca las pestañas.`
+• Correcciones: la app ya no aparece como un reproductor de música en la pantalla bloqueada y el teclado ya no amplía la pantalla.`
 };
 
 // Langues de la fiche. en-US sert aussi aux boutiques anglophones sans traduction propre ; es-MX couvre l'Amérique latine.
@@ -119,4 +122,4 @@ What is new in 1.3: the app is localized in English, French and Spanish (languag
 
 User-generated content safeguards: names go through a server-side blocklist; every public recording goes through an automated check before it is shown (speech is refused, doubtful recordings are held for manual review by the developer); each entry has a Report button, entries are hidden automatically after three reports, authors can delete their own entries, and private groups hide a reported entry immediately. Contact: see the support URL.
 
-Demo without an account or a microphone: on the main screen, tap the title "Prout Box" five times quickly. Four sample recordings are generated and the jury screen opens. Then open TOP PROUTS / TOP TOOTS and GROUPES / GROUPS. No login is required anywhere in the app.`;
+Demo without an account or a microphone: on the main screen, tap the title "Prout Box" five times quickly. Four sample recordings are generated and the jury screen opens. Then open TOP PROUTS / TOP TOOTS and MINI-JEUX / MINI-GAMES (the three group games: Who tooted?, Toot of the day, The copycat). No login is required anywhere in the app.`;

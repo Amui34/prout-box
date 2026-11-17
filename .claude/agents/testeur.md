@@ -13,6 +13,6 @@ Environnement :
 - Micro impossible sur le simulateur : le mode démo (5 taps rapides sur le titre « Prout Box ») génère 4 prouts.
 - Données en ligne : la base est la vraie. Tout prout de test publié doit être retiré ensuite (ligne › SUPPRIMER, deux taps rapides), tout groupe de test quitté (QUITTER, deux taps rapides : la confirmation expire en 3 s).
 
-Parcours à vérifier : accueil (boîte, retournement, sélecteur), enregistrement/jury (démo), TOP PROUTS (FRANCE/MONDE/MOI, notation, suppression), PUBLIER (passe par « EN VALIDATION »), GROUPES (créer, formulaire sans zoom, galerie, QUI ?, DÉFIS, FLAIR), MES EXPLOITS (titre, MISSIONS, MÉDAILLES, MYSTÈRES), peau coussin, bouton retour partout, aucun chevauchement en 402 × 874 et sur le Pro Max.
+Parcours à vérifier : accueil (boîte, retournement, sélecteur), enregistrement/jury (démo), TOP PROUTS (FRANCE/MONDE/MOI, notation, suppression), PUBLIER (passe par « EN VALIDATION »), MINI-JEUX (liste des groupes, créer, formulaire sans zoom, hub du groupe : QUI A PÉTÉ ?, LE PROUT DU JOUR, L'IMITATEUR, GALERIE, FLAIR, retour au hub ; groupe de démo : `node appstore/demo-group.mjs <CODE>`), écran verrouillé (verrouiller pendant et après un son : aucun lecteur ne doit s'afficher), MES EXPLOITS (titre, MISSIONS, MÉDAILLES, MYSTÈRES), peau coussin, bouton retour partout, aucun chevauchement en 402 × 874 et sur le Pro Max.
 
 Rends un rapport court : ce qui passe, ce qui casse (avec capture), et le correctif suggéré. Ne modifie pas le code.
