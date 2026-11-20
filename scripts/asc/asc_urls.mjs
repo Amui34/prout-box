@@ -1,7 +1,7 @@
 // Pose les URL d'assistance et marketing sur la version modifiable la plus récente (fr-FR).
 // Usage : node scripts/asc/asc_urls.mjs
 import { req, APP } from './asc_lib.mjs';
-const SUPPORT = 'https://amui34.github.io/prout-box/assistance.html', SITE = 'https://amui34.github.io/prout-box/';
+const SUPPORT = 'https://proutbox.com/assistance.html', SITE = 'https://proutbox.com/';
 const vs = await req('GET', `/v1/apps/${APP}/appStoreVersions?limit=5`);
 for (const v of vs.j.data || []) {
   const st = v.attributes.appVersionState || v.attributes.appStoreState;

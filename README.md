@@ -13,7 +13,7 @@ Application iOS + web : on retourne le téléphone (ou la boîte à l'écran) et
 | Capacitor (`ios/`) | enveloppe iOS, bundle `com.proutbox.app`, équipe `772LDD7BCT` | ce dépôt |
 | `assets/` | icône et splash en SVG → PNG (sharp) → tailles iOS (`@capacitor/assets`) | ce dépôt |
 | `appstore/` | fiche App Store, captures 6,9" (`shoot.sh` + `render.mjs`) | ce dépôt |
-| `docs/` | page vitrine + politique de confidentialité, publiées par GitHub Pages sur https://amui34.github.io/prout-box/ | ce dépôt |
+| `docs/` | page vitrine + politique de confidentialité, publiées par GitHub Pages sur https://proutbox.com/ (domaine attaché le 20/11/2026, `docs/CNAME`) | ce dépôt |
 
 ## Mettre en route le classement en ligne (une seule fois)
 

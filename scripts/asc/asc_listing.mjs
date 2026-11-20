@@ -10,7 +10,7 @@ import { LISTING, REVIEW_NOTES } from '../../appstore/listing.mjs';
 const VERSION = process.argv.slice(2).find(a => !a.startsWith('--')), DRY = process.argv.includes('--dry-run');
 if (!VERSION) { console.log('usage: asc_listing.mjs <version> [--dry-run]'); process.exit(1); }
 const IDENT = JSON.parse(fs.readFileSync(new URL('../../appstore/identite.json', import.meta.url), 'utf8'));
-const SITE = 'https://amui34.github.io/prout-box/';   // à passer sur https://proutbox.com/ quand le domaine servira le site
+const SITE = 'https://proutbox.com/';   // le site est servi sur le domaine depuis le 20/11/2026 (GitHub Pages + CNAME) ; l'ancienne adresse amui34.github.io/prout-box/ redirige
 const urls = loc => { const en = !loc.startsWith('fr'); return { supportUrl: SITE + (en ? 'en/support.html' : 'assistance.html'), marketingUrl: SITE + (en ? 'en/' : ''), privacy: SITE + (en ? 'en/privacy.html' : 'privacy.html') }; };
 // garde-fous
 let bad = 0; const len = s => [...s].length;
